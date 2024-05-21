@@ -1,10 +1,13 @@
 package com.thiha.roomrent.controller;
 
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,7 +45,7 @@ public class AgentController {
        
     }
    
-    @PutMapping("/edit-profile")
+    @PutMapping("/profile")
     private ResponseEntity<AgentDto> updateAgent(@RequestBody AgentDto newAgent){
         String currentUser = getCurrentAgentName();
 
@@ -55,7 +58,7 @@ public class AgentController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    @PostMapping("/add-post")
+    @PostMapping("/room-post")
     private ResponseEntity<RoomPostDto> createRoomPost(@RequestBody RoomPostDto roomPostDto){
         AgentDto currentAgent = getCurrentAgent();
         if(currentAgent != null){
@@ -66,6 +69,14 @@ public class AgentController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
+    @GetMapping("/room-post")
+    private ResponseEntity<List<RoomPostDto>> getRoomPosts(){
+        AgentDto currentAgent = getCurrentAgent();
+        List<RoomPostDto> roomPosts = roomPostService.getRoomPostsByAgentId(currentAgent.getId());
+        return new ResponseEntity<>(roomPosts, HttpStatus.OK);
+    }
+
+
     @GetMapping("/room-post/{id}")
     private ResponseEntity<RoomPostDto> getRoomPost(@PathVariable Long id){
         String currentUser = getCurrentAgentName();
@@ -74,14 +85,13 @@ public class AgentController {
             if(roomPostDto.getAgent().getUsername().equals(currentUser)){
                 return new ResponseEntity<>(roomPostDto, HttpStatus.OK);
             }
-        }else{
-            System.out.println("Reach here because roomPost is null..");
         }
         
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PutMapping("/edit-post/{id}")
+    // Edit existing room post
+    @PutMapping("/room-post/{id}")
     private ResponseEntity<RoomPostDto> updateRoomPost(@RequestBody RoomPostDto roomPostDto, @PathVariable Long id){
         AgentDto currentAgent = getCurrentAgent();
         RoomPostDto originalRoomPostDto = roomPostService.findRoomPostById(id);
@@ -92,6 +102,20 @@ public class AgentController {
             }
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    @DeleteMapping("/room-post/{id}")
+    private ResponseEntity<Void> deleteRoomPost(@PathVariable Long roomPostId){
+        AgentDto currentAgent = getCurrentAgent();
+        RoomPostDto roomPostToDelete = roomPostService.findRoomPostById(roomPostId);
+        if(roomPostToDelete == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        if(currentAgent.getId() == roomPostToDelete.getAgent().getId()){
+            // Delete room post
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
 

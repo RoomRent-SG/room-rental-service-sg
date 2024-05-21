@@ -1,9 +1,10 @@
 package com.thiha.roomrent.model;
 
+import java.util.Date;
+
 import com.thiha.roomrent.enums.AirConTime;
 import com.thiha.roomrent.enums.CookingAllowance;
 import com.thiha.roomrent.enums.Location;
-import com.thiha.roomrent.enums.PassType;
 import com.thiha.roomrent.enums.PropertyType;
 import com.thiha.roomrent.enums.RoomType;
 import com.thiha.roomrent.enums.SharePub;
@@ -40,6 +41,12 @@ public class RoomPost {
     @Column(name = "station_name")
     private StationName stationName;
 
+    @Column(name = "price")
+    private double price;
+
+    @Column(name = "posted_at")
+    private Date postedAt;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "room_type")
     private RoomType roomType;
@@ -64,9 +71,6 @@ public class RoomPost {
     @Column(name = "allow_visitor", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean allowVisitor;
 
-    @Column(name = "passType")
-    @Enumerated(EnumType.STRING)
-    private PassType passType;
 
     @Column(name = "location")
     @Enumerated(EnumType.STRING)
@@ -76,7 +80,7 @@ public class RoomPost {
     @Enumerated(EnumType.STRING)
     private PropertyType propertyType;
 
-    @ManyToOne(optional = true)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "agent_id")
     private Agent agent;
 

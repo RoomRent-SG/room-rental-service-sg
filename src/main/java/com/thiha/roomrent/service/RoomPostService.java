@@ -1,5 +1,7 @@
 package com.thiha.roomrent.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import com.thiha.roomrent.dto.RoomPostDto;
@@ -23,7 +25,6 @@ public class RoomPostService implements RoomPostServiceImpl{
         roomPost.setAllowVisitor(roomPostDto.isAllowVisitor());
         roomPost.setCookingAllowance(roomPostDto.getCookingAllowance());
         roomPost.setLocation(roomPostDto.getLocation());
-        roomPost.setPassType(roomPostDto.getPassType());
         roomPost.setPropertyType(roomPostDto.getPropertyType());
         roomPost.setRoomType(roomPostDto.getRoomType());
         roomPost.setSharePub(roomPostDto.getSharePub());
@@ -46,19 +47,6 @@ public class RoomPostService implements RoomPostServiceImpl{
 
     @Override
     public RoomPostDto updateRoomPost(RoomPostDto originalRoomPost, RoomPostDto updateRoomPost) {
-        //  private Long id;
-        // private StationName stationName;
-        // private RoomType roomType;
-        // private int totalPax;
-        // private CookingAllowance cookingAllowance;
-        // private SharePub sharePub;
-        // private AirConTime airConTime;
-        // private boolean allowVisitor;
-        // private PassType passType;
-        // private Location location;
-        // private PropertyType propertyType;
-        // @JsonIgnore
-        // private Agent agent;
         originalRoomPost.setStationName(updateRoomPost.getStationName());
         originalRoomPost.setRoomType(updateRoomPost.getRoomType());
         originalRoomPost.setTotalPax(updateRoomPost.getTotalPax());
@@ -66,11 +54,25 @@ public class RoomPostService implements RoomPostServiceImpl{
         originalRoomPost.setSharePub(updateRoomPost.getSharePub());
         originalRoomPost.setAirConTime(updateRoomPost.getAirConTime());
         originalRoomPost.setAllowVisitor(updateRoomPost.isAllowVisitor());
-        originalRoomPost.setPassType(updateRoomPost.getPassType());
         originalRoomPost.setLocation(updateRoomPost.getLocation());
         originalRoomPost.setPropertyType(updateRoomPost.getPropertyType());
         RoomPost savedRoomPost = roomPostRepository.save(RoomPostMapper.mapToRoomPost(originalRoomPost));
         return RoomPostMapper.mapToRoomPostDto(savedRoomPost);
+    }
+
+    @Override
+    public List<RoomPostDto> getRoomPostsByAgentId(Long agentId) {
+        List<RoomPost> roomPosts = roomPostRepository.getRoomPostsByAgentId(agentId);
+        List<RoomPostDto> roomPostDtos = new ArrayList<>();
+        for(RoomPost roomPost: roomPosts){
+            roomPostDtos.add(RoomPostMapper.mapToRoomPostDto(roomPost));
+        }
+        return roomPostDtos;
+    }
+
+    @Override
+    public void deleteRoomPostById(Long id) {
+        roomPostRepository.deleteById(id);
     }
 
     
