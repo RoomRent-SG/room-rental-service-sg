@@ -81,7 +81,7 @@ public class RoomPost {
     private PropertyType propertyType;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "agent_id")
+    @JoinColumn(name = "agent_id", referencedColumnName = "id")
     private Agent agent;
 
 }

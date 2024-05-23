@@ -39,7 +39,7 @@ public class Agent extends UserModel{
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
-    @Column(name = "profile_photo")
+    @Column(name = "profile_photo", nullable = false)
     private String profilePhoto;
 
     @Column(name = "created_at")

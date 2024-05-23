@@ -1,6 +1,7 @@
 package com.thiha.roomrent.controller;
 
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -14,13 +15,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.thiha.roomrent.dto.AgentDto;
 import com.thiha.roomrent.dto.RoomPostDto;
 import com.thiha.roomrent.mapper.AgentMapper;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.RoomPostService;
+import com.thiha.roomrent.service.S3ImageUploadService;
 
 import lombok.AllArgsConstructor;
 
@@ -31,6 +36,7 @@ import lombok.AllArgsConstructor;
 public class AgentController {
     private AgentService agentService;
     private RoomPostService roomPostService;
+    private S3ImageUploadService imageUploadService;
     
 
     @GetMapping("/profile")
@@ -116,6 +122,16 @@ public class AgentController {
             return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
+
+    @PostMapping("/{postId}/images")
+    private ResponseEntity<Void> uploadRoomImage(@RequestParam("file") MultipartFile file){
+        try{
+            imageUploadService.uploadImage(file.getOriginalFilename(), file);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch(IOException e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 
