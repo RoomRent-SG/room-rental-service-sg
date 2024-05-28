@@ -25,7 +25,7 @@ import com.thiha.roomrent.dto.LoginResponseDto;
 import com.thiha.roomrent.enums.UserRole;
 import com.thiha.roomrent.mapper.AgentMapper;
 import com.thiha.roomrent.service.AgentService;
-import com.thiha.roomrent.service.S3ImageUploadService;
+import com.thiha.roomrent.service.S3ImageService;
 
 import lombok.AllArgsConstructor;
 
@@ -36,7 +36,7 @@ public class AuthController {
    private final AgentService agentService;
    private final AuthenticationManager authenticationManager;
    private final JwtUtils jwtUtils;
-   private final S3ImageUploadService imageUploadService;
+   private final S3ImageService s3ImageService;
 
    @PostMapping("/agent/register")
    private ResponseEntity<?> registerAgent(@ModelAttribute AgentRegisterDto registeredAgent){
@@ -49,7 +49,7 @@ public class AuthController {
             }
             MultipartFile profileImage = registeredAgent.getProfileImage();
             try{
-                imageUploadService.uploadImage(profileImage.getOriginalFilename(), profileImage);
+                s3ImageService.uploadImage(profileImage.getOriginalFilename(), profileImage);
             }catch(IOException e){
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
@@ -82,7 +82,7 @@ public class AuthController {
         try{
             Arrays.asList(files).stream().forEach(file ->{
                 try {
-                    imageUploadService.uploadImage(file.getOriginalFilename(), file);
+                    s3ImageService.uploadImage(file.getOriginalFilename(), file);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

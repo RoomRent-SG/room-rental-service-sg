@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -20,12 +21,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.thiha.roomrent.dto.AgentDto;
+import com.thiha.roomrent.dto.AgentRegisterDto;
 import com.thiha.roomrent.dto.RoomPostDto;
 import com.thiha.roomrent.mapper.AgentMapper;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.RoomPostService;
-import com.thiha.roomrent.service.S3ImageUploadService;
+import com.thiha.roomrent.service.S3ImageService;
 
 import lombok.AllArgsConstructor;
 
@@ -36,7 +38,7 @@ import lombok.AllArgsConstructor;
 public class AgentController {
     private AgentService agentService;
     private RoomPostService roomPostService;
-    private S3ImageUploadService imageUploadService;
+    private S3ImageService s3ImageService;
     
 
     @GetMapping("/profile")
@@ -52,14 +54,33 @@ public class AgentController {
     }
    
     @PutMapping("/profile")
-    private ResponseEntity<AgentDto> updateAgent(@RequestBody AgentDto newAgent){
+    private ResponseEntity<AgentDto> updateAgent(@ModelAttribute AgentRegisterDto newAgent){
         String currentUser = getCurrentAgentName();
+
+        if(newAgent.getProfileImage()==null || newAgent.getProfileImage().isEmpty()){
+            // profile image must not be null
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        MultipartFile newProfileImage = newAgent.getProfileImage();
 
         AgentDto existingAgent = agentService.findAgentByName(currentUser);
         if (existingAgent != null) {
-            // agent can only change phone number and profile picture
-            AgentDto updatedAgent = agentService.updateExistingAgent(newAgent, existingAgent);
-            return new ResponseEntity<>(updatedAgent, HttpStatus.OK);
+            /*agent can only change phone number and profile picture
+            delete the exsiting image on s3 and update the profile photo name in db 
+            */ 
+            AgentRegisterDto updatedAgent = AgentMapper.mapToAgentRegisterDtoFromAgentDto(existingAgent);
+            try{
+                s3ImageService.deleteImage(existingAgent.getProfilePhoto());
+                String filename = newProfileImage.getOriginalFilename();
+                s3ImageService.uploadImage(filename, newProfileImage);
+                newAgent.setProfilePhoto(filename);
+                AgentDto updatedAgent = agentService.updateExistingAgent(AgentMapper.mapToAgentDtoFromAgentRegisterDto(newAgent), existingAgent);
+                return new ResponseEntity<>(updatedAgent, HttpStatus.OK);
+            }catch(IOException e){
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
@@ -127,7 +148,7 @@ public class AgentController {
     @PostMapping("/{postId}/images")
     private ResponseEntity<Void> uploadRoomImage(@RequestParam("file") MultipartFile file){
         try{
-            imageUploadService.uploadImage(file.getOriginalFilename(), file);
+            s3ImageService.uploadImage(file.getOriginalFilename(), file);
             return new ResponseEntity<>(HttpStatus.OK);
         }catch(IOException e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

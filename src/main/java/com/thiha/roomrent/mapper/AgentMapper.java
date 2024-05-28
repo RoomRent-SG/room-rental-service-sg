@@ -18,7 +18,7 @@ public class AgentMapper {
         );
    }
 
-    public static AgentDto mapToAgentDtoFromAgentRegisterDto(AgentRegisterDto registerAgent){
+   public static AgentDto mapToAgentDtoFromAgentRegisterDto(AgentRegisterDto registerAgent){
     return new AgentDto(
         registerAgent.getId(),
         registerAgent.getEmail(),
