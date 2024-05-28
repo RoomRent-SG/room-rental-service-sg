@@ -69,7 +69,6 @@ public class AgentController {
             /*agent can only change phone number and profile picture
             delete the exsiting image on s3 and update the profile photo name in db 
             */ 
-            AgentRegisterDto updatedAgent = AgentMapper.mapToAgentRegisterDtoFromAgentDto(existingAgent);
             try{
                 s3ImageService.deleteImage(existingAgent.getProfilePhoto());
                 String filename = newProfileImage.getOriginalFilename();
