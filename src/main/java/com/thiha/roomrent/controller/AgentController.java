@@ -44,7 +44,6 @@ public class AgentController {
     @GetMapping("/profile")
     private ResponseEntity<AgentDto> getAgent(){
         String currentUser = getCurrentAgentName();
-        System.out.println(currentUser+ " in agent controller");
         AgentDto agent = agentService.findAgentByName(currentUser);
         if (agent != null) {
             return new ResponseEntity<>(agent, HttpStatus.OK);
