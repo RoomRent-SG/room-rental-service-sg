@@ -8,7 +8,7 @@ import com.thiha.roomrent.model.Agent;
 public interface RoomPostServiceImpl {
    RoomPostDto createRoomPost(RoomPostRegisterDto roomPostRegisterDto, Agent agent);
    RoomPostDto findRoomPostById(Long id);
-   RoomPostDto updateRoomPost(RoomPostDto originalRoomPost, RoomPostDto updateRoomPost);
+   RoomPostDto updateRoomPost(RoomPostDto originalRoomPost, RoomPostRegisterDto updateRoomPost);
    List<RoomPostDto> getRoomPostsByAgentId(Long agentId);
    void deleteRoomPostById(Long id);
 }

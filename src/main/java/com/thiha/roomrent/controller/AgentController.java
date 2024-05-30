@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -132,12 +131,12 @@ public class AgentController {
 
     // Edit existing room post
     @PutMapping("/room-post/{id}")
-    private ResponseEntity<RoomPostDto> updateRoomPost(@RequestBody RoomPostDto roomPostDto, @PathVariable Long id){
+    private ResponseEntity<RoomPostDto> updateRoomPost(@ModelAttribute RoomPostRegisterDto editedRoomPost, @PathVariable Long id){
         AgentDto currentAgent = getCurrentAgent();
         RoomPostDto originalRoomPostDto = roomPostService.findRoomPostById(id);
         if(originalRoomPostDto != null){
             if(currentAgent.getUsername().equals(originalRoomPostDto.getAgent().getUsername())){
-                RoomPostDto updatedRoomPost = roomPostService.updateRoomPost(originalRoomPostDto, roomPostDto);
+                RoomPostDto updatedRoomPost = roomPostService.updateRoomPost(originalRoomPostDto, editedRoomPost);
                 return new ResponseEntity<>(updatedRoomPost, HttpStatus.OK);
             }
         }

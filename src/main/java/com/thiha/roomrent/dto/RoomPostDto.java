@@ -24,7 +24,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RoomPostDto {
-    @JsonIgnore
     private Long id;
     private StationName stationName;
     private double price;
@@ -40,6 +39,5 @@ public class RoomPostDto {
     private Agent agent;
     @JsonIgnore
     private Date postedAt;
-    @JsonIgnore
     private List<RoomPhoto> roomPhotos;
 }

@@ -89,7 +89,6 @@ public class RoomPost {
     @JoinColumn(name = "agent_id", referencedColumnName = "id")
     private Agent agent;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "roomPost", cascade = CascadeType.ALL, orphanRemoval = true)
     List<RoomPhoto> roomPhotos;
 
