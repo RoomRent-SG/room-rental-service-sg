@@ -142,7 +142,7 @@ public class AgentController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    @DeleteMapping("/room-post/{id}")
+    @DeleteMapping("/room-post/{roomPostId}")
     private ResponseEntity<Void> deleteRoomPost(@PathVariable Long roomPostId){
         AgentDto currentAgent = getCurrentAgent();
         RoomPostDto roomPostToDelete = roomPostService.findRoomPostById(roomPostId);
@@ -151,6 +151,7 @@ public class AgentController {
         }
         if(currentAgent.getId() == roomPostToDelete.getAgent().getId()){
             // Delete room post
+            roomPostService.deleteRoomPostById(roomPostId);
             return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
