@@ -1,7 +1,6 @@
 package com.thiha.roomrent.dto;
 
 import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thiha.roomrent.enums.UserRole;
 import lombok.AllArgsConstructor;
@@ -15,6 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AgentDto {
+   @JsonIgnore
    private Long id;
    @NonNull
    private String email;
@@ -26,7 +26,7 @@ public class AgentDto {
    private String phoneNumber;
    @NonNull
    private String profilePhoto;
-   @JsonFormat(pattern = "dd/MM/yyyy")
+   @JsonIgnore
    private Date createdAt;
    @NonNull
    private UserRole role;

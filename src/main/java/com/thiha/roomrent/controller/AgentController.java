@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.thiha.roomrent.dto.AgentDto;
 import com.thiha.roomrent.dto.AgentRegisterDto;
 import com.thiha.roomrent.dto.RoomPostDto;
+import com.thiha.roomrent.dto.RoomPostRegisterDto;
 import com.thiha.roomrent.mapper.AgentMapper;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.service.AgentService;
@@ -85,12 +86,25 @@ public class AgentController {
     }
 
     @PostMapping("/room-post")
-    private ResponseEntity<RoomPostDto> createRoomPost(@RequestBody RoomPostDto roomPostDto){
+    private ResponseEntity<RoomPostDto> createRoomPost(@ModelAttribute RoomPostRegisterDto registeredRoomPost){
         AgentDto currentAgent = getCurrentAgent();
+        List<MultipartFile> roomPhotoFiles = registeredRoomPost.getRoomPhotoFiles();
+        if(roomPhotoFiles == null){
+            // The room post creation requires room photos
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        if(roomPhotoFiles.size() > 10){
+            // too many photos
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         if(currentAgent != null){
-            Agent agent = AgentMapper.mapToAgent(currentAgent);
-            RoomPostDto savedRoomPost = roomPostService.createRoomPost(roomPostDto, agent);
-            return new ResponseEntity<>(savedRoomPost, HttpStatus.CREATED);
+            try{
+                Agent agent = AgentMapper.mapToAgent(currentAgent);
+                RoomPostDto savedRoomPost = roomPostService.createRoomPost(registeredRoomPost, agent);
+                return new ResponseEntity<>(savedRoomPost, HttpStatus.CREATED);
+            }catch(RuntimeException e){
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }

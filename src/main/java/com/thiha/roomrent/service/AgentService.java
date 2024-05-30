@@ -1,5 +1,6 @@
 package com.thiha.roomrent.service;
 
+import java.util.Date;
 import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +25,8 @@ public class AgentService implements AgentServiceImpl{
         String hashedPassword = passwordEncoder.encode(agentDto.getPassword());
         agentDto.setPassword(hashedPassword);
         Agent agent = AgentMapper.mapToAgent(agentDto);
+        // set the creation date
+        agent.setCreatedAt(new Date());
         Agent savedAgent = agentRepository.save(agent);
         return AgentMapper.mapToAgentDto(savedAgent);
     }

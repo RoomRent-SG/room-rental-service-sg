@@ -1,7 +1,7 @@
 package com.thiha.roomrent.model;
 
 import java.util.Date;
-import org.springframework.format.annotation.DateTimeFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thiha.roomrent.enums.UserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,6 +24,7 @@ import lombok.Setter;
 @Table(name = "agents")
 public class Agent extends UserModel{
     @Id
+    @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -43,7 +44,6 @@ public class Agent extends UserModel{
     private String profilePhoto;
 
     @Column(name = "created_at")
-    @DateTimeFormat(pattern = "dd/MM/yyyy")
     private Date createdAt;
 
     @Column(name = "role", nullable = false)

@@ -1,12 +1,18 @@
 package com.thiha.roomrent.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.thiha.roomrent.dto.RoomPostDto;
+import com.thiha.roomrent.dto.RoomPostRegisterDto;
 import com.thiha.roomrent.mapper.RoomPostMapper;
 import com.thiha.roomrent.model.Agent;
+import com.thiha.roomrent.model.RoomPhoto;
 import com.thiha.roomrent.model.RoomPost;
 import com.thiha.roomrent.repository.RoomPostRepository;
 import com.thiha.roomrent.service.impl.RoomPostServiceImpl;
@@ -17,20 +23,39 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class RoomPostService implements RoomPostServiceImpl{
     private RoomPostRepository roomPostRepository;
+    private S3ImageService s3ImageService;
 
     @Override
-    public RoomPostDto createRoomPost(RoomPostDto roomPostDto, Agent agent) {
+    public RoomPostDto createRoomPost(RoomPostRegisterDto roomPostRegisterDto, Agent agent) {
         RoomPost roomPost = new RoomPost();
-        roomPost.setAirConTime(roomPostDto.getAirConTime());
-        roomPost.setAllowVisitor(roomPostDto.isAllowVisitor());
-        roomPost.setCookingAllowance(roomPostDto.getCookingAllowance());
-        roomPost.setLocation(roomPostDto.getLocation());
-        roomPost.setPropertyType(roomPostDto.getPropertyType());
-        roomPost.setRoomType(roomPostDto.getRoomType());
-        roomPost.setSharePub(roomPostDto.getSharePub());
-        roomPost.setStationName(roomPostDto.getStationName());
-        roomPost.setTotalPax(roomPostDto.getTotalPax());
+        roomPost.setAirConTime(roomPostRegisterDto.getAirConTime());
+        roomPost.setAllowVisitor(roomPostRegisterDto.isAllowVisitor());
+        roomPost.setCookingAllowance(roomPostRegisterDto.getCookingAllowance());
+        roomPost.setLocation(roomPostRegisterDto.getLocation());
+        roomPost.setPropertyType(roomPostRegisterDto.getPropertyType());
+        roomPost.setRoomType(roomPostRegisterDto.getRoomType());
+        roomPost.setSharePub(roomPostRegisterDto.getSharePub());
+        roomPost.setStationName(roomPostRegisterDto.getStationName());
+        roomPost.setTotalPax(roomPostRegisterDto.getTotalPax());
         roomPost.setAgent(agent);
+        roomPost.setPrice(roomPostRegisterDto.getPrice()); 
+        roomPost.setPostedAt(new Date());
+        
+        // upload images to s3
+        List<MultipartFile> roomPhotoFiles = roomPostRegisterDto.getRoomPhotoFiles();
+        List<RoomPhoto> roomPhotos = new ArrayList<>();
+        roomPhotoFiles.forEach(image -> {
+                    try{
+                        s3ImageService.uploadImage(image.getOriginalFilename(), image);
+                        RoomPhoto roomPhoto = new RoomPhoto();
+                        roomPhoto.setFileName(image.getOriginalFilename());
+                        roomPhoto.setRoomPost(roomPost);
+                        roomPhotos.add(roomPhoto);
+                    }catch(IOException e){
+                        throw new RuntimeException();
+                    }
+                });
+        roomPost.setRoomPhotos(roomPhotos);
         RoomPost savedRoomPost = roomPostRepository.save(roomPost);
 
         return RoomPostMapper.mapToRoomPostDto(savedRoomPost);
