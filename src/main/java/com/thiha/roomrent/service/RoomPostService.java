@@ -10,8 +10,13 @@ import javax.management.RuntimeErrorException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import com.thiha.roomrent.dto.AllRoomPostsResponse;
 import com.thiha.roomrent.dto.RoomPostDto;
 import com.thiha.roomrent.dto.RoomPostRegisterDto;
 import com.thiha.roomrent.mapper.RoomPostMapper;
@@ -144,6 +149,24 @@ public class RoomPostService implements RoomPostServiceImpl{
     @Override
     public void deleteRoomPostById(Long id) {
         roomPostRepository.deleteById(id);
+    }
+
+    @Override
+    public AllRoomPostsResponse getAllRoomPosts(int pageNo, int PageSize, String sortedBy) {
+        Pageable pageable = PageRequest.of(pageNo, PageSize, Sort.by(sortedBy));
+        Page<RoomPost> roomPosts = roomPostRepository.findAll(pageable);
+        List<RoomPost> listOfRoomPosts = roomPosts.getContent();
+        List<RoomPostDto> listOfRoomPostDtos = new ArrayList<>();
+        for(RoomPost roomPost:listOfRoomPosts){
+            listOfRoomPostDtos.add(RoomPostMapper.mapToRoomPostDto(roomPost));
+        }
+        AllRoomPostsResponse roomPostsResponse = new AllRoomPostsResponse();
+        roomPostsResponse.setAllRoomPosts(listOfRoomPostDtos);
+        roomPostsResponse.setPageNo(roomPosts.getNumber());
+        roomPostsResponse.setPageSize(roomPosts.getSize());
+        roomPostsResponse.setTotalContenSize(roomPosts.getTotalElements());
+        roomPostsResponse.setLast(roomPosts.isLast());
+        return roomPostsResponse;
     }
 
     

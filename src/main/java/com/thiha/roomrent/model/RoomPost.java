@@ -2,8 +2,6 @@ package com.thiha.roomrent.model;
 
 import java.util.Date;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thiha.roomrent.enums.AirConTime;
 import com.thiha.roomrent.enums.CookingAllowance;
 import com.thiha.roomrent.enums.Location;
