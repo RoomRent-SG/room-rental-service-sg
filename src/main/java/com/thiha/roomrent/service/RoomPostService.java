@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
-import javax.management.RuntimeErrorException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -19,12 +16,14 @@ import org.springframework.web.multipart.MultipartFile;
 import com.thiha.roomrent.dto.AllRoomPostsResponse;
 import com.thiha.roomrent.dto.RoomPostDto;
 import com.thiha.roomrent.dto.RoomPostRegisterDto;
+import com.thiha.roomrent.dto.RoomPostSearchFilter;
 import com.thiha.roomrent.mapper.RoomPostMapper;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.RoomPhoto;
 import com.thiha.roomrent.model.RoomPost;
 import com.thiha.roomrent.repository.RoomPostRepository;
 import com.thiha.roomrent.service.impl.RoomPostServiceImpl;
+import com.thiha.roomrent.specification.RoomPostSpecification;
 
 
 @Service
@@ -151,21 +150,48 @@ public class RoomPostService implements RoomPostServiceImpl{
         roomPostRepository.deleteById(id);
     }
 
+    /*
+     * the room posts will be sorted by postedAt attribute by defaults
+     */
+
     @Override
-    public AllRoomPostsResponse getAllRoomPosts(int pageNo, int PageSize, String sortedBy) {
-        Pageable pageable = PageRequest.of(pageNo, PageSize, Sort.by(sortedBy));
-        Page<RoomPost> roomPosts = roomPostRepository.findAll(pageable);
-        List<RoomPost> listOfRoomPosts = roomPosts.getContent();
+    public AllRoomPostsResponse getAllRoomPosts(int pageNo, int pageSize, RoomPostSearchFilter searchFilter) {
+        /*
+         * make sure pageNo and pageSize are positive
+         */
+        pageNo = pageNo<0? 0 : pageNo ;
+        pageSize = pageSize<0? 10: pageSize;
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("postedAt"));
+        Page<RoomPost> roomPosts;
+        List<RoomPost> listOfRoomPosts;
         List<RoomPostDto> listOfRoomPostDtos = new ArrayList<>();
+        AllRoomPostsResponse roomPostsResponse = new AllRoomPostsResponse();
+
+
+        List<RoomPostDto> filteredRoomPosts = new ArrayList<>();
+
+        //apply filter after retrieving all posts
+        if(searchFilter == null){
+            roomPosts = roomPostRepository.findAll(pageable);
+            listOfRoomPosts =  roomPosts.getContent();
+
+        }else{
+            RoomPostSpecification specification = new RoomPostSpecification(searchFilter);
+            roomPosts = roomPostRepository.findAll(specification, pageable);
+            listOfRoomPosts = roomPosts.getContent();
+        }
+
+        //map to RoomPostDTO
         for(RoomPost roomPost:listOfRoomPosts){
             listOfRoomPostDtos.add(RoomPostMapper.mapToRoomPostDto(roomPost));
         }
-        AllRoomPostsResponse roomPostsResponse = new AllRoomPostsResponse();
-        roomPostsResponse.setAllRoomPosts(listOfRoomPostDtos);
-        roomPostsResponse.setPageNo(roomPosts.getNumber());
-        roomPostsResponse.setPageSize(roomPosts.getSize());
-        roomPostsResponse.setTotalContenSize(roomPosts.getTotalElements());
-        roomPostsResponse.setLast(roomPosts.isLast());
+        filteredRoomPosts = listOfRoomPostDtos;
+            roomPostsResponse.setAllRoomPosts(filteredRoomPosts);
+            roomPostsResponse.setPageNo(roomPosts.getNumber());
+            roomPostsResponse.setPageSize(roomPosts.getSize());
+            roomPostsResponse.setTotalContenSize(roomPosts.getTotalElements());
+            roomPostsResponse.setLast(roomPosts.isLast());
+        
         return roomPostsResponse;
     }
 
