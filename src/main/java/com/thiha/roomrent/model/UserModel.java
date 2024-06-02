@@ -1,5 +1,7 @@
 package com.thiha.roomrent.model;
 
+import java.io.Serializable;
+
 import com.thiha.roomrent.enums.UserRole;
 
 import lombok.AllArgsConstructor;
@@ -11,7 +13,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserModel {
+public class UserModel implements Serializable{
    private Long id;
    private String username;
    private String password;

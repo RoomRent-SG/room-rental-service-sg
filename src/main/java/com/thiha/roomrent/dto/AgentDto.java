@@ -1,5 +1,6 @@
 package com.thiha.roomrent.dto;
 
+import java.io.Serializable;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thiha.roomrent.enums.UserRole;
@@ -13,7 +14,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AgentDto {
+public class AgentDto implements Serializable{
    @JsonIgnore
    private Long id;
    @NonNull

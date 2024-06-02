@@ -1,6 +1,6 @@
 package com.thiha.roomrent.enums;
 
-public enum AirConTime {
+public enum AirConTime{
    LIMITED("limited"),
    UNLIMITED("unlimited");
 

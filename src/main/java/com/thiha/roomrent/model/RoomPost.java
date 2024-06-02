@@ -1,5 +1,6 @@
 package com.thiha.roomrent.model;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import com.thiha.roomrent.enums.AirConTime;
@@ -15,6 +16,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,7 +37,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoomPost {
+public class RoomPost implements Serializable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -87,7 +89,14 @@ public class RoomPost {
     @JoinColumn(name = "agent_id", referencedColumnName = "id")
     private Agent agent;
 
-    @OneToMany(mappedBy = "roomPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    /*
+     * If roomPhotos are loaded lazily, the data will only be loaded if the object is called or used.So, if the code
+     * doesn't use the roomPhoto objects, they will not loaded. owever, if roomPhotos are not accessed within an active Hibernate session,
+     * As a result, trying to access them later (e.g., during serialization for caching) will cause a LazyInitializationExceptionit 
+     * will become serialization error when the roompost data is cached in the redis. 
+     * However, changing FetchType to EAGER will effect on performance of the app in other operations if the data is large.
+     */
+    @OneToMany(mappedBy = "roomPost", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     List<RoomPhoto> roomPhotos;
 
 }

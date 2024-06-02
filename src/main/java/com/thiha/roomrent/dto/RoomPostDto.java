@@ -1,5 +1,6 @@
 package com.thiha.roomrent.dto;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -23,7 +24,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoomPostDto {
+public class RoomPostDto implements Serializable{
     private Long id;
     private StationName stationName;
     private double price;

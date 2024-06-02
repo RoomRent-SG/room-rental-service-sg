@@ -1,7 +1,5 @@
 package com.thiha.roomrent.dto;
 
-import java.lang.reflect.Field;
-
 import com.amazonaws.services.iotsitewise.model.PropertyType;
 import com.thiha.roomrent.enums.AirConTime;
 import com.thiha.roomrent.enums.CookingAllowance;

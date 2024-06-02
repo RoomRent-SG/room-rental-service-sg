@@ -1,5 +1,7 @@
 package com.thiha.roomrent.model;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
@@ -22,7 +24,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class RoomPhoto {
+public class RoomPhoto implements Serializable{
     @Id
     @Column(name = "photo_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

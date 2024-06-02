@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +39,7 @@ public class RoomPostService implements RoomPostServiceImpl{
     private String cloudFrontUrl;
 
     @Override
+    @CacheEvict(value = "all_room_posts", allEntries = true)
     public RoomPostDto createRoomPost(RoomPostRegisterDto roomPostRegisterDto, Agent agent) {
         RoomPost roomPost = new RoomPost();
         roomPost.setAirConTime(roomPostRegisterDto.getAirConTime());
@@ -83,6 +86,7 @@ public class RoomPostService implements RoomPostServiceImpl{
     }
 
     @Override
+    @CacheEvict(value = "all_room_posts")
     public RoomPostDto updateRoomPost(RoomPostDto originalRoomPost, RoomPostRegisterDto updateRoomPost) {
         originalRoomPost.setStationName(updateRoomPost.getStationName());
         originalRoomPost.setRoomType(updateRoomPost.getRoomType());
@@ -146,6 +150,7 @@ public class RoomPostService implements RoomPostServiceImpl{
     }
 
     @Override
+    @CacheEvict(value = "all_room_posts")
     public void deleteRoomPostById(Long id) {
         roomPostRepository.deleteById(id);
     }
@@ -155,6 +160,7 @@ public class RoomPostService implements RoomPostServiceImpl{
      */
 
     @Override
+    @Cacheable(value = "all_room_posts")
     public AllRoomPostsResponse getAllRoomPosts(int pageNo, int pageSize, RoomPostSearchFilter searchFilter) {
         /*
          * make sure pageNo and pageSize are positive
@@ -179,18 +185,27 @@ public class RoomPostService implements RoomPostServiceImpl{
             RoomPostSpecification specification = new RoomPostSpecification(searchFilter);
             roomPosts = roomPostRepository.findAll(specification, pageable);
             listOfRoomPosts = roomPosts.getContent();
+
         }
 
         //map to RoomPostDTO
         for(RoomPost roomPost:listOfRoomPosts){
-            listOfRoomPostDtos.add(RoomPostMapper.mapToRoomPostDto(roomPost));
+            RoomPostDto roomPostDto = RoomPostMapper.mapToRoomPostDto(roomPost); 
+            listOfRoomPostDtos.add(roomPostDto);
+            /*
+             * load the roomphots data manually because they are implemented by lazy loading
+             * forcing hibernate to fetch the contents by creating new ArrayList
+             * without creating new ArrayList (roomPostDto.setRoomPhotos(roomPost.getRoomPhotos())), it will not work
+             */
+            roomPostDto.setRoomPhotos(new ArrayList<>(roomPost.getRoomPhotos()));
         }
-        filteredRoomPosts = listOfRoomPostDtos;
-            roomPostsResponse.setAllRoomPosts(filteredRoomPosts);
-            roomPostsResponse.setPageNo(roomPosts.getNumber());
-            roomPostsResponse.setPageSize(roomPosts.getSize());
-            roomPostsResponse.setTotalContenSize(roomPosts.getTotalElements());
-            roomPostsResponse.setLast(roomPosts.isLast());
+
+        filteredRoomPosts = listOfRoomPostDtos;        
+        roomPostsResponse.setAllRoomPosts(filteredRoomPosts);
+        roomPostsResponse.setPageNo(roomPosts.getNumber());
+        roomPostsResponse.setPageSize(roomPosts.getSize());
+        roomPostsResponse.setTotalContenSize(roomPosts.getTotalElements());
+        roomPostsResponse.setLast(roomPosts.isLast());
         
         return roomPostsResponse;
     }
