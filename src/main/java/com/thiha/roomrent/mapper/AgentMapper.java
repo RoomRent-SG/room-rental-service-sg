@@ -14,7 +14,8 @@ public class AgentMapper {
             agent.getPhoneNumber(),
             agent.getProfilePhoto(),
             agent.getCreatedAt(),
-            agent.getRole()
+            agent.getRole(),
+            agent.getTokens()
         );
    }
 
@@ -27,7 +28,8 @@ public class AgentMapper {
         registerAgent.getPhoneNumber(),
         registerAgent.getProfilePhoto(),
         registerAgent.getCreatedAt(),
-        registerAgent.getRole()
+        registerAgent.getRole(),
+        null
     );
    }
 
@@ -36,13 +38,15 @@ public class AgentMapper {
     //need server side validation required
     return new Agent(
         agentDto.getId(),
-        agentDto.getEmail(),
         agentDto.getUsername(),
         agentDto.getPassword(),
+        agentDto.getRole(),
+        agentDto.getTokens(),
+        agentDto.getEmail(),
         agentDto.getPhoneNumber(),
         agentDto.getProfilePhoto(),
-        agentDto.getCreatedAt(),
-        agentDto.getRole()
+        agentDto.getCreatedAt() 
     );
    }
 }
+

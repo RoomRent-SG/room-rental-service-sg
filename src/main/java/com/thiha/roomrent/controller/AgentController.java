@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -18,13 +18,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.thiha.roomrent.dto.AgentDto;
 import com.thiha.roomrent.dto.AgentRegisterDto;
 import com.thiha.roomrent.dto.RoomPostDto;
 import com.thiha.roomrent.dto.RoomPostRegisterDto;
+import com.thiha.roomrent.enums.UserRole;
 import com.thiha.roomrent.mapper.AgentMapper;
 import com.thiha.roomrent.model.Agent;
+import com.thiha.roomrent.model.UserModel;
+import com.thiha.roomrent.security.UserDetailsImpl;
 import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.RoomPostService;
 import com.thiha.roomrent.service.S3ImageService;
@@ -86,6 +88,7 @@ public class AgentController {
     @PostMapping("/room-post")
     private ResponseEntity<RoomPostDto> createRoomPost(@ModelAttribute RoomPostRegisterDto registeredRoomPost){
         AgentDto currentAgent = getCurrentAgent();
+        System.out.println(currentAgent.getUsername());
         List<MultipartFile> roomPhotoFiles = registeredRoomPost.getRoomPhotoFiles();
         if(roomPhotoFiles == null){
             // The room post creation requires room photos
@@ -95,16 +98,16 @@ public class AgentController {
             // too many photos
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        if(currentAgent != null){
+        {
             try{
                 Agent agent = AgentMapper.mapToAgent(currentAgent);
                 RoomPostDto savedRoomPost = roomPostService.createRoomPost(registeredRoomPost, agent);
                 return new ResponseEntity<>(savedRoomPost, HttpStatus.CREATED);
             }catch(RuntimeException e){
+                System.out.println(e.getMessage());
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping("/room-post")
@@ -170,25 +173,19 @@ public class AgentController {
 
     //utility methods
     private AgentDto getCurrentAgent(){
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String currentUser;
-        if(principal instanceof UserDetails){
-            currentUser = ((UserDetails)principal).getUsername();
-        }else{
-            currentUser = principal.toString();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl)authentication.getPrincipal();
+        UserModel user = userDetails.getUser();
+        if (user.getRole() == UserRole.AGENT && user instanceof Agent) {
+            return AgentMapper.mapToAgentDto((Agent) user);
         }
-        AgentDto agent = agentService.findAgentByName(currentUser);
-        return agent;
+        return null;
     }
 
     private String getCurrentAgentName(){
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String currentUser;
-        if(principal instanceof UserDetails){
-            currentUser = ((UserDetails)principal).getUsername();
-        }else{
-            currentUser = principal.toString();
-        }
-        return currentUser;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl)authentication.getPrincipal();
+        return userDetails.getUsername();
     }
+        
 }

@@ -86,9 +86,10 @@ public class JwtUtils {
         }
     }
 
-    public boolean validateClaims(Claims claims)throws AuthenticationException{
+    // checked the token expiration
+    public boolean isJwtTokenExpired(Claims claims)throws AuthenticationException{
         try{
-            return claims.getExpiration().after(new Date());
+            return claims.getExpiration().before(new Date());
         }catch(Exception e){
             throw e;
         }

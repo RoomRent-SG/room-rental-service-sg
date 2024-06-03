@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.http.MediaType;
@@ -16,6 +17,8 @@ import org.springframework.http.MediaType;
 import com.fasterxml.jackson.core.exc.StreamWriteException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thiha.roomrent.security.RoomRentUserDetailsService;
+
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,10 +29,13 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtAuthorizationFilter extends OncePerRequestFilter{
     private final JwtUtils jwtUtils;
     private final ObjectMapper mapper;
+    private final RoomRentUserDetailsService roomRentUserDetailsService;
 
-    public JwtAuthorizationFilter(JwtUtils jwtUtils, ObjectMapper mapper) {
+    public JwtAuthorizationFilter(JwtUtils jwtUtils, ObjectMapper mapper,
+     RoomRentUserDetailsService roomRentUserDetailsService) {
         this.jwtUtils = jwtUtils;
         this.mapper = mapper;
+        this.roomRentUserDetailsService = roomRentUserDetailsService;
     }
 
     @SuppressWarnings("null")
@@ -43,12 +49,15 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter{
                     filterChain.doFilter(request, response);
                     return;
                 }
-                // logger.info(token);
                 Claims claims = jwtUtils.resolveClaims(request);
-
-                if(claims != null && jwtUtils.validateClaims(claims)){
+                
+                /*
+                 * Implement logout logic here
+                 */
+                if(claims != null && !jwtUtils.isJwtTokenExpired(claims)){
                     String username = claims.getSubject();
-                    Authentication authentication = new UsernamePasswordAuthenticationToken(username,"", new ArrayList<>());
+                    UserDetails userDetails = roomRentUserDetailsService.loadUserByUsername(username);
+                    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails,"", userDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }catch(Exception e){

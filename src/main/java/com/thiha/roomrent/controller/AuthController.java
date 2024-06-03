@@ -24,7 +24,11 @@ import com.thiha.roomrent.dto.LoginRequestDto;
 import com.thiha.roomrent.dto.LoginResponseDto;
 import com.thiha.roomrent.enums.UserRole;
 import com.thiha.roomrent.mapper.AgentMapper;
+import com.thiha.roomrent.model.JwtToken;
+import com.thiha.roomrent.model.UserModel;
+import com.thiha.roomrent.security.UserDetailsImpl;
 import com.thiha.roomrent.service.AgentService;
+import com.thiha.roomrent.service.JwtTokenServiceImpl;
 import com.thiha.roomrent.service.S3ImageService;
 
 import lombok.AllArgsConstructor;
@@ -37,6 +41,7 @@ public class AuthController {
    private final AuthenticationManager authenticationManager;
    private final JwtUtils jwtUtils;
    private final S3ImageService s3ImageService;
+   private final JwtTokenServiceImpl jwtTokenService;
 
    @PostMapping("/agent/register")
    private ResponseEntity<?> registerAgent(@ModelAttribute AgentRegisterDto registeredAgent){
@@ -72,24 +77,14 @@ public class AuthController {
         System.out.println("inside login controller...");
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        UserModel user = userDetails.getUser();
         String jwtToken = jwtUtils.generateJwtToken(loginDto);
+        JwtToken token = new JwtToken();
+        token.setToken(jwtToken);
+        token.setUser(user);
+        jwtTokenService.saveToken(token);
         return new ResponseEntity<>(new LoginResponseDto(loginDto.getUsername(), jwtToken), HttpStatus.OK);
    }
 
-   //test
-    @PostMapping("/images")
-    private ResponseEntity<Void> uploadRoomImage(@RequestParam("files") MultipartFile[] files){
-        try{
-            Arrays.asList(files).stream().forEach(file ->{
-                try {
-                    s3ImageService.uploadImage(file.getOriginalFilename(), file);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            return new ResponseEntity<>(HttpStatus.OK);
-        }catch(RuntimeException e){
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 }

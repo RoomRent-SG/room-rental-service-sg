@@ -1,17 +1,12 @@
 package com.thiha.roomrent.model;
 
 import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.List;
+
 import com.thiha.roomrent.enums.UserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,23 +14,22 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "agents")
 public class Agent extends UserModel{
-    @Id
-    @JsonIgnore
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    // @Id
+    // @JsonIgnore
+    // @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // private Long id;
 
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "user_name", nullable = false)
-    private String username;
+    // @Column(name = "user_name", nullable = false)
+    // private String username;
 
-    @Column(name = "password")
-    private String password;
+    // @Column(name = "password")
+    // private String password;
 
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
@@ -46,11 +40,13 @@ public class Agent extends UserModel{
     @Column(name = "created_at")
     private Date createdAt;
 
-    @Column(name = "role", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private UserRole role = UserRole.AGENT;
-
-    // @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, orphanRemoval = true)
-    // List<RoomPost> roomPosts;
+   public Agent(Long id, String username, String password, UserRole role,
+   List<JwtToken> tokens, String email, String phoneNumber, String profilePhoto, Date createdAt){
+        super(id, username, password, role, tokens);
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.profilePhoto = profilePhoto;
+        this.createdAt = createdAt;
+   }
 
 }

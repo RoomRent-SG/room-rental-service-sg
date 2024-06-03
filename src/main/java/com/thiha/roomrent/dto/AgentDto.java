@@ -2,8 +2,12 @@ package com.thiha.roomrent.dto;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thiha.roomrent.enums.UserRole;
+import com.thiha.roomrent.model.JwtToken;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,4 +35,6 @@ public class AgentDto implements Serializable{
    private Date createdAt;
    @NonNull
    private UserRole role;
+   @JsonIgnore
+   private List<JwtToken> tokens;
 }
