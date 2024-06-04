@@ -1,6 +1,7 @@
 package com.thiha.roomrent.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +17,12 @@ public interface JwtTokenRepository extends JpaRepository<JwtToken, Long>{
             WHERE t.user.id = :id
             """)
     List<JwtToken> getTokensByUserId(@Param("id")Long id);
+
+
+    @Query("""
+            SELECT token
+            FROM JwtToken token
+            WHERE token.token = :stringToken
+            """)
+    Optional<JwtToken> getTokenByStringToken(@Param("stringToken")String stringToken);
 }

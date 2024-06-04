@@ -28,9 +28,12 @@ import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.UserModel;
 import com.thiha.roomrent.security.UserDetailsImpl;
 import com.thiha.roomrent.service.AgentService;
+import com.thiha.roomrent.service.LogoutService;
 import com.thiha.roomrent.service.RoomPostService;
 import com.thiha.roomrent.service.S3ImageService;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 
 
@@ -41,6 +44,7 @@ public class AgentController {
     private AgentService agentService;
     private RoomPostService roomPostService;
     private S3ImageService s3ImageService;
+    private LogoutService logoutService;
     
 
     @GetMapping("/profile")
@@ -168,6 +172,19 @@ public class AgentController {
         }catch(IOException e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PostMapping("/logout")
+    private ResponseEntity<Void> doLogout(HttpServletRequest request,
+                 HttpServletResponse response
+                 ,Authentication authentication){
+                    System.out.println("log out controller.");
+        try{
+            logoutService.performLogout(request, response, authentication);
+        }catch(Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 

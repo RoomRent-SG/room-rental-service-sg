@@ -17,7 +17,9 @@ import org.springframework.http.MediaType;
 import com.fasterxml.jackson.core.exc.StreamWriteException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thiha.roomrent.dto.TokenDto;
 import com.thiha.roomrent.security.RoomRentUserDetailsService;
+import com.thiha.roomrent.service.JwtTokenServiceImpl;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -30,12 +32,15 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter{
     private final JwtUtils jwtUtils;
     private final ObjectMapper mapper;
     private final RoomRentUserDetailsService roomRentUserDetailsService;
+    private final JwtTokenServiceImpl tokenService;
 
     public JwtAuthorizationFilter(JwtUtils jwtUtils, ObjectMapper mapper,
-     RoomRentUserDetailsService roomRentUserDetailsService) {
+     RoomRentUserDetailsService roomRentUserDetailsService,
+     JwtTokenServiceImpl tokenService) {
         this.jwtUtils = jwtUtils;
         this.mapper = mapper;
         this.roomRentUserDetailsService = roomRentUserDetailsService;
+        this.tokenService = tokenService;
     }
 
     @SuppressWarnings("null")
@@ -52,9 +57,10 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter{
                 Claims claims = jwtUtils.resolveClaims(request);
                 
                 /*
-                 * Implement logout logic here
+                 * Implement logout logic here by checking isRevoked attribute of token 
                  */
-                if(claims != null && !jwtUtils.isJwtTokenExpired(claims)){
+                TokenDto tokenDto = tokenService.getTokenUsingTokenValue(token);
+                if(claims != null && !jwtUtils.isJwtTokenExpired(claims) && tokenDto!=null && !tokenDto.isRevoked()){
                     String username = claims.getSubject();
                     UserDetails userDetails = roomRentUserDetailsService.loadUserByUsername(username);
                     Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails,"", userDetails.getAuthorities());
