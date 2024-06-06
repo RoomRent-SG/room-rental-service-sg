@@ -8,5 +8,5 @@ public interface AgentServiceImpl{
     AgentDto findAgentByEmail(String email);
     AgentDto findAgentById(Long id);
     AgentDto findAgentByName(String name);
-    AgentDto updateExistingAgent(AgentDto newAgentDto, AgentDto existingAgentDto );
+    AgentDto updateExistingAgent(AgentRegisterDto newAgentDto, AgentDto existingAgentDto );
 }

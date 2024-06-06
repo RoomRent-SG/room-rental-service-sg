@@ -43,7 +43,6 @@ public class AuthController {
   
    @PostMapping("/agent/login")
    private ResponseEntity<LoginResponseDto> loginAgent(@RequestBody LoginRequestDto loginDto){
-        System.out.println("inside login controller...");
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();

@@ -3,15 +3,17 @@ package com.thiha.roomrent.service;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Optional;
+
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import com.amazonaws.services.workmail.model.EmailAddressInUseException;
 import com.thiha.roomrent.dto.AgentDto;
 import com.thiha.roomrent.dto.AgentRegisterDto;
 import com.thiha.roomrent.enums.UserRole;
 import com.thiha.roomrent.exceptions.S3ImageUploadException;
 import com.thiha.roomrent.exceptions.EmailAlreadyRegisteredException;
+import com.thiha.roomrent.exceptions.EntityNotFoundException;
 import com.thiha.roomrent.exceptions.NameAlreadyExistedException;
 import com.thiha.roomrent.exceptions.ProfileImageNotFoundException;
 import com.thiha.roomrent.mapper.AgentMapper;
@@ -83,12 +85,38 @@ public class AgentService implements AgentServiceImpl{
         if(optionalAgent.isPresent()){
             return AgentMapper.mapToAgentDto(optionalAgent.get());
         }
-        return null;
+        throw new EntityNotFoundException("Agent cannot be found");
     }
+    // @Override
+    // public AgentDto updateExistingAgent(AgentDto newAgentDto, AgentDto existingAgentDto) {
+    //     existingAgentDto.setPhoneNumber(newAgentDto.getPhoneNumber());
+    //     existingAgentDto.setProfilePhoto(newAgentDto.getProfilePhoto());
+    //     return AgentMapper.mapToAgentDto(agentRepository.save(AgentMapper.mapToAgent(existingAgentDto)));
+    // }
+
     @Override
-    public AgentDto updateExistingAgent(AgentDto newAgentDto, AgentDto existingAgentDto) {
+    public AgentDto updateExistingAgent(AgentRegisterDto newAgentDto, AgentDto existingAgentDto) {
+        if(newAgentDto.getProfileImage()==null || newAgentDto.getProfileImage().isEmpty()){
+            throw new ProfileImageNotFoundException("Profile photo cannnot be empty");
+        }
+        /*agent can only change phone number and profile picture
+        delete the exsiting image on s3 and update the profile photo name in db 
+        */ 
+        MultipartFile newProfileImage = newAgentDto.getProfileImage();
+        imageService.deleteImage(existingAgentDto.getProfilePhoto());
+        String newFileName = newProfileImage.getOriginalFilename();
+        try {
+            imageService.uploadImage(newFileName, newProfileImage);
+        } catch (IOException e) {
+            throw new S3ImageUploadException("Error uploading Image to s3");
+        }
+
+        //change profile photo
+        existingAgentDto.setProfilePhoto(newFileName);
+
+        //change phone number
         existingAgentDto.setPhoneNumber(newAgentDto.getPhoneNumber());
-        existingAgentDto.setProfilePhoto(newAgentDto.getProfilePhoto());
+        
         return AgentMapper.mapToAgentDto(agentRepository.save(AgentMapper.mapToAgent(existingAgentDto)));
     }
    

@@ -51,67 +51,22 @@ public class AgentController {
     private ResponseEntity<AgentDto> getAgent(){
         String currentUser = getCurrentAgentName();
         AgentDto agent = agentService.findAgentByName(currentUser);
-        if (agent != null) {
-            return new ResponseEntity<>(agent, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-       
+        return new ResponseEntity<>(agent, HttpStatus.OK);
     }
    
     @PutMapping("/profile")
     private ResponseEntity<AgentDto> updateAgent(@ModelAttribute AgentRegisterDto newAgent){
-        String currentUser = getCurrentAgentName();
-
-        if(newAgent.getProfileImage()==null || newAgent.getProfileImage().isEmpty()){
-            // profile image must not be null
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        MultipartFile newProfileImage = newAgent.getProfileImage();
-
-        AgentDto existingAgent = agentService.findAgentByName(currentUser);
-        if (existingAgent != null) {
-            /*agent can only change phone number and profile picture
-            delete the exsiting image on s3 and update the profile photo name in db 
-            */ 
-            try{
-                s3ImageService.deleteImage(existingAgent.getProfilePhoto());
-                String filename = newProfileImage.getOriginalFilename();
-                s3ImageService.uploadImage(filename, newProfileImage);
-                newAgent.setProfilePhoto(filename);
-                AgentDto updatedAgent = agentService.updateExistingAgent(AgentMapper.mapToAgentDtoFromAgentRegisterDto(newAgent), existingAgent);
-                return new ResponseEntity<>(updatedAgent, HttpStatus.OK);
-            }catch(IOException e){
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-            
-        }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        AgentDto existingAgent = getCurrentAgent();
+        AgentDto updatedAgent = agentService.updateExistingAgent(newAgent, existingAgent);
+        return new ResponseEntity<>(updatedAgent, HttpStatus.OK);
     }
 
     @PostMapping("/room-post")
     private ResponseEntity<RoomPostDto> createRoomPost(@ModelAttribute RoomPostRegisterDto registeredRoomPost){
-        AgentDto currentAgent = getCurrentAgent();
-        System.out.println(currentAgent.getUsername());
-        List<MultipartFile> roomPhotoFiles = registeredRoomPost.getRoomPhotoFiles();
-        if(roomPhotoFiles == null){
-            // The room post creation requires room photos
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        if(roomPhotoFiles.size() > 10){
-            // too many photos
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        {
-            try{
-                Agent agent = AgentMapper.mapToAgent(currentAgent);
-                RoomPostDto savedRoomPost = roomPostService.createRoomPost(registeredRoomPost, agent);
-                return new ResponseEntity<>(savedRoomPost, HttpStatus.CREATED);
-            }catch(RuntimeException e){
-                System.out.println(e.getMessage());
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
+        AgentDto currentAgent = getCurrentAgent(); 
+        Agent agent = AgentMapper.mapToAgent(currentAgent);
+        RoomPostDto savedRoomPost = roomPostService.createRoomPost(registeredRoomPost, agent);
+        return new ResponseEntity<>(savedRoomPost, HttpStatus.CREATED);
     }
 
     @GetMapping("/room-post")
@@ -139,14 +94,8 @@ public class AgentController {
     @PutMapping("/room-post/{id}")
     private ResponseEntity<RoomPostDto> updateRoomPost(@ModelAttribute RoomPostRegisterDto editedRoomPost, @PathVariable Long id){
         AgentDto currentAgent = getCurrentAgent();
-        RoomPostDto originalRoomPostDto = roomPostService.findRoomPostById(id);
-        if(originalRoomPostDto != null){
-            if(currentAgent.getUsername().equals(originalRoomPostDto.getAgent().getUsername())){
-                RoomPostDto updatedRoomPost = roomPostService.updateRoomPost(originalRoomPostDto, editedRoomPost);
-                return new ResponseEntity<>(updatedRoomPost, HttpStatus.OK);
-            }
-        }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        RoomPostDto updatedRoomPost = roomPostService.updateRoomPost(id, currentAgent, editedRoomPost);
+        return new ResponseEntity<>(updatedRoomPost, HttpStatus.OK);
     }
 
     @DeleteMapping("/room-post/{roomPostId}")

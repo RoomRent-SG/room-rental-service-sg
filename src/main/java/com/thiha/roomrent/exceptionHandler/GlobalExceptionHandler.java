@@ -1,10 +1,16 @@
 package com.thiha.roomrent.exceptionHandler;
 
+import java.io.IOException;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.thiha.roomrent.exceptions.EmailAlreadyRegisteredException;
+import com.thiha.roomrent.exceptions.EntityNotFoundException;
 import com.thiha.roomrent.exceptions.NameAlreadyExistedException;
+import com.thiha.roomrent.exceptions.ProfileImageNotFoundException;
+import com.thiha.roomrent.exceptions.RoomPhotoNotFoundException;
+import com.thiha.roomrent.exceptions.RoomPhotosExceedLimitException;
 import com.thiha.roomrent.exceptions.S3ImageUploadException;
 
 @RestControllerAdvice
@@ -13,8 +19,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(S3ImageUploadException.class)
     public ResponseEntity<?> handleImageUploadException(S3ImageUploadException exception){
-        return ResponseEntity.internalServerError()
-                .body(exception.getMessage());
+        return ResponseEntity.badRequest()
+                .body(exception.getErrorMessage());
     }
 
     @ExceptionHandler(EmailAlreadyRegisteredException.class)
@@ -30,4 +36,41 @@ public class GlobalExceptionHandler {
                             .badRequest()
                             .body(exception.getErrorMessage());
     }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<?> handleEntityNotFoundException(EntityNotFoundException exception){
+        return ResponseEntity
+                            .badRequest()
+                            .body(exception.getErrorMassage());
+    }
+
+    @ExceptionHandler(ProfileImageNotFoundException.class)
+    public ResponseEntity<?> handleProfileImageNotFoundException(ProfileImageNotFoundException exception){
+        return ResponseEntity
+                            .badRequest()
+                            .body(exception.getErrorMessage());
+    }
+
+    @ExceptionHandler(RoomPhotoNotFoundException.class)
+    public ResponseEntity<?> handleRoomPhotoNotFoundException(RoomPhotoNotFoundException exception){
+        return ResponseEntity
+                            .badRequest()
+                            .body(exception.getErrorMessage());
+    }
+
+
+    @ExceptionHandler(RoomPhotosExceedLimitException.class)
+    public ResponseEntity<?> handleRoomPhotosExceedLimitException(RoomPhotosExceedLimitException exception){
+        return ResponseEntity
+                            .badRequest()
+                            .body(exception.getErrorMessage());
+    }
+
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<?> handleIOException(IOException exception){
+        return ResponseEntity
+                            .badRequest()
+                            .body(exception.getMessage());
+    }
+
 }
