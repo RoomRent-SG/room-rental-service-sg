@@ -1,10 +1,11 @@
 package com.thiha.roomrent.exceptionHandler;
 
 import java.io.IOException;
-
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import com.thiha.roomrent.dto.ErrorResponse;
 import com.thiha.roomrent.exceptions.EmailAlreadyRegisteredException;
 import com.thiha.roomrent.exceptions.EntityNotFoundException;
 import com.thiha.roomrent.exceptions.LogoutException;
@@ -19,66 +20,75 @@ public class GlobalExceptionHandler {
     
 
     @ExceptionHandler(S3ImageUploadException.class)
-    public ResponseEntity<?> handleImageUploadException(S3ImageUploadException exception){
+    public ResponseEntity<ErrorResponse> handleImageUploadException(S3ImageUploadException exception){
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getErrorMessage());
         return ResponseEntity.badRequest()
-                .body(exception.getErrorMessage());
+                .body(response);
     }
 
     @ExceptionHandler(EmailAlreadyRegisteredException.class)
-    public ResponseEntity<?> handleEmailAlreadyRegisteredException(EmailAlreadyRegisteredException exception){
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyRegisteredException(EmailAlreadyRegisteredException exception){
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getErrorMessage());
         return ResponseEntity
                             .badRequest()
-                            .body(exception.getErrorMessage());
+                            .body(response);
     }
 
     @ExceptionHandler(NameAlreadyExistedException.class)
-    public ResponseEntity<?> handleNameAlredyExistedException(NameAlreadyExistedException exception){
+    public ResponseEntity<ErrorResponse> handleNameAlredyExistedException(NameAlreadyExistedException exception){
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getErrorMessage());
         return ResponseEntity
                             .badRequest()
-                            .body(exception.getErrorMessage());
+                            .body(response);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<?> handleEntityNotFoundException(EntityNotFoundException exception){
+    public ResponseEntity<ErrorResponse> handleEntityNotFoundException(EntityNotFoundException exception){
+        ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND.value(), exception.getErrorMassage());
         return ResponseEntity
-                            .badRequest()
-                            .body(exception.getErrorMassage());
+                            .status(HttpStatus.NOT_FOUND)
+                            .body(response);
     }
 
     @ExceptionHandler(ProfileImageNotFoundException.class)
-    public ResponseEntity<?> handleProfileImageNotFoundException(ProfileImageNotFoundException exception){
+    public ResponseEntity<ErrorResponse> handleProfileImageNotFoundException(ProfileImageNotFoundException exception){
+        ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND.value(), exception.getErrorMessage());
         return ResponseEntity
-                            .badRequest()
-                            .body(exception.getErrorMessage());
+                            .status(HttpStatus.NOT_FOUND)
+                            .body(response);
     }
 
     @ExceptionHandler(RoomPhotoNotFoundException.class)
-    public ResponseEntity<?> handleRoomPhotoNotFoundException(RoomPhotoNotFoundException exception){
+    public ResponseEntity<ErrorResponse> handleRoomPhotoNotFoundException(RoomPhotoNotFoundException exception){
+        ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND.value(), exception.getErrorMessage());
         return ResponseEntity
                             .badRequest()
-                            .body(exception.getErrorMessage());
+                            .body(response);
     }
 
 
     @ExceptionHandler(RoomPhotosExceedLimitException.class)
-    public ResponseEntity<?> handleRoomPhotosExceedLimitException(RoomPhotosExceedLimitException exception){
+    public ResponseEntity<ErrorResponse> handleRoomPhotosExceedLimitException(RoomPhotosExceedLimitException exception){
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getErrorMessage());
         return ResponseEntity
                             .badRequest()
-                            .body(exception.getErrorMessage());
+                            .body(response);
     }
 
     @ExceptionHandler(IOException.class)
-    public ResponseEntity<?> handleIOException(IOException exception){
+    public ResponseEntity<ErrorResponse> handleIOException(IOException exception){
+        ErrorResponse response = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage());
         return ResponseEntity
-                            .badRequest()
-                            .body(exception.getMessage());
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body(response);
     }
 
     @ExceptionHandler(LogoutException.class)
-    public ResponseEntity<?> handleLogoutException(LogoutException exception){
+    public ResponseEntity<ErrorResponse> handleLogoutException(LogoutException exception){
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getErrorMessage());
         return ResponseEntity
                             .badRequest()
-                            .body(exception.getErrorMessage());
+                            .body(response);
     }
 
 }

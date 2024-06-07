@@ -22,6 +22,7 @@ import com.thiha.roomrent.dto.AgentRegisterDto;
 import com.thiha.roomrent.dto.RoomPostDto;
 import com.thiha.roomrent.dto.RoomPostRegisterDto;
 import com.thiha.roomrent.enums.UserRole;
+import com.thiha.roomrent.exceptions.EntityNotFoundException;
 import com.thiha.roomrent.mapper.AgentMapper;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.UserModel;
@@ -81,8 +82,10 @@ public class AgentController {
         RoomPostDto roomPostDto = roomPostService.findRoomPostById(id);
         if(roomPostDto.getAgent().getUsername().equals(currentUser)){
             return new ResponseEntity<>(roomPostDto, HttpStatus.OK);
+        }else{
+            // don't let the user know the unauthorized entity exists
+            throw new EntityNotFoundException("Roompost cannot be found");
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     // Edit existing room post

@@ -3,13 +3,10 @@ package com.thiha.roomrent.service;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
-
-import com.amazonaws.services.deadline.model.InternalServerErrorException;
 import com.thiha.roomrent.auth.JwtUtils;
 import com.thiha.roomrent.dto.TokenDto;
 import com.thiha.roomrent.exceptions.LogoutException;
 import com.thiha.roomrent.mapper.TokenMapper;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
