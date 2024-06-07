@@ -3,7 +3,6 @@ package com.thiha.roomrent.controller;
 
 import java.io.IOException;
 import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -31,7 +30,6 @@ import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.LogoutService;
 import com.thiha.roomrent.service.RoomPostService;
 import com.thiha.roomrent.service.S3ImageService;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -81,12 +79,9 @@ public class AgentController {
     private ResponseEntity<RoomPostDto> getRoomPost(@PathVariable Long id){
         String currentUser = getCurrentAgentName();
         RoomPostDto roomPostDto = roomPostService.findRoomPostById(id);
-        if(roomPostDto != null){
-            if(roomPostDto.getAgent().getUsername().equals(currentUser)){
-                return new ResponseEntity<>(roomPostDto, HttpStatus.OK);
-            }
+        if(roomPostDto.getAgent().getUsername().equals(currentUser)){
+            return new ResponseEntity<>(roomPostDto, HttpStatus.OK);
         }
-        
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
@@ -101,17 +96,13 @@ public class AgentController {
     @DeleteMapping("/room-post/{roomPostId}")
     private ResponseEntity<Void> deleteRoomPost(@PathVariable Long roomPostId){
         AgentDto currentAgent = getCurrentAgent();
-        RoomPostDto roomPostToDelete = roomPostService.findRoomPostById(roomPostId);
-        if(roomPostToDelete == null){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        if(currentAgent.getId() == roomPostToDelete.getAgent().getId()){
-            // Delete room post
-            roomPostService.deleteRoomPostById(roomPostId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        roomPostService.deleteRoomPostById(roomPostId, currentAgent);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    /*
+     * uploadRoomImage is for testing only
+     */
 
     @PostMapping("/{postId}/images")
     private ResponseEntity<Void> uploadRoomImage(@RequestParam("file") MultipartFile file){
@@ -127,12 +118,7 @@ public class AgentController {
     private ResponseEntity<Void> doLogout(HttpServletRequest request,
                  HttpServletResponse response
                  ,Authentication authentication){
-                    System.out.println("log out controller.");
-        try{
-            logoutService.performLogout(request, response, authentication);
-        }catch(Exception e){
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        logoutService.performLogout(request, response, authentication);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

@@ -13,7 +13,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.thiha.roomrent.dto.AgentDto;
@@ -93,7 +96,7 @@ public class RoomPostService implements RoomPostServiceImpl{
         if(optionalRoomPost.isPresent()){
             return RoomPostMapper.mapToRoomPostDto(optionalRoomPost.get());
         }
-        return null;
+        throw new EntityNotFoundException("Roompost cannot be found");
     }
 
     @Override
@@ -109,6 +112,7 @@ public class RoomPostService implements RoomPostServiceImpl{
             throw new EntityNotFoundException("Room post cannot be found");
         }
         originalRoomPost.setStationName(updateRoomPost.getStationName());
+        originalRoomPost.setPrice(updateRoomPost.getPrice());
         originalRoomPost.setRoomType(updateRoomPost.getRoomType());
         originalRoomPost.setTotalPax(updateRoomPost.getTotalPax());
         originalRoomPost.setCookingAllowance(updateRoomPost.getCookingAllowance());
@@ -178,9 +182,31 @@ public class RoomPostService implements RoomPostServiceImpl{
 
     @Override
     @CacheEvict(value = "all_room_posts")
-    public void deleteRoomPostById(Long id) {
+    public void deleteRoomPostById(Long id, AgentDto currentAgent) {
+        RoomPostDto roomPostToDelete = this.findRoomPostById(id);
+        if(roomPostToDelete == null){
+            throw new EntityNotFoundException("Roompost cannot be found");
+        }
+        if(roomPostToDelete.getAgent().getId()!=currentAgent.getId()){
+            throw new EntityNotFoundException("Roompost cannot be found");
+        }
         roomPostRepository.deleteById(id);
     }
+
+    //     @DeleteMapping("/room-post/{roomPostId}")
+    // private ResponseEntity<Void> deleteRoomPost(@PathVariable Long roomPostId){
+    //     AgentDto currentAgent = getCurrentAgent();
+    //     RoomPostDto roomPostToDelete = roomPostService.findRoomPostById(roomPostId);
+    //     if(roomPostToDelete == null){
+    //         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    //     }
+    //     if(currentAgent.getId() == roomPostToDelete.getAgent().getId()){
+    //         // Delete room post
+    //         roomPostService.deleteRoomPostById(roomPostId);
+    //         return new ResponseEntity<>(HttpStatus.OK);
+    //     }
+    //     return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    // }
 
     /*
      * the room posts will be sorted by postedAt attribute by defaults

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.services.deadline.model.InternalServerErrorException;
 import com.thiha.roomrent.auth.JwtUtils;
 import com.thiha.roomrent.dto.TokenDto;
+import com.thiha.roomrent.exceptions.LogoutException;
 import com.thiha.roomrent.mapper.TokenMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,11 +39,11 @@ public class LogoutService {
                 this.logoutHandler.logout(request, response, authentication);
                 this.logoutHandler.setClearAuthentication(true);
             }else{
-                throw new InternalServerErrorException("JWT not found in repo");
+                throw new LogoutException("JWT not found in repo");
             }
             
         }else{
-            throw new InternalServerErrorException("Error parsing jwt from request");
+            throw new LogoutException("Error parsing jwt from request");
         } 
    }
 }

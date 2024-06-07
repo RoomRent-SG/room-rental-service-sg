@@ -3,6 +3,7 @@ package com.thiha.roomrent.model;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thiha.roomrent.enums.UserRole;
 
 import jakarta.persistence.CascadeType;
@@ -37,6 +38,7 @@ public class UserModel implements Serializable{
    @Column(name = "username", nullable = false)
    private String username;
 
+   @JsonIgnore
    @Column(name = "password", nullable = false)
    private String password;
 
@@ -44,6 +46,7 @@ public class UserModel implements Serializable{
    @Enumerated(EnumType.STRING)
    private UserRole role;
 
+   @JsonIgnore
    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
    private List<JwtToken> tokens;
 }

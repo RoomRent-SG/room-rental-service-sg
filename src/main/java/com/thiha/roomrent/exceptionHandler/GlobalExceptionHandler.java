@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.thiha.roomrent.exceptions.EmailAlreadyRegisteredException;
 import com.thiha.roomrent.exceptions.EntityNotFoundException;
+import com.thiha.roomrent.exceptions.LogoutException;
 import com.thiha.roomrent.exceptions.NameAlreadyExistedException;
 import com.thiha.roomrent.exceptions.ProfileImageNotFoundException;
 import com.thiha.roomrent.exceptions.RoomPhotoNotFoundException;
@@ -71,6 +72,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                             .badRequest()
                             .body(exception.getMessage());
+    }
+
+    @ExceptionHandler(LogoutException.class)
+    public ResponseEntity<?> handleLogoutException(LogoutException exception){
+        return ResponseEntity
+                            .badRequest()
+                            .body(exception.getErrorMessage());
     }
 
 }

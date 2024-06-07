@@ -14,5 +14,5 @@ public interface RoomPostServiceImpl {
    RoomPostDto updateRoomPost(Long postId,AgentDto agent, RoomPostRegisterDto updateRoomPost);
    List<RoomPostDto> getRoomPostsByAgentId(Long agentId);
    AllRoomPostsResponse getAllRoomPosts(int pageNo, int PageSize, RoomPostSearchFilter searchFilter);
-   void deleteRoomPostById(Long id);
+   void deleteRoomPostById(Long id, AgentDto currentAgent);
 }
