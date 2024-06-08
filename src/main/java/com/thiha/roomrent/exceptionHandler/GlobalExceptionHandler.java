@@ -3,6 +3,7 @@ package com.thiha.roomrent.exceptionHandler;
 import java.io.IOException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.thiha.roomrent.dto.ErrorResponse;
@@ -88,6 +89,14 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getErrorMessage());
         return ResponseEntity
                             .badRequest()
+                            .body(response);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentialException(BadCredentialsException exception){
+        ErrorResponse response = new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), exception.getMessage());
+        return ResponseEntity
+                            .status(HttpStatus.UNAUTHORIZED)
                             .body(response);
     }
 
