@@ -18,6 +18,7 @@ public class RoomPostMapper {
                         roomPost.isAllowVisitor(),
                         roomPost.getLocation(),
                         roomPost.getPropertyType(),
+                        roomPost.getDescription(),
                         roomPost.getAgent(),
                         roomPost.getPostedAt(),
                         roomPost.getRoomPhotos());
@@ -36,6 +37,7 @@ public class RoomPostMapper {
                             roomPostDto.isAllowVisitor(),
                             roomPostDto.getLocation(),
                             roomPostDto.getPropertyType(),
+                            roomPostDto.getDescription(),
                             roomPostDto.getAgent(),
                             roomPostDto.getRoomPhotos());
    }
@@ -52,6 +54,7 @@ public class RoomPostMapper {
                         registerDto.isAllowVisitor(),
                         registerDto.getLocation(),
                         registerDto.getPropertyType(),
+                        registerDto.getDescription(),
                         registerDto.getAgent(),
                         registerDto.getPostedAt(),
                         registerDto.getRoomPhotos());

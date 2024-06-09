@@ -36,6 +36,7 @@ public class RoomPostDto implements Serializable{
     private boolean allowVisitor;
     private Location location;
     private PropertyType propertyType;
+    private String description;
     private Agent agent;
     @JsonIgnore
     private Date postedAt;

@@ -85,6 +85,9 @@ public class RoomPost implements Serializable{
     @Enumerated(EnumType.STRING)
     private PropertyType propertyType;
 
+    @Column(name = "description", nullable = false)
+    private String description;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "agent_id", referencedColumnName = "id")
     private Agent agent;

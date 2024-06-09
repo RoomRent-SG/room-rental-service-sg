@@ -77,6 +77,7 @@ public class RoomPostService implements RoomPostServiceImpl{
         roomPost.setSharePub(roomPostRegisterDto.getSharePub());
         roomPost.setStationName(roomPostRegisterDto.getStationName());
         roomPost.setTotalPax(roomPostRegisterDto.getTotalPax());
+        roomPost.setDescription(roomPostRegisterDto.getDescription());
         roomPost.setAgent(agent);
         roomPost.setPrice(roomPostRegisterDto.getPrice()); 
         roomPost.setPostedAt(new Date());
@@ -117,6 +118,7 @@ public class RoomPostService implements RoomPostServiceImpl{
         originalRoomPost.setAllowVisitor(updateRoomPost.isAllowVisitor());
         originalRoomPost.setLocation(updateRoomPost.getLocation());
         originalRoomPost.setPropertyType(updateRoomPost.getPropertyType());
+        originalRoomPost.setDescription(updateRoomPost.getDescription());
         List<MultipartFile> updatedRoomImageFiles = updateRoomPost.getRoomPhotoFiles();
         List<String> updatedFilenames = new ArrayList<>();
         List<RoomPhoto> existingRoomPhotos = originalRoomPost.getRoomPhotos();
