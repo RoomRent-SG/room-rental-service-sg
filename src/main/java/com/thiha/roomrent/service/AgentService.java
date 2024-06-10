@@ -37,7 +37,7 @@ public class AgentService implements AgentServiceImpl{
         if(agentByName.isPresent()){
             throw new NameAlreadyExistedException("Name already taken");
         }
-        if (registeredAgent.getProfileImage() == null) {
+        if (registeredAgent.getProfileImage() == null || registeredAgent.getProfileImage().isEmpty()) {
             throw new ProfileImageNotFoundException("Profile Image cannot be null");
         }
         MultipartFile profileImage = registeredAgent.getProfileImage();

@@ -37,7 +37,7 @@ public class Agent extends UserModel{
     @Column(name = "profile_photo", nullable = false)
     private String profilePhoto;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private Date createdAt;
 
    public Agent(Long id, String username, String password, UserRole role,

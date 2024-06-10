@@ -3,15 +3,16 @@ package com.thiha.roomrent.dto;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thiha.roomrent.enums.UserRole;
 import com.thiha.roomrent.model.JwtToken;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.Setter;
 
 @Getter
@@ -21,19 +22,21 @@ import lombok.Setter;
 public class AgentDto implements Serializable{
    @JsonIgnore
    private Long id;
-   @NonNull
+   @NotNull(message = "Email should not be empty")
    private String email;
-   @NonNull
+   @NotNull(message = "Username should not be empty")
+   @NotBlank(message = "Username should not be empty")
    private String username;
    @JsonIgnore
    private String password;
-   @NonNull
+   @NotNull(message = "Phone number should not be empty")
+   @NotEmpty(message = "Phone number should not be empty")
    private String phoneNumber;
-   @NonNull
+   @NotNull(message = "profile photo should not be empty")
    private String profilePhoto;
    @JsonIgnore
    private Date createdAt;
-   @NonNull
+   @NotNull(message = "Role should not be empty")
    private UserRole role;
    @JsonIgnore
    private List<JwtToken> tokens;

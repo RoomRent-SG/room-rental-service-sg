@@ -14,8 +14,9 @@ import com.thiha.roomrent.dto.LoginRequestDto;
 import com.thiha.roomrent.dto.LoginResponseDto;
 import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.LoginService;
-
+import com.thiha.roomrent.validator.ObjectValidator;
 import lombok.AllArgsConstructor;
+import lombok.var;
 
 @RestController
 @AllArgsConstructor
@@ -24,9 +25,15 @@ public class AuthController {
    private final AgentService agentService;
    private final AuthenticationManager authenticationManager;
    private final LoginService loginService;
+   private final ObjectValidator<AgentRegisterDto> agentRegisterValidator;
 
    @PostMapping("/agent/register")
    private ResponseEntity<?> registerAgent(@ModelAttribute AgentRegisterDto registeredAgent){
+        var violations = agentRegisterValidator.vaildate(registeredAgent);
+        if(!violations.isEmpty()){
+            String errorMessage = String.join("\n", violations);
+            return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+        }
         AgentDto savedAgent =  agentService.createAgent(registeredAgent);
         return new ResponseEntity<>(savedAgent, HttpStatus.CREATED);
     }

@@ -41,6 +41,7 @@ public class RoomPostRegisterDto {
     private Location location;
     private PropertyType propertyType;
     private List<MultipartFile> roomPhotoFiles;
+    private String description;
     @JsonIgnore
     private Agent agent;
     @JsonIgnore
