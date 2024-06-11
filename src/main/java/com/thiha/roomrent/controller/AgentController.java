@@ -31,6 +31,8 @@ import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.LogoutService;
 import com.thiha.roomrent.service.RoomPostService;
 import com.thiha.roomrent.service.S3ImageService;
+import com.thiha.roomrent.validator.ObjectValidator;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -44,6 +46,7 @@ public class AgentController {
     private RoomPostService roomPostService;
     private S3ImageService s3ImageService;
     private LogoutService logoutService;
+    private ObjectValidator<RoomPostRegisterDto> roomPostValidator;
     
 
     @GetMapping("/profile")
@@ -61,7 +64,12 @@ public class AgentController {
     }
 
     @PostMapping("/room-post")
-    private ResponseEntity<RoomPostDto> createRoomPost(@ModelAttribute RoomPostRegisterDto registeredRoomPost){
+    private ResponseEntity<?> createRoomPost(@ModelAttribute RoomPostRegisterDto registeredRoomPost){
+        var violations = roomPostValidator.vaildate(registeredRoomPost);
+        if(!violations.isEmpty()){
+            String errorMessage = String.join("\n", violations);
+            return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+        }
         AgentDto currentAgent = getCurrentAgent(); 
         Agent agent = AgentMapper.mapToAgent(currentAgent);
         RoomPostDto savedRoomPost = roomPostService.createRoomPost(registeredRoomPost, agent);
