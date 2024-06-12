@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.thiha.roomrent.dto.ErrorResponse;
 import com.thiha.roomrent.exceptions.EmailAlreadyRegisteredException;
 import com.thiha.roomrent.exceptions.EntityNotFoundException;
+import com.thiha.roomrent.exceptions.InvalidObjectException;
 import com.thiha.roomrent.exceptions.LogoutException;
 import com.thiha.roomrent.exceptions.NameAlreadyExistedException;
 import com.thiha.roomrent.exceptions.ProfileImageNotFoundException;
@@ -97,6 +98,14 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), exception.getMessage());
         return ResponseEntity
                             .status(HttpStatus.UNAUTHORIZED)
+                            .body(response);
+    }
+
+    @ExceptionHandler(InvalidObjectException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidObjectException(InvalidObjectException exception){
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getErrorMessage());
+        return ResponseEntity
+                            .status(HttpStatus.BAD_REQUEST)
                             .body(response);
     }
 

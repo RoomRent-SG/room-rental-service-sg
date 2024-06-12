@@ -30,41 +30,38 @@ import lombok.Setter;
 public class RoomPostRegisterDto {
     @JsonIgnore
     private Long id;
+    
     @NotNull(message = "Station name cannot be null")
-    @NotEmpty(message = "Station name cannot be empty")
     private StationName stationName;
-    @NotNull(message = "Price cannot be null")
-    @NotEmpty(message = "Price cannot be empty")
+    /*
+     * need to validate somehow
+     */
     private double price;
     @JsonIgnore
     private Date postedAt;
     @NotNull(message = "Room Type cannot be null")
-    @NotEmpty(message = "Room Type cannot be empty")
+    
     private RoomType roomType;
     @NotNull(message = "Total person cannot be null")
-    @NotEmpty(message = "Total person cannot be empty")
+    
     private int totalPax;
     @NotNull(message = "Cooking Allowance cannot be null")
-    @NotEmpty(message = "Cooking Allowance cannot be empty")
+
     private CookingAllowance cookingAllowance;
     @NotNull(message = "Pub Share field cannot be null")
-    @NotEmpty(message = "Pub Share filed cannot be empty")
+
     private SharePub sharePub;
     @NotNull(message = "AirconTime field cannot be null")
-    @NotEmpty(message = "AirconTime field cannot be empty")
+
     private AirConTime airConTime;
     @NotNull(message = "AllowVisitor field cannot be null")
-    @NotEmpty(message = "AllowVisitor field cannot be empty")
     private boolean allowVisitor;
     @NotNull(message = "Location cannot be null")
-    @NotEmpty(message = "Location cannot be empty")
     private Location location;
-    @NotNull(message = "Property type cannot be null")
-    @NotEmpty(message = "Property type cannot be empty")  
+    @NotNull(message = "Property type cannot be null") 
     private PropertyType propertyType;
     private List<MultipartFile> roomPhotoFiles;
     @NotNull(message = "Description cannot be null")
-    @NotEmpty(message = "Description cannot be empty")
     private String description;
     @JsonIgnore
     private Agent agent;

@@ -47,6 +47,7 @@ public class AgentController {
     private S3ImageService s3ImageService;
     private LogoutService logoutService;
     private ObjectValidator<RoomPostRegisterDto> roomPostValidator;
+    private ObjectValidator<AgentRegisterDto> agentValidator;
     
 
     @GetMapping("/profile")
@@ -58,6 +59,7 @@ public class AgentController {
    
     @PutMapping("/profile")
     private ResponseEntity<AgentDto> updateAgent(@ModelAttribute AgentRegisterDto newAgent){
+        agentValidator.doVaildation(newAgent);
         AgentDto existingAgent = getCurrentAgent();
         AgentDto updatedAgent = agentService.updateExistingAgent(newAgent, existingAgent);
         return new ResponseEntity<>(updatedAgent, HttpStatus.OK);
@@ -65,11 +67,7 @@ public class AgentController {
 
     @PostMapping("/room-post")
     private ResponseEntity<?> createRoomPost(@ModelAttribute RoomPostRegisterDto registeredRoomPost){
-        var violations = roomPostValidator.vaildate(registeredRoomPost);
-        if(!violations.isEmpty()){
-            String errorMessage = String.join("\n", violations);
-            return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
-        }
+        roomPostValidator.doVaildation(registeredRoomPost);
         AgentDto currentAgent = getCurrentAgent(); 
         Agent agent = AgentMapper.mapToAgent(currentAgent);
         RoomPostDto savedRoomPost = roomPostService.createRoomPost(registeredRoomPost, agent);
@@ -100,6 +98,7 @@ public class AgentController {
     @PutMapping("/room-post/{id}")
     private ResponseEntity<RoomPostDto> updateRoomPost(@ModelAttribute RoomPostRegisterDto editedRoomPost, @PathVariable Long id){
         AgentDto currentAgent = getCurrentAgent();
+        roomPostValidator.doVaildation(editedRoomPost);
         RoomPostDto updatedRoomPost = roomPostService.updateRoomPost(id, currentAgent, editedRoomPost);
         return new ResponseEntity<>(updatedRoomPost, HttpStatus.OK);
     }

@@ -1,9 +1,9 @@
 package com.thiha.roomrent.validator;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
+import com.thiha.roomrent.exceptions.InvalidObjectException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -14,14 +14,14 @@ public class ObjectValidator<T> {
     private final ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
     private final Validator validator = validatorFactory.getValidator();
 
-    public Set<String> vaildate(T objectToValidate){
+    public void doVaildation(T objectToValidate){
         Set<ConstraintViolation<T>> violations = validator.validate(objectToValidate);
         if(!violations.isEmpty()){
-            return violations
+            String errorMessage =  violations
                             .stream()
                             .map(ConstraintViolation::getMessage)
-                            .collect(Collectors.toSet());
+                            .collect(Collectors.joining("\n"));
+            throw new InvalidObjectException(errorMessage);
         }
-        return new HashSet<String>();
     }
 }

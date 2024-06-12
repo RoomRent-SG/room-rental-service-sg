@@ -16,7 +16,6 @@ import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.LoginService;
 import com.thiha.roomrent.validator.ObjectValidator;
 import lombok.AllArgsConstructor;
-import lombok.var;
 
 @RestController
 @AllArgsConstructor
@@ -29,11 +28,7 @@ public class AuthController {
 
    @PostMapping("/agent/register")
    private ResponseEntity<?> registerAgent(@ModelAttribute AgentRegisterDto registeredAgent){
-        var violations = agentRegisterValidator.vaildate(registeredAgent);
-        if(!violations.isEmpty()){
-            String errorMessage = String.join("\n", violations);
-            return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
-        }
+        agentRegisterValidator.doVaildation(registeredAgent);
         AgentDto savedAgent =  agentService.createAgent(registeredAgent);
         return new ResponseEntity<>(savedAgent, HttpStatus.CREATED);
     }
