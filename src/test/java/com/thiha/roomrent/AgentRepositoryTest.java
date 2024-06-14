@@ -1,7 +1,7 @@
 package com.thiha.roomrent;
 
 import java.util.Date;
-
+import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ public class AgentRepositoryTest {
     AgentRepository agentRepository;
 
     @Test
-    public void testAgetRepositorySaveAgent(){
+    public void testAgentRepositorySaveAgent(){
         AgentDto agentDto = AgentDto.builder().username("tester7")
                                 .email("tester7@test.com")
                                 .password("password")
@@ -38,5 +38,96 @@ public class AgentRepositoryTest {
         Assertions.assertThat(savedAgent).isNotNull();
         Assertions.assertThat(savedAgent.getUsername()).isEqualTo(agentDto.getUsername());
         
+    }
+
+    @Test
+    public void testAgentRepositoryFindAllAgents(){
+        AgentDto agentDto1 = AgentDto.builder().username("tester7")
+                                .email("tester7@test.com")
+                                .password("password")
+                                .phoneNumber("091128393")
+                                .profilePhoto("photolink")
+                                .createdAt(new Date())
+                                .role(UserRole.AGENT)
+                                .build();
+        Agent agent1 = AgentMapper.mapToAgent(agentDto1);
+        AgentDto agentDto = AgentDto.builder().username("tester8")
+                                .email("tester8@test.com")
+                                .password("password")
+                                .phoneNumber("091128393")
+                                .profilePhoto("photolink")
+                                .createdAt(new Date())
+                                .role(UserRole.AGENT)
+                                .build();
+        Agent agent = AgentMapper.mapToAgent(agentDto);
+
+        Agent savedAgent = agentRepository.save(agent);
+
+        Agent savedAgent1 = agentRepository.save(agent1);
+
+        List<Agent> allAgents = agentRepository.findAll();
+
+        Assertions.assertThat(allAgents.size()).isEqualTo(2);
+    }
+
+    @Test
+    public void testFindAgentByEmail(){
+        AgentDto agentDto = AgentDto.builder().username("tester8")
+                                .email("tester8@test.com")
+                                .password("password")
+                                .phoneNumber("091128393")
+                                .profilePhoto("photolink")
+                                .createdAt(new Date())
+                                .role(UserRole.AGENT)
+                                .build();
+        Agent agent = AgentMapper.mapToAgent(agentDto);
+
+        Agent savedAgent = agentRepository.save(agent);
+
+        Agent returnAgent = agentRepository.findByEmail(agentDto.getEmail()).get();
+
+        Assertions.assertThat(returnAgent).isNotNull();
+        Assertions.assertThat(returnAgent.getEmail()).isEqualTo(agentDto.getEmail());
+
+    }
+
+    @Test
+    public void testFindAgentById(){
+        AgentDto agentDto = AgentDto.builder().username("tester8")
+                                .email("tester8@test.com")
+                                .password("password")
+                                .phoneNumber("091128393")
+                                .profilePhoto("photolink")
+                                .createdAt(new Date())
+                                .role(UserRole.AGENT)
+                                .build();
+        Agent agent = AgentMapper.mapToAgent(agentDto);
+
+        Agent savedAgent = agentRepository.save(agent);
+
+        Agent returnAgent = agentRepository.findById(savedAgent.getId()).get();
+
+        Assertions.assertThat(returnAgent).isNotNull();
+        Assertions.assertThat(returnAgent.getId()).isEqualTo(savedAgent.getId());
+    }
+
+    @Test
+    public void testFindAgentByUsername(){
+        AgentDto agentDto = AgentDto.builder().username("tester8")
+                                .email("tester8@test.com")
+                                .password("password")
+                                .phoneNumber("091128393")
+                                .profilePhoto("photolink")
+                                .createdAt(new Date())
+                                .role(UserRole.AGENT)
+                                .build();
+        Agent agent = AgentMapper.mapToAgent(agentDto);
+
+        Agent savedAgent = agentRepository.save(agent);
+
+        Agent returnAgent = agentRepository.findByUsername(savedAgent.getUsername()).get();
+
+        Assertions.assertThat(returnAgent).isNotNull();
+        Assertions.assertThat(returnAgent.getUsername()).isEqualTo(savedAgent.getUsername());
     }
 }
