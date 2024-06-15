@@ -1,12 +1,29 @@
 package com.thiha.roomrent;
 
+import static org.mockito.Mockito.when;
+
+import java.util.Date;
+
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.thiha.roomrent.dto.AgentDto;
+import com.thiha.roomrent.dto.AgentRegisterDto;
+import com.thiha.roomrent.enums.UserRole;
+import com.thiha.roomrent.mapper.AgentMapper;
+import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.repository.AgentRepository;
 import com.thiha.roomrent.service.AgentService;
+import com.thiha.roomrent.service.S3ImageService;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -19,27 +36,51 @@ public class AgentServiceTest {
     @Mock
     private AgentRepository agentRepository;
 
-    // @Test
-    // void testFindAgentByEmail(){
-    //     AgentDto agentDto = new AgentDto();
-    //     agentDto.setEmail("serviceTest@gmail.com");
-    //     agentDto.setUsername("tester");
-    //     agentDto.setPassword("pass");
-    //     agentDto.setPhoneNumber("0923435453");
-    //     agentDto.setCreatedAt(new Date());
-    //     agentDto.setProfilePhoto("www.myphoto.gl");
+    @Mock
+    private S3ImageService imageService;
 
-    //     when(agentRepository.save(any(Agent.class))).thenReturn(AgentMapper.mapToAgent(agentDto));
-    //     when(agentRepository.findByEmail("serviceTest@gmail.com")).thenReturn(Optional.of(AgentMapper.mapToAgent(agentDto)));
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
-    //     AgentDto savedAgentDto = agentService.createAgent(agentDto);
+    @Test
+    public void testCreteAgent(){
 
-    //     AgentDto retrivedAgentDto = agentService.findAgentByEmail(savedAgentDto.getEmail());
-    //     assertThat(retrivedAgentDto.getEmail()).isEqualTo(savedAgentDto.getEmail());
+        // Create a mock MultipartFile
+        MultipartFile mockMultipartFile = new MockMultipartFile(
+                "profileImage",
+                "testimage.jpg",
+                "image/jpeg",
+                "test image content".getBytes()
+        );
 
-    //     AgentDto nullAgentDto = agentService.findAgentByEmail("shouldReturnNull@gmail.com");
-    //     assertThat(nullAgentDto).isEqualTo(null);
+        AgentRegisterDto registerAgent = AgentRegisterDto.builder()
+                                                        .username("tester7")
+                                                        .email("tester7@test.com")
+                                                        .password("password")
+                                                        .phoneNumber("091128393")
+                                                        .profilePhoto("photolink")
+                                                        .profileImage(mockMultipartFile)
+                                                        .createdAt(new Date())
+                                                        .role(UserRole.AGENT)
+                                                        .build();
+                                            
 
+        AgentDto agentDto = AgentDto.builder().username("tester7")
+                                            .email("tester7@test.com")
+                                            .password("password")
+                                            .phoneNumber("091128393")
+                                            .profilePhoto("photolink")
+                                            .createdAt(new Date())
+                                            .role(UserRole.AGENT)
+                                            .build();
+        Agent agent = AgentMapper.mapToAgent(agentDto);
+        when(agentRepository.save(Mockito.any(Agent.class))).thenReturn(agent);
+
+        AgentDto savedAgentDto = agentService.createAgent(registerAgent);
+
+        Assertions.assertThat(savedAgentDto).isNotNull();
         
-    // }
+    }
+
+  
 }
