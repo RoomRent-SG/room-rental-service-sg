@@ -1,16 +1,29 @@
 package com.thiha.roomrent;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
+import org.junit.Rule;
+import org.junit.contrib.java.lang.system.SystemOutRule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
@@ -21,6 +34,7 @@ import com.thiha.roomrent.dto.AgentRegisterDto;
 import com.thiha.roomrent.enums.UserRole;
 import com.thiha.roomrent.mapper.AgentMapper;
 import com.thiha.roomrent.model.Agent;
+import com.thiha.roomrent.model.JwtToken;
 import com.thiha.roomrent.repository.AgentRepository;
 import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.S3ImageService;
@@ -42,45 +56,85 @@ public class AgentServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Rule
+	public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
+
+    private MultipartFile mockMultipartFile;
+    private Agent existingAgent;
+    private Agent createdAgent;
+
+    @BeforeEach
+    public void setup() throws IOException{
+        mockMultipartFile = new MockMultipartFile(
+                                            "profileImage",
+                                            "testimage.jpg",
+                                            "image/jpeg",
+                                            "test image content".getBytes()
+                                    );
+        existingAgent = new Agent(
+                            1L,
+                            "tester7",
+                            "password",
+                            UserRole.AGENT,
+                            new ArrayList<JwtToken>(),
+                            "tester7@tt.com",
+                            "091111111",
+                            "profilephoto.com",
+                            new Date()
+                        );
+        Mockito.when(agentRepository.save(any(Agent.class))).thenReturn(existingAgent);
+        createdAgent =  agentRepository.save(existingAgent);
+        System.out.println(existingAgent.getPhoneNumber());
+
+        // Mock S3 image upload behavior
+        doNothing().when(imageService).uploadImage(mockMultipartFile.getOriginalFilename(), mockMultipartFile);
+
+    }
+
     @Test
-    public void testCreteAgent(){
-
-        // Create a mock MultipartFile
-        MultipartFile mockMultipartFile = new MockMultipartFile(
-                "profileImage",
-                "testimage.jpg",
-                "image/jpeg",
-                "test image content".getBytes()
-        );
-
+    public void testCreateAgent() throws IOException{
         AgentRegisterDto registerAgent = AgentRegisterDto.builder()
-                                                        .username("tester7")
-                                                        .email("tester7@test.com")
-                                                        .password("password")
-                                                        .phoneNumber("091128393")
-                                                        .profilePhoto("photolink")
-                                                        .profileImage(mockMultipartFile)
-                                                        .createdAt(new Date())
-                                                        .role(UserRole.AGENT)
-                                                        .build();
-                                            
-
-        AgentDto agentDto = AgentDto.builder().username("tester7")
-                                            .email("tester7@test.com")
+                                            .username("tester8")
+                                            .email("tester8@test.com")
                                             .password("password")
-                                            .phoneNumber("091128393")
+                                            .phoneNumber("09222222")
                                             .profilePhoto("photolink")
+                                            .profileImage(mockMultipartFile)
                                             .createdAt(new Date())
                                             .role(UserRole.AGENT)
                                             .build();
-        Agent agent = AgentMapper.mapToAgent(agentDto);
-        when(agentRepository.save(Mockito.any(Agent.class))).thenReturn(agent);
-
+        //mocek repo behaviour
+        Mockito.when(agentRepository.save(Mockito.any(Agent.class)))
+                    .thenReturn(AgentMapper.mapToAgent(AgentMapper.mapToAgentDtoFromAgentRegisterDto(registerAgent)));
         AgentDto savedAgentDto = agentService.createAgent(registerAgent);
-
         Assertions.assertThat(savedAgentDto).isNotNull();
-        
+        Assertions.assertThat(savedAgentDto.getUsername()).isEqualTo(registerAgent.getUsername());
+       // Verify uploadImage was called
+        verify(imageService).uploadImage(mockMultipartFile.getOriginalFilename(), mockMultipartFile);
     }
 
-  
+   @Test
+    public void testUpdateExistingAgent() throws IOException {
+        AgentRegisterDto newAgentRegisterDto = AgentRegisterDto.builder()
+                                        .username("tester7")
+                                        .email("tester7@test.com")
+                                        .password("password")
+                                        .phoneNumber("09440224474")
+                                        .profilePhoto("photolink")
+                                        .profileImage(mockMultipartFile)
+                                        .createdAt(new Date())
+                                        .role(UserRole.AGENT)
+                                        .build();
+        AgentDto existigAgentDto = AgentMapper.mapToAgentDto(createdAgent);
+
+        //since there is no actual database, it will only change the passed object ^^
+        agentService.updateExistingAgent(newAgentRegisterDto, existigAgentDto);
+
+        Assertions.assertThat(existigAgentDto.getPhoneNumber()).isEqualTo(newAgentRegisterDto.getPhoneNumber());
+        verify(agentRepository, times(1)).save(existingAgent);
+
+    }
+
+
 }
+

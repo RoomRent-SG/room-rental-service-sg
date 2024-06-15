@@ -130,4 +130,5 @@ public class AgentRepositoryTest {
         Assertions.assertThat(returnAgent).isNotNull();
         Assertions.assertThat(returnAgent.getUsername()).isEqualTo(savedAgent.getUsername());
     }
+
 }
