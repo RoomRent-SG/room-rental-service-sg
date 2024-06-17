@@ -17,6 +17,7 @@ import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.RoomPhoto;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,6 +26,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 public class RoomPostRegisterDto {
     @JsonIgnore
     private Long id;
