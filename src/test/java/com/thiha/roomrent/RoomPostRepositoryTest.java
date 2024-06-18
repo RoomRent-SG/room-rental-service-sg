@@ -1,8 +1,6 @@
 package com.thiha.roomrent;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertThrows;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -11,28 +9,25 @@ import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.thiha.roomrent.dto.RoomPostDto;
 import com.thiha.roomrent.dto.RoomPostRegisterDto;
 import com.thiha.roomrent.enums.AirConTime;
 import com.thiha.roomrent.enums.CookingAllowance;
 import com.thiha.roomrent.enums.Location;
 import com.thiha.roomrent.enums.PropertyType;
+import com.thiha.roomrent.enums.RoomType;
 import com.thiha.roomrent.enums.SharePub;
 import com.thiha.roomrent.enums.StationName;
 import com.thiha.roomrent.enums.UserRole;
@@ -62,17 +57,9 @@ public class RoomPostRepositoryTest {
     private MultipartFile mockMultipartFile;
     private List<MultipartFile> imageFiles = new ArrayList<>();
 
-
-    @Test
-    public void testSaveRoomPostSucced(){
-        mockMultipartFile = new MockMultipartFile(
-                                            "profileImage",
-                                            "testimage.jpg",
-                                            "image/jpeg",
-                                            "test image content".getBytes()
-                                    );
-        imageFiles.add(mockMultipartFile);
-        agent = new Agent(1L,
+    @BeforeEach
+    public void setup(){
+        Agent newAgent = new Agent(1L,
                             "tester7",
                             "password",
                             UserRole.AGENT,
@@ -82,7 +69,17 @@ public class RoomPostRepositoryTest {
                             "profilephoto.com",
                             new Date()
                         );
-        agentRepository.save(agent);
+        agent = agentRepository.save(newAgent);
+
+        mockMultipartFile = new MockMultipartFile(
+                                            "profileImage",
+                                            "testimage.jpg",
+                                            "image/jpeg",
+                                            "test image content".getBytes()
+                                    );
+        imageFiles.add(mockMultipartFile);
+        
+        
         
         registerRoomPost = RoomPostRegisterDto.builder()
                                 .agent(agent)
@@ -95,12 +92,17 @@ public class RoomPostRepositoryTest {
                                 .postedAt(new Date())
                                 .price(1600.0)
                                 .propertyType(PropertyType.CONDO)
+                                .roomType(RoomType.MASTER_ROOM)
                                 .roomPhotoFiles(imageFiles)
                                 .roomPhotos(new ArrayList<RoomPhoto>())
                                 .sharePub(SharePub.INCLUSIVE)
                                 .stationName(StationName.BUGIS)
                                 .totalPax(2)
                                 .build();
+    }
+
+    @Test
+    public void testSaveRoomPostSucced(){
         RoomPostDto roomPostDto = RoomPostMapper.mapToRoomPostDtoFromRoomPostRegisterDto(registerRoomPost);
         RoomPost roomPostToSave = RoomPostMapper.mapToRoomPost(roomPostDto);
 
@@ -108,5 +110,61 @@ public class RoomPostRepositoryTest {
 
         Assertions.assertThat(savedRoomPost).isNotNull();
         
+    }
+
+    @Test
+    public void testSaveRoomPostWithoutLocationAttributeThrowsInvalidConstraintException(){
+        RoomPostRegisterDto newRoomPostRegister = RoomPostRegisterDto.builder()
+                                                    .agent(agent)
+                                                    .airConTime(AirConTime.UNLIMITED)
+                                                    .allowVisitor(true)
+                                                    .cookingAllowance(CookingAllowance.COOKING_ALLOWED)
+                                                    .description("MasterRoom for rent")
+                                                    .id(11L)//no location attr
+                                                    .postedAt(new Date())
+                                                    .price(1600.0)
+                                                    .propertyType(PropertyType.CONDO)
+                                                    .roomPhotoFiles(imageFiles)
+                                                    .roomPhotos(new ArrayList<RoomPhoto>())
+                                                    .sharePub(SharePub.INCLUSIVE)
+                                                    .stationName(StationName.BUGIS)
+                                                    .totalPax(2)
+                                                    .build();
+        RoomPost newRoomPost = RoomPostMapper.mapToRoomPost(
+                                        RoomPostMapper.mapToRoomPostDtoFromRoomPostRegisterDto(newRoomPostRegister));
+
+        DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class,
+                                                    ()-> {
+                                                        roomPostRepository.save(newRoomPost);
+                                                    }); 
+        Assertions.assertThat(exception).isExactlyInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    public void deleteRoomPostSucceed(){
+        RoomPost roomPostToSave = RoomPostMapper.mapToRoomPost(
+            RoomPostMapper.mapToRoomPostDtoFromRoomPostRegisterDto(registerRoomPost)
+        );
+        RoomPost savedRoomPost = roomPostRepository.save(roomPostToSave);
+
+        Assertions.assertThat(savedRoomPost.getAgent().getId()).isEqualTo(agent.getId());
+
+        roomPostRepository.delete(savedRoomPost);
+
+        Optional<RoomPost> deletedRoomPost = roomPostRepository.findById(savedRoomPost.getId());
+        Assertions.assertThat(deletedRoomPost.isPresent()).isFalse();
+    }
+
+    @Test
+    public void getRoomPostByAgentIdSucceed(){
+        RoomPost roomPostToSave = RoomPostMapper.mapToRoomPost(
+            RoomPostMapper.mapToRoomPostDtoFromRoomPostRegisterDto(registerRoomPost)
+        );
+        RoomPost savedRoomPost = roomPostRepository.save(roomPostToSave);
+
+        List<RoomPost> roomPostsList = roomPostRepository.getRoomPostsByAgentId(agent.getId());
+
+        Assertions.assertThat(roomPostsList.size()).isEqualTo(1);
+        Assertions.assertThat(roomPostsList.get(0).getLocation()).isEqualTo(savedRoomPost.getLocation());
     }
 }

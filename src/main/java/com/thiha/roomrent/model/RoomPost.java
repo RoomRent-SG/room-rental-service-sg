@@ -27,6 +27,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -37,39 +38,40 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class RoomPost implements Serializable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "station_name")
+    @Column(name = "station_name", nullable = false)
     private StationName stationName;
 
-    @Column(name = "price")
+    @Column(name = "price", nullable = false)
     private double price;
 
     @Column(name = "posted_at")
     private Date postedAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "room_type")
+    @Column(name = "room_type", nullable = false)
     private RoomType roomType;
 
-    @Column(name = "total_person")
+    @Column(name = "total_person", nullable = false)
     @Min(1)
     @Max(4)
     private int totalPax;
 
-    @Column(name = "cooking_allowance")
+    @Column(name = "cooking_allowance", nullable = false)
     @Enumerated(EnumType.STRING)
     private CookingAllowance cookingAllowance;
    
-    @Column(name = "share_PUB")
+    @Column(name = "share_PUB", nullable = false)
     @Enumerated(EnumType.STRING)
     private SharePub sharePub;
 
-    @Column(name = "aircon_time")
+    @Column(name = "aircon_time", nullable = false)
     @Enumerated(EnumType.STRING)
     private AirConTime airConTime;
 
@@ -77,11 +79,11 @@ public class RoomPost implements Serializable{
     private boolean allowVisitor;
 
 
-    @Column(name = "location")
+    @Column(name = "location", nullable = false)
     @Enumerated(EnumType.STRING)
     private Location location;
 
-    @Column(name = "property_type")
+    @Column(name = "property_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private PropertyType propertyType;
 
