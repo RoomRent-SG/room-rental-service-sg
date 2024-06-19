@@ -1,15 +1,18 @@
 package com.thiha.roomrent;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-
+import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.Rule;
 import org.junit.contrib.java.lang.system.SystemOutRule;
@@ -21,7 +24,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.thiha.roomrent.dto.RoomPostDto;
 import com.thiha.roomrent.dto.RoomPostRegisterDto;
 import com.thiha.roomrent.enums.AirConTime;
@@ -122,7 +124,6 @@ public class RoomPostServiceTest {
                     .stationName(StationName.BUGIS)
                     .totalPax(2)
                     .build();
-        
     }
 
     @Test
@@ -133,9 +134,44 @@ public class RoomPostServiceTest {
         //mock s3ImageSerive
         doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));
         RoomPostDto createdRoomPostDto = roomPostService.createRoomPost(roomPostRegisterDto, agent);
-
+        
+        verify(imageService, times(1)).uploadImage(anyString(), any(MultipartFile.class));
         Assertions.assertThat(createdRoomPostDto.getId()).isEqualTo(roomPost.getId());
     }
 
-    
+    @Test
+    public void findRoomPostByIdSucced() throws IOException{
+       //mock roompostrepo
+       when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
+
+       //mock s3ImageSerive
+       doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));
+       RoomPostDto createdRoomPostDto = roomPostService.createRoomPost(roomPostRegisterDto, agent);
+       
+       when(roomPostRepository.findById(anyLong())).thenReturn(Optional.of(roomPost));
+       RoomPostDto existingRoomPost = roomPostService.findRoomPostById(createdRoomPostDto.getId());
+
+       Assertions.assertThat(existingRoomPost.getDescription()).isEqualTo(createdRoomPostDto.getDescription());
+    }
+
+    @Test
+    public void findRoomPostByAgentIdSuceed() throws IOException{
+       //mock roompostrepo
+       when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
+
+       //mock s3ImageSerive
+       doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));
+       RoomPostDto createdRoomPostDto = roomPostService.createRoomPost(roomPostRegisterDto, agent);
+       
+       verify(imageService, times(1)).uploadImage(anyString(), any(MultipartFile.class));
+
+       when(roomPostRepository.getRoomPostsByAgentId(agent.getId())).thenReturn(Arrays.asList(roomPost));
+
+       List<RoomPostDto> roomPosts = roomPostService.getRoomPostsByAgentId(agent.getId());
+
+       Assertions.assertThat(roomPosts.size()).isEqualTo(1);
+       Assertions.assertThat(roomPosts.get(0).getAgent().getUsername()).isEqualTo(agent.getUsername());
+       verify(roomPostRepository, times(1)).getRoomPostsByAgentId(agent.getId());
+    }
+
 }
