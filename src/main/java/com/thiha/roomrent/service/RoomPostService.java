@@ -106,7 +106,7 @@ public class RoomPostService implements RoomPostServiceImpl{
         RoomPost originalRoomPost = optionalRoomPost.get();
         if(!originalRoomPost.getAgent().getUsername().equals(agent.getUsername())){
             //unauthorized entity
-            throw new EntityNotFoundException("Room post cannot be found");
+            throw new EntityNotFoundException("RoomPost cannot be found");
         }
         originalRoomPost.setStationName(updateRoomPost.getStationName());
         originalRoomPost.setPrice(updateRoomPost.getPrice());

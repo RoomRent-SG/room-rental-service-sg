@@ -1,9 +1,11 @@
 package com.thiha.roomrent;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,6 +26,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.thiha.roomrent.dto.AgentDto;
 import com.thiha.roomrent.dto.RoomPostDto;
 import com.thiha.roomrent.dto.RoomPostRegisterDto;
 import com.thiha.roomrent.enums.AirConTime;
@@ -34,6 +38,8 @@ import com.thiha.roomrent.enums.RoomType;
 import com.thiha.roomrent.enums.SharePub;
 import com.thiha.roomrent.enums.StationName;
 import com.thiha.roomrent.enums.UserRole;
+import com.thiha.roomrent.exceptions.EntityNotFoundException;
+import com.thiha.roomrent.mapper.AgentMapper;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.JwtToken;
 import com.thiha.roomrent.model.RoomPhoto;
@@ -174,4 +180,119 @@ public class RoomPostServiceTest {
        verify(roomPostRepository, times(1)).getRoomPostsByAgentId(agent.getId());
     }
 
+    @Test
+    public void updateRoomPostWithValidIdSucceed(){
+        when(roomPostRepository.findById(anyLong())).thenReturn(Optional.of(roomPost));
+
+        RoomPostRegisterDto updatedRegisterRoomPost = RoomPostRegisterDto.builder()
+                                                    .agent(agent)
+                                                    .airConTime(AirConTime.UNLIMITED)
+                                                    .allowVisitor(true)
+                                                    .cookingAllowance(CookingAllowance.COOKING_ALLOWED)
+                                                    .description("MasterRoom for rent")
+                                                    .id(11L)
+                                                    .location(Location.BUKIT_TIMAH)
+                                                    .postedAt(new Date())
+                                                    .price(1600.0)
+                                                    .propertyType(PropertyType.CONDO)
+                                                    .roomType(RoomType.MASTER_ROOM)
+                                                    .roomPhotoFiles(imageFiles)
+                                                    .roomPhotos(new ArrayList<RoomPhoto>())
+                                                    .sharePub(SharePub.INCLUSIVE)
+                                                    .stationName(StationName.BUGIS)
+                                                    .totalPax(2)
+                                                    .build();
+        when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
+
+        try {
+            doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        AgentDto agentDto = AgentMapper.mapToAgentDto(agent);
+
+        RoomPostDto updatedRoomPostDto =  roomPostService.updateRoomPost(anyLong(), agentDto, updatedRegisterRoomPost);
+
+        Assertions.assertThat(updatedRoomPostDto.getLocation()).isEqualTo(updatedRegisterRoomPost.getLocation());
+        verify(roomPostRepository, times(1)).findById(anyLong());
+        verify(roomPostRepository, times(1)).save(any(RoomPost.class));
+
+    }
+
+    @Test
+    public void updateRoomPostWithInvalidIdThrowsEntityNotFoundException(){
+        when(roomPostRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        RoomPostRegisterDto updatedRegisterRoomPost = RoomPostRegisterDto.builder()
+                                                    .agent(agent)
+                                                    .airConTime(AirConTime.UNLIMITED)
+                                                    .allowVisitor(true)
+                                                    .cookingAllowance(CookingAllowance.COOKING_ALLOWED)
+                                                    .description("MasterRoom for rent")
+                                                    .id(11L)
+                                                    .location(Location.BUKIT_TIMAH)
+                                                    .postedAt(new Date())
+                                                    .price(1600.0)
+                                                    .propertyType(PropertyType.CONDO)
+                                                    .roomType(RoomType.MASTER_ROOM)
+                                                    .roomPhotoFiles(imageFiles)
+                                                    .roomPhotos(new ArrayList<RoomPhoto>())
+                                                    .sharePub(SharePub.INCLUSIVE)
+                                                    .stationName(StationName.BUGIS)
+                                                    .totalPax(2)
+                                                    .build();
+        AgentDto agentDto = AgentMapper.mapToAgentDto(agent);
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                                                 ()->{
+                                                    roomPostService.updateRoomPost(anyLong(), agentDto, updatedRegisterRoomPost);
+                                                 });
+        Assertions.assertThat(exception.getErrorMassage()).isEqualTo("RoomPost cannot be found");
+        verify(roomPostRepository, times(1)).findById(anyLong());
+        verify(roomPostRepository, never()).save(any(RoomPost.class));
+    }
+
+    @Test
+    public void updateRoomPostWithInvalidAgentThrowsEntityNotFoundException(){
+        when(roomPostRepository.findById(anyLong())).thenReturn(Optional.of(roomPost));
+
+        RoomPostRegisterDto updatedRegisterRoomPost = RoomPostRegisterDto.builder()
+                                                    .agent(agent)
+                                                    .airConTime(AirConTime.UNLIMITED)
+                                                    .allowVisitor(true)
+                                                    .cookingAllowance(CookingAllowance.COOKING_ALLOWED)
+                                                    .description("MasterRoom for rent")
+                                                    .id(11L)
+                                                    .location(Location.BUKIT_TIMAH)
+                                                    .postedAt(new Date())
+                                                    .price(1600.0)
+                                                    .propertyType(PropertyType.CONDO)
+                                                    .roomType(RoomType.MASTER_ROOM)
+                                                    .roomPhotoFiles(imageFiles)
+                                                    .roomPhotos(new ArrayList<RoomPhoto>())
+                                                    .sharePub(SharePub.INCLUSIVE)
+                                                    .stationName(StationName.BUGIS)
+                                                    .totalPax(2)
+                                                    .build();
+        AgentDto invalidAgentDto = AgentDto.builder()
+                                            .id(22L)
+                                            .username("Invalid Agent")
+                                            .email("invalidagent.tt.com")
+                                            .password("password")
+                                            .createdAt(new Date())
+                                            .phoneNumber("134324343")
+                                            .profilePhoto("profile")
+                                            .role(UserRole.AGENT)
+                                            .build();
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                                                 ()->{
+                                                    roomPostService.updateRoomPost(anyLong(), invalidAgentDto, updatedRegisterRoomPost);
+                                                 });
+        Assertions.assertThat(exception.getErrorMassage()).isEqualTo("RoomPost cannot be found");
+        verify(roomPostRepository, times(1)).findById(anyLong());
+        verify(roomPostRepository, never()).save(any(RoomPost.class));
+    }
+
 }
+
+
