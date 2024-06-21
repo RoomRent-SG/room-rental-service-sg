@@ -2,12 +2,10 @@ package com.thiha.roomrent.model;
 
 import java.util.Date;
 import java.util.List;
-
 import com.thiha.roomrent.enums.UserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

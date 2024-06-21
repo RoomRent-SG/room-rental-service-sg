@@ -13,6 +13,8 @@ public interface RoomPostServiceImpl {
    RoomPostDto findRoomPostById(Long id);
    RoomPostDto updateRoomPost(Long postId,AgentDto agent, RoomPostRegisterDto updateRoomPost);
    List<RoomPostDto> getRoomPostsByAgentId(Long agentId);
-   AllRoomPostsResponse getAllRoomPosts(int pageNo, int PageSize, RoomPostSearchFilter searchFilter);
+   List<RoomPostDto> getActiveRoomPostsByAgentId(Long agentId);
+   List<RoomPostDto> getArchivedRoomPostsByAgentId(Long agentId);
+   AllRoomPostsResponse getAllActiveRoomPosts(int pageNo, int PageSize, RoomPostSearchFilter searchFilter);
    void deleteRoomPostById(Long id, AgentDto currentAgent);
 }

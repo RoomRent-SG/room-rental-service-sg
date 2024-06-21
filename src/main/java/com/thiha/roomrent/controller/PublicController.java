@@ -28,7 +28,7 @@ public class PublicController {
          * Page index will start from 1
          * overriding the 0-based index
          */
-        AllRoomPostsResponse roomPostsResponse =  roomPostService.getAllRoomPosts(pageNo-1, pageSize, searchFilter);
+        AllRoomPostsResponse roomPostsResponse =  roomPostService.getAllActiveRoomPosts(pageNo-1, pageSize, searchFilter);
         return new ResponseEntity<AllRoomPostsResponse>(roomPostsResponse,HttpStatus.OK);
     }
 }

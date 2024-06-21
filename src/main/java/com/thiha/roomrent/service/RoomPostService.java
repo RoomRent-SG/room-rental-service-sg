@@ -81,6 +81,7 @@ public class RoomPostService implements RoomPostServiceImpl{
         roomPost.setAgent(agent);
         roomPost.setPrice(roomPostRegisterDto.getPrice()); 
         roomPost.setPostedAt(new Date());
+        roomPost.setArchived(false);
         roomPost.setRoomPhotos(roomPhotos);
         RoomPost savedRoomPost = roomPostRepository.save(roomPost);
 
@@ -170,7 +171,7 @@ public class RoomPostService implements RoomPostServiceImpl{
 
     @Override
     public List<RoomPostDto> getRoomPostsByAgentId(Long agentId) {
-        List<RoomPost> roomPosts = roomPostRepository.getRoomPostsByAgentId(agentId);
+        List<RoomPost> roomPosts = roomPostRepository.findAllRoomPostsByAgentId(agentId);
         List<RoomPostDto> roomPostDtos = new ArrayList<>();
         for(RoomPost roomPost: roomPosts){
             roomPostDtos.add(RoomPostMapper.mapToRoomPostDto(roomPost));
@@ -212,13 +213,13 @@ public class RoomPostService implements RoomPostServiceImpl{
 
     @Override
     @Cacheable(value = "all_room_posts")
-    public AllRoomPostsResponse getAllRoomPosts(int pageNo, int pageSize, RoomPostSearchFilter searchFilter) {
+    public AllRoomPostsResponse getAllActiveRoomPosts(int pageNo, int pageSize, RoomPostSearchFilter searchFilter) {
         /*
          * make sure pageNo and pageSize are positive
          */
         pageNo = pageNo<0? 0 : pageNo ;
         pageSize = pageSize<0? 10: pageSize;
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("postedAt"));
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("postedAt").descending());
         Page<RoomPost> roomPosts;
         List<RoomPost> listOfRoomPosts;
         List<RoomPostDto> listOfRoomPostDtos = new ArrayList<>();
@@ -229,12 +230,12 @@ public class RoomPostService implements RoomPostServiceImpl{
 
         //apply filter after retrieving all posts
         if(searchFilter == null){
-            roomPosts = roomPostRepository.findAll(pageable);
+            roomPosts = roomPostRepository.findAllActiveRoomPosts(pageable);
             listOfRoomPosts =  roomPosts.getContent();
 
         }else{
             RoomPostSpecification specification = new RoomPostSpecification(searchFilter);
-            roomPosts = roomPostRepository.findAll(specification, pageable);
+            roomPosts = roomPostRepository.findAllActiveRoomPosts(specification, pageable);
             listOfRoomPosts = roomPosts.getContent();
 
         }
@@ -259,6 +260,26 @@ public class RoomPostService implements RoomPostServiceImpl{
         roomPostsResponse.setLast(roomPosts.isLast());
         
         return roomPostsResponse;
+    }
+
+    @Override
+    public List<RoomPostDto> getActiveRoomPostsByAgentId(Long agentId) {
+        List<RoomPost> roomPosts = roomPostRepository.findActiveRoomPostsByAgentId(agentId);
+        List<RoomPostDto> roomPostDtos = new ArrayList<>();
+        for(RoomPost roomPost: roomPosts){
+            roomPostDtos.add(RoomPostMapper.mapToRoomPostDto(roomPost));
+        }
+        return roomPostDtos;
+    }
+
+    @Override
+    public List<RoomPostDto> getArchivedRoomPostsByAgentId(Long agentId) {
+        List<RoomPost> roomPosts = roomPostRepository.findArchivedRoomPostsByAgentId(agentId);
+        List<RoomPostDto> roomPostDtos = new ArrayList<>();
+        for(RoomPost roomPost: roomPosts){
+            roomPostDtos.add(RoomPostMapper.mapToRoomPostDto(roomPost));
+        }
+        return roomPostDtos;
     }
 
     

@@ -90,6 +90,12 @@ public class RoomPost implements Serializable{
     @Column(name = "description", nullable = false)
     private String description;
 
+    /*
+     * RoomPosts older than 50-days will be automatically archived and will not be displayed to users
+     */
+    @Column(name = "is_archived", nullable = false)
+    private boolean isArchived;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "agent_id", referencedColumnName = "id")
     private Agent agent;

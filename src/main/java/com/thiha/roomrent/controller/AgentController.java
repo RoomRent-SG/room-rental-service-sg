@@ -74,12 +74,20 @@ public class AgentController {
         return new ResponseEntity<>(savedRoomPost, HttpStatus.CREATED);
     }
 
-    @GetMapping("/room-post")
-    private ResponseEntity<List<RoomPostDto>> getRoomPosts(){
+    @GetMapping("/room-post/active")
+    private ResponseEntity<List<RoomPostDto>> getActiveRoomPosts(){
         AgentDto currentAgent = getCurrentAgent();
-        List<RoomPostDto> roomPosts = roomPostService.getRoomPostsByAgentId(currentAgent.getId());
+        List<RoomPostDto> roomPosts = roomPostService.getActiveRoomPostsByAgentId(currentAgent.getId());
         return new ResponseEntity<>(roomPosts, HttpStatus.OK);
     }
+
+    @GetMapping("/room-post/archived")
+    private ResponseEntity<List<RoomPostDto>> getArchivedRoomPosts(){
+        AgentDto currentAgent = getCurrentAgent();
+        List<RoomPostDto> roomPosts = roomPostService.getArchivedRoomPostsByAgentId(currentAgent.getId());
+        return new ResponseEntity<>(roomPosts, HttpStatus.OK);
+    }
+
 
 
     @GetMapping("/room-post/{id}")

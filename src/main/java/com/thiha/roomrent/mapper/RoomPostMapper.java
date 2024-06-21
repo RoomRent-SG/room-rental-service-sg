@@ -25,21 +25,24 @@ public class RoomPostMapper {
    }
 
    public static RoomPost mapToRoomPost(RoomPostDto roomPostDto){
-    return new RoomPost(roomPostDto.getId(),
-                            roomPostDto.getStationName(),
-                            roomPostDto.getPrice(),
-                            roomPostDto.getPostedAt(),
-                            roomPostDto.getRoomType(),
-                            roomPostDto.getTotalPax(),
-                            roomPostDto.getCookingAllowance(),
-                            roomPostDto.getSharePub(),
-                            roomPostDto.getAirConTime(),
-                            roomPostDto.isAllowVisitor(),
-                            roomPostDto.getLocation(),
-                            roomPostDto.getPropertyType(),
-                            roomPostDto.getDescription(),
-                            roomPostDto.getAgent(),
-                            roomPostDto.getRoomPhotos());
+      RoomPost roomPost = RoomPost.builder()
+                              .id(roomPostDto.getId())
+                              .agent(roomPostDto.getAgent())
+                              .airConTime(roomPostDto.getAirConTime())
+                              .allowVisitor(roomPostDto.isAllowVisitor())
+                              .cookingAllowance(roomPostDto.getCookingAllowance())
+                              .description(roomPostDto.getDescription())
+                              .location(roomPostDto.getLocation())
+                              .postedAt(roomPostDto.getPostedAt())
+                              .price(roomPostDto.getPrice())
+                              .propertyType(roomPostDto.getPropertyType())
+                              .roomPhotos(roomPostDto.getRoomPhotos())
+                              .roomType(roomPostDto.getRoomType())
+                              .sharePub(roomPostDto.getSharePub())
+                              .stationName(roomPostDto.getStationName())
+                              .totalPax(roomPostDto.getTotalPax())
+                              .build();
+    return roomPost;
    }
 
    public static RoomPostDto mapToRoomPostDtoFromRoomPostRegisterDto(RoomPostRegisterDto registerDto){

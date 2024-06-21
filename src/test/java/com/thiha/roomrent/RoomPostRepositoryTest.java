@@ -162,7 +162,7 @@ public class RoomPostRepositoryTest {
         );
         RoomPost savedRoomPost = roomPostRepository.save(roomPostToSave);
 
-        List<RoomPost> roomPostsList = roomPostRepository.getRoomPostsByAgentId(agent.getId());
+        List<RoomPost> roomPostsList = roomPostRepository.findAllRoomPostsByAgentId(agent.getId());
 
         Assertions.assertThat(roomPostsList.size()).isEqualTo(1);
         Assertions.assertThat(roomPostsList.get(0).getLocation()).isEqualTo(savedRoomPost.getLocation());

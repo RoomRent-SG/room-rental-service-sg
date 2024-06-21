@@ -2,6 +2,9 @@ package com.thiha.roomrent.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -14,5 +17,20 @@ import com.thiha.roomrent.model.RoomPost;
 public interface RoomPostRepository extends JpaRepository<RoomPost, Long>, JpaSpecificationExecutor<RoomPost>{
 
     @Query("SELECT roomPost FROM RoomPost roomPost WHERE roomPost.agent.id = :agentId")
-   List<RoomPost> getRoomPostsByAgentId(@Param("agentId")Long agentId);
+   List<RoomPost> findAllRoomPostsByAgentId(@Param("agentId")Long agentId);
+
+   @Query("SELECT roomPost FROM RoomPost roomPost WHERE roomPost.agent.id = :agentId AND roomPost.isArchived=false")
+   List<RoomPost> findActiveRoomPostsByAgentId(@Param("agentId")Long agentId);
+
+   @Query("SELECT roomPost FROM RoomPost roomPost WHERE roomPost.agent.id = :agentId AND roomPost.isArchived=true")
+   List<RoomPost> findArchivedRoomPostsByAgentId(@Param("agentId")Long agentId);
+   
+   @Query("SELECT roomPost FROM RoomPost roomPost WHERE roomPost.isArchived=false")
+   Page<RoomPost> findAllActiveRoomPosts(Specification<RoomPost> specification,Pageable pageable);
+
+   @Query("SELECT roomPost FROM RoomPost roomPost WHERE roomPost.isArchived=false")
+   Page<RoomPost> findAllActiveRoomPosts(Pageable pageable);
+
+   @Query("SELECT roomPost FROM RoomPost roomPost WHERE roomPost.isArchived=false")
+   List<RoomPost> findAllActiveRoomPosts();
 }

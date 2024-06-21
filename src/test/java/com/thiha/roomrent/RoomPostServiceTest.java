@@ -122,6 +122,7 @@ public class RoomPostServiceTest {
                     .id(11L)
                     .location(Location.BALESTIER)
                     .postedAt(new Date())
+                    .isArchived(false)
                     .price(1600.0)
                     .propertyType(PropertyType.CONDO)
                     .roomType(RoomType.MASTER_ROOM)
@@ -161,7 +162,7 @@ public class RoomPostServiceTest {
     }
 
     @Test
-    public void findRoomPostByAgentIdSuceed() throws IOException{
+    public void findActiveRoomPostByAgentIdSuceed() throws IOException{
        //mock roompostrepo
        when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
 
@@ -171,13 +172,13 @@ public class RoomPostServiceTest {
        
        verify(imageService, times(1)).uploadImage(anyString(), any(MultipartFile.class));
 
-       when(roomPostRepository.getRoomPostsByAgentId(agent.getId())).thenReturn(Arrays.asList(roomPost));
+       when(roomPostRepository.findActiveRoomPostsByAgentId(agent.getId())).thenReturn(Arrays.asList(roomPost));
 
-       List<RoomPostDto> roomPosts = roomPostService.getRoomPostsByAgentId(agent.getId());
+       List<RoomPostDto> roomPosts = roomPostService.getActiveRoomPostsByAgentId(agent.getId());
 
        Assertions.assertThat(roomPosts.size()).isEqualTo(1);
        Assertions.assertThat(roomPosts.get(0).getAgent().getUsername()).isEqualTo(agent.getUsername());
-       verify(roomPostRepository, times(1)).getRoomPostsByAgentId(agent.getId());
+       verify(roomPostRepository, times(1)).findActiveRoomPostsByAgentId(agent.getId());
     }
 
     @Test
