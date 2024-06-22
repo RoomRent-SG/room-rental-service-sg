@@ -282,6 +282,23 @@ public class RoomPostService implements RoomPostServiceImpl{
         return roomPostDtos;
     }
 
+    @Override
+    public RoomPostDto reactivateRoomPost(Long id, AgentDto currentAgent) {
+        Optional<RoomPost> roomPost = roomPostRepository.findById(id);
+        if(roomPost.isPresent()){
+            RoomPost roomPostToActivate = roomPost.get();
+            if(roomPostToActivate.getAgent().getUsername().equals(currentAgent.getUsername())){
+                roomPostToActivate.setArchived(false);
+                RoomPost updatedRoomPost = roomPostRepository.save(roomPostToActivate);
+                return RoomPostMapper.mapToRoomPostDto(updatedRoomPost);
+            }else{
+                throw new EntityNotFoundException("RoomPost Not Found");
+            }
+        }else{
+            throw new EntityNotFoundException("RoomPost Not Found");
+        }
+    }
+
     
     
 }

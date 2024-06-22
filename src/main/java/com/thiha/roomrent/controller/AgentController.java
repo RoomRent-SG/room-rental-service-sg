@@ -111,6 +111,12 @@ public class AgentController {
         return new ResponseEntity<>(updatedRoomPost, HttpStatus.OK);
     }
 
+    @PutMapping("/room-post/{id}/activate")
+    private ResponseEntity<Void> reactivateRoomPost(@PathVariable Long id){
+        roomPostService.reactivateRoomPost(id, getCurrentAgent());
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
     @DeleteMapping("/room-post/{roomPostId}")
     private ResponseEntity<Void> deleteRoomPost(@PathVariable Long roomPostId){
         AgentDto currentAgent = getCurrentAgent();

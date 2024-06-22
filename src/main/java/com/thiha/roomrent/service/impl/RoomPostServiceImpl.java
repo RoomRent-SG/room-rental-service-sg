@@ -12,6 +12,7 @@ public interface RoomPostServiceImpl {
    RoomPostDto createRoomPost(RoomPostRegisterDto roomPostRegisterDto, Agent agent);
    RoomPostDto findRoomPostById(Long id);
    RoomPostDto updateRoomPost(Long postId,AgentDto agent, RoomPostRegisterDto updateRoomPost);
+   RoomPostDto reactivateRoomPost(Long id, AgentDto currentAgent);
    List<RoomPostDto> getRoomPostsByAgentId(Long agentId);
    List<RoomPostDto> getActiveRoomPostsByAgentId(Long agentId);
    List<RoomPostDto> getArchivedRoomPostsByAgentId(Long agentId);
