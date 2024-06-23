@@ -62,4 +62,5 @@ public class RoomPostMapper {
                         registerDto.getPostedAt(),
                         registerDto.getRoomPhotos());
    }
+
 }

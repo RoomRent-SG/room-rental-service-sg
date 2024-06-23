@@ -132,7 +132,8 @@ public class RoomPostRepositoryTest {
                                                     .build();
         RoomPost newRoomPost = RoomPostMapper.mapToRoomPost(
                                         RoomPostMapper.mapToRoomPostDtoFromRoomPostRegisterDto(newRoomPostRegister));
-
+        newRoomPost.setArchived(true);
+        System.out.println("isArchived"+newRoomPost.isArchived());
         DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class,
                                                     ()-> {
                                                         roomPostRepository.save(newRoomPost);
@@ -166,5 +167,58 @@ public class RoomPostRepositoryTest {
 
         Assertions.assertThat(roomPostsList.size()).isEqualTo(1);
         Assertions.assertThat(roomPostsList.get(0).getLocation()).isEqualTo(savedRoomPost.getLocation());
+    }
+
+    @Test
+    public void getActiveRoomPostsReturnEmptyList(){
+        RoomPost roomPostToSave = RoomPostMapper.mapToRoomPost(
+            RoomPostMapper.mapToRoomPostDtoFromRoomPostRegisterDto(registerRoomPost)
+        );
+        roomPostToSave.setArchived(true);
+        RoomPost savedRoomPost = roomPostRepository.save(roomPostToSave);
+
+        List<RoomPost> roomPostsList = roomPostRepository.findActiveRoomPostsByAgentId(agent.getId());
+
+        Assertions.assertThat(roomPostsList.size()).isEqualTo(0);
+    }
+
+    @Test
+    public void getActiveRoomPostByAgentIdSucceed(){
+        RoomPost roomPostToSave = RoomPostMapper.mapToRoomPost(
+            RoomPostMapper.mapToRoomPostDtoFromRoomPostRegisterDto(registerRoomPost)
+        );
+        roomPostToSave.setArchived(false);
+        RoomPost savedRoomPost = roomPostRepository.save(roomPostToSave);
+
+        List<RoomPost> roomPostsList = roomPostRepository.findActiveRoomPostsByAgentId(agent.getId());
+
+        Assertions.assertThat(roomPostsList.size()).isEqualTo(1);
+        Assertions.assertThat(roomPostsList.get(0).getLocation()).isEqualTo(savedRoomPost.getLocation());
+    }
+
+    @Test
+    public void getArchivedRoomPostByAgentIdReturnRoomPostList(){
+        RoomPost roomPostToSave = RoomPostMapper.mapToRoomPost(
+            RoomPostMapper.mapToRoomPostDtoFromRoomPostRegisterDto(registerRoomPost)
+        );
+        roomPostToSave.setArchived(true);
+        RoomPost savedRoomPost = roomPostRepository.save(roomPostToSave);
+
+        List<RoomPost> roomPostsList = roomPostRepository.findArchivedRoomPostsByAgentId(agent.getId());
+        Assertions.assertThat(roomPostsList.size()).isEqualTo(1);
+        Assertions.assertThat(roomPostsList.get(0).getLocation()).isEqualTo(savedRoomPost.getLocation());
+    }
+
+    @Test
+    public void getArchivedRoomPostByAgentIdReturnEmptyList(){
+        RoomPost roomPostToSave = RoomPostMapper.mapToRoomPost(
+            RoomPostMapper.mapToRoomPostDtoFromRoomPostRegisterDto(registerRoomPost)
+        );
+        roomPostToSave.setArchived(false);
+        roomPostRepository.save(roomPostToSave);
+
+        List<RoomPost> roomPostsList = roomPostRepository.findArchivedRoomPostsByAgentId(agent.getId());
+        roomPostsList = roomPostRepository.findArchivedRoomPostsByAgentId(agent.getId());
+        Assertions.assertThat(roomPostsList.size()).isEqualTo(0);
     }
 }

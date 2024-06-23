@@ -26,7 +26,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.thiha.roomrent.dto.AgentDto;
 import com.thiha.roomrent.dto.RoomPostDto;
 import com.thiha.roomrent.dto.RoomPostRegisterDto;
@@ -292,6 +291,29 @@ public class RoomPostServiceTest {
         Assertions.assertThat(exception.getErrorMassage()).isEqualTo("RoomPost cannot be found");
         verify(roomPostRepository, times(1)).findById(anyLong());
         verify(roomPostRepository, never()).save(any(RoomPost.class));
+    }
+
+    @Test
+    public void deleteRoomPostByIdSucceed(){
+        when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
+
+        RoomPost savedRoomPost = roomPostRepository.save(roomPost);
+
+        Assertions.assertThat(savedRoomPost.getDescription()).isEqualTo(roomPost.getDescription());
+
+        when(roomPostRepository.findById(1L)).thenReturn(Optional.of(roomPost));
+
+        AgentDto agentDto = AgentMapper.mapToAgentDto(agent);
+        roomPostService.deleteRoomPostById(1L, agentDto);
+
+        verify(roomPostRepository, times(1)).findById(1L);
+        verify(roomPostRepository, times(1)).deleteById(1L);
+
+        when(roomPostRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Optional<RoomPost> deletedRoomPost = roomPostRepository.findById(1L);
+        Assertions.assertThat(deletedRoomPost).isEmpty();
+
     }
 
 }

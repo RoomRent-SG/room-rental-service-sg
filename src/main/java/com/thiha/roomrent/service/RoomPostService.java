@@ -192,20 +192,6 @@ public class RoomPostService implements RoomPostServiceImpl{
         roomPostRepository.deleteById(id);
     }
 
-    //     @DeleteMapping("/room-post/{roomPostId}")
-    // private ResponseEntity<Void> deleteRoomPost(@PathVariable Long roomPostId){
-    //     AgentDto currentAgent = getCurrentAgent();
-    //     RoomPostDto roomPostToDelete = roomPostService.findRoomPostById(roomPostId);
-    //     if(roomPostToDelete == null){
-    //         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    //     }
-    //     if(currentAgent.getId() == roomPostToDelete.getAgent().getId()){
-    //         // Delete room post
-    //         roomPostService.deleteRoomPostById(roomPostId);
-    //         return new ResponseEntity<>(HttpStatus.OK);
-    //     }
-    //     return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-    // }
 
     /*
      * the room posts will be sorted by postedAt attribute by defaults
@@ -298,7 +284,6 @@ public class RoomPostService implements RoomPostServiceImpl{
             throw new EntityNotFoundException("RoomPost Not Found");
         }
     }
-
     
     
 }
