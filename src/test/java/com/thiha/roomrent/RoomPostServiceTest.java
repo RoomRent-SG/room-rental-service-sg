@@ -167,7 +167,7 @@ public class RoomPostServiceTest {
 
        //mock s3ImageSerive
        doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));
-       RoomPostDto createdRoomPostDto = roomPostService.createRoomPost(roomPostRegisterDto, agent);
+       roomPostService.createRoomPost(roomPostRegisterDto, agent);
        
        verify(imageService, times(1)).uploadImage(anyString(), any(MultipartFile.class));
 

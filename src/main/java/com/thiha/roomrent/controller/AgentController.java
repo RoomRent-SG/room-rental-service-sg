@@ -1,7 +1,6 @@
 package com.thiha.roomrent.controller;
 
 
-import java.io.IOException;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 import com.thiha.roomrent.dto.AgentDto;
 import com.thiha.roomrent.dto.AgentRegisterDto;
 import com.thiha.roomrent.dto.RoomPostDto;
@@ -30,7 +27,6 @@ import com.thiha.roomrent.security.UserDetailsImpl;
 import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.LogoutService;
 import com.thiha.roomrent.service.RoomPostService;
-import com.thiha.roomrent.service.S3ImageService;
 import com.thiha.roomrent.validator.ObjectValidator;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,7 +40,6 @@ import lombok.AllArgsConstructor;
 public class AgentController {
     private AgentService agentService;
     private RoomPostService roomPostService;
-    private S3ImageService s3ImageService;
     private LogoutService logoutService;
     private ObjectValidator<RoomPostRegisterDto> roomPostValidator;
     private ObjectValidator<AgentRegisterDto> agentValidator;
@@ -124,19 +119,6 @@ public class AgentController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    /*
-     * uploadRoomImage is for testing only
-     */
-
-    @PostMapping("/{postId}/images")
-    private ResponseEntity<Void> uploadRoomImage(@RequestParam("file") MultipartFile file){
-        try{
-            s3ImageService.uploadImage(file.getOriginalFilename(), file);
-            return new ResponseEntity<>(HttpStatus.OK);
-        }catch(IOException e){
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 
     @PostMapping("/logout")
     private ResponseEntity<Void> doLogout(HttpServletRequest request,

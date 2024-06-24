@@ -2,7 +2,10 @@ package com.thiha.roomrent.service;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -116,6 +119,12 @@ public class AgentService implements AgentServiceImpl{
         existingAgentDto.setPhoneNumber(newAgentDto.getPhoneNumber());
         
         return AgentMapper.mapToAgentDto(agentRepository.save(AgentMapper.mapToAgent(existingAgentDto)));
+    }
+
+    @Override
+    public List<AgentDto> findAllAgents() {
+        List<Agent> agents = agentRepository.findAll();
+        return agents.stream().map(agent -> AgentMapper.mapToAgentDto(agent)).collect(Collectors.toList());
     }
    
 }

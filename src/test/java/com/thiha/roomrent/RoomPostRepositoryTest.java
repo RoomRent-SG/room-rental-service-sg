@@ -175,7 +175,7 @@ public class RoomPostRepositoryTest {
             RoomPostMapper.mapToRoomPostDtoFromRoomPostRegisterDto(registerRoomPost)
         );
         roomPostToSave.setArchived(true);
-        RoomPost savedRoomPost = roomPostRepository.save(roomPostToSave);
+        roomPostRepository.save(roomPostToSave);
 
         List<RoomPost> roomPostsList = roomPostRepository.findActiveRoomPostsByAgentId(agent.getId());
 

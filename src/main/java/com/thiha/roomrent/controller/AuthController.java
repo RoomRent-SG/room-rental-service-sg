@@ -41,4 +41,9 @@ public class AuthController {
         return new ResponseEntity<>(loginResponse, HttpStatus.OK);
    }
 
+   @PostMapping("/admin/login")
+   private ResponseEntity<LoginResponseDto> loginAdmin(@RequestBody LoginRequestDto loginDto){
+     LoginResponseDto loginResponse = loginService.performLogin(loginDto, authenticationManager);
+     return new ResponseEntity<LoginResponseDto>(loginResponse, HttpStatus.OK);
+   }
 }

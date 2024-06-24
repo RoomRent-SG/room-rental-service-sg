@@ -10,8 +10,10 @@ import com.thiha.roomrent.model.UserModel;
 import com.thiha.roomrent.repository.UserRepository;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class RoomRentUserDetailsService implements UserDetailsService{
     
@@ -19,14 +21,14 @@ public class RoomRentUserDetailsService implements UserDetailsService{
 
     @Override
     public UserDetails loadUserByUsername(String username) {
-        System.out.println("Inside my custom service....");
         UserModel user;
         Optional<UserModel> optionalUser = userRepository.findByUsername(username);
-
+        log.info("USERNAME "+ optionalUser);
         if(optionalUser.isPresent()){
             user = optionalUser.get();
             return new UserDetailsImpl(user);
         }else{
+            log.info("user not found");
             throw new UsernameNotFoundException(username);
         }
         
@@ -38,6 +40,7 @@ public class RoomRentUserDetailsService implements UserDetailsService{
         if(optionalUser.isPresent()){
             return optionalUser.get();
         }
+        System.out.println("user not found");
         return null;
     }
 

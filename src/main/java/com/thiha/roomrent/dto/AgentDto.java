@@ -22,7 +22,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class AgentDto implements Serializable{
-   @JsonIgnore
    private Long id;
    @NotNull(message = "Email should not be empty")
    private String email;
