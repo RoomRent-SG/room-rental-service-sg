@@ -1,5 +1,7 @@
 package com.thiha.roomrent.enums;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum PropertyType {
     CONDO("condominium"),
     HDB("HDB");
@@ -9,8 +11,8 @@ public enum PropertyType {
         this.propertyType = propertyType;
     }
 
-    @Override
-    public String toString(){
+    @JsonValue
+    public String getPropertyType(){
         return this.propertyType;
     }
 }

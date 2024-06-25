@@ -1,5 +1,7 @@
 package com.thiha.roomrent.enums;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum CookingAllowance {
     NO_COOKING("No Cooking Allowed"),
     LIGHT_COOKING("Light Cooking Allowed"),
@@ -11,8 +13,8 @@ public enum CookingAllowance {
         this.cooking = cooking;
     }
 
-    @Override
-    public String toString(){
+    @JsonValue
+    public String getCookingAllowance(){
         return this.cooking;
     }
 }

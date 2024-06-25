@@ -111,3 +111,13 @@ public class RoomPost implements Serializable{
     List<RoomPhoto> roomPhotos;
 
 }
+
+
+/*
+ * moveInDate
+ * nearest MRT
+ * addresss
+ * roomArea
+ * buildingName
+ * minStay
+ */

@@ -1,5 +1,7 @@
 package com.thiha.roomrent.enums;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum SharePub {
     INCLUSIVE("PUB inclusive"),
     SHARE("share PUB");
@@ -9,8 +11,8 @@ public enum SharePub {
         this.pub = pub;
     }
 
-    @Override
-    public String toString(){
+    @JsonValue
+    public String getSharePub(){
         return this.pub;
     }
 }

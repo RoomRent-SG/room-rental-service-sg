@@ -38,7 +38,6 @@ public class RoomPostDto implements Serializable{
     private PropertyType propertyType;
     private String description;
     private Agent agent;
-    @JsonIgnore
     private Date postedAt;
     private List<RoomPhoto> roomPhotos;
 }

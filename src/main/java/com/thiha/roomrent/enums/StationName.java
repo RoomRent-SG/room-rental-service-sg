@@ -1,5 +1,7 @@
 package com.thiha.roomrent.enums;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum StationName{
     JURONG_EAST("Jurong East"),
     BUKIT_BATOK("Bukit Batok"),
@@ -130,8 +132,8 @@ public enum StationName{
         this.station = stationName;
     }
 
-    @Override
-    public String toString(){
+    @JsonValue
+    public String getStationName(){
         return this.station;
     }
 }

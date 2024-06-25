@@ -1,5 +1,7 @@
 package com.thiha.roomrent.enums;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum Location {
     RAFFLES_PLACE("Raffles Place"),
     MARINA("Marina"),
@@ -70,14 +72,14 @@ public enum Location {
     EUNOS("Eunos"),
     SELETAR("Seletar");
 
-    private final String displayName;
+    private final String location;
 
-    Location(String displayName) {
-        this.displayName = displayName;
+    Location(String location) {
+        this.location= location;
     }
 
-    @Override
-    public String toString() {
-        return this.displayName;
+    @JsonValue
+    public String getLocation(){
+        return this.location;
     }
 }

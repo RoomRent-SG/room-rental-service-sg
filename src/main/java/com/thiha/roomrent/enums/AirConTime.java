@@ -1,16 +1,18 @@
 package com.thiha.roomrent.enums;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum AirConTime{
-   LIMITED("limited"),
-   UNLIMITED("unlimited");
+   LIMITED("Limited"),
+   UNLIMITED("Unlimited");
 
    private final String airConTime;
    private AirConTime(String airConTime){
         this.airConTime = airConTime;
    }
 
-   @Override
-   public String toString(){
-        return this.airConTime;
+   @JsonValue
+   public String getAirConTime(){
+     return this.airConTime;
    }
 }

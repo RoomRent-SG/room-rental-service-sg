@@ -1,5 +1,7 @@
 package com.thiha.roomrent.enums;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum RoomType {
     COMMON_ROOM("Common Room"),
     MASTER_ROOM("Master Room"),
@@ -12,8 +14,8 @@ public enum RoomType {
         this.roomType = roomType;
     }
 
-    @Override
-    public String toString(){
+    @JsonValue
+    public String getRoomType(){
         return this.roomType;
     }
 }
