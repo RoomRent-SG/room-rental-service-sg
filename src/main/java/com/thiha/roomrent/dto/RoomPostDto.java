@@ -3,8 +3,6 @@ package com.thiha.roomrent.dto;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thiha.roomrent.enums.AirConTime;
 import com.thiha.roomrent.enums.CookingAllowance;
 import com.thiha.roomrent.enums.Location;
@@ -28,6 +26,7 @@ public class RoomPostDto implements Serializable{
     private Long id;
     private StationName stationName;
     private double price;
+    private String address;
     private RoomType roomType;
     private int totalPax;
     private CookingAllowance cookingAllowance;
@@ -37,6 +36,7 @@ public class RoomPostDto implements Serializable{
     private Location location;
     private PropertyType propertyType;
     private String description;
+    private String thumbnailImage;
     private Agent agent;
     private Date postedAt;
     private List<RoomPhoto> roomPhotos;

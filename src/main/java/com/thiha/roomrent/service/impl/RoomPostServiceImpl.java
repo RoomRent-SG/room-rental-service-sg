@@ -11,11 +11,12 @@ import com.thiha.roomrent.model.Agent;
 public interface RoomPostServiceImpl {
    RoomPostDto createRoomPost(RoomPostRegisterDto roomPostRegisterDto, Agent agent);
    RoomPostDto findRoomPostById(Long id);
+   RoomPostDto findRoomPostById(Long id, AgentDto agentDto);
    RoomPostDto updateRoomPost(Long postId,AgentDto agent, RoomPostRegisterDto updateRoomPost);
    RoomPostDto reactivateRoomPost(Long id, AgentDto currentAgent);
    List<RoomPostDto> getRoomPostsByAgentId(Long agentId);
    List<RoomPostDto> getActiveRoomPostsByAgentId(Long agentId);
    List<RoomPostDto> getArchivedRoomPostsByAgentId(Long agentId);
-   AllRoomPostsResponse getAllActiveRoomPosts(int pageNo, int PageSize, RoomPostSearchFilter searchFilter);
+   AllRoomPostsResponse getAllActiveRoomPosts(int pageNo, int pageSize, RoomPostSearchFilter searchFilter);
    void deleteRoomPostById(Long id, AgentDto currentAgent);
 }

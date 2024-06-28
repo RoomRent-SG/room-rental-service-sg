@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.thiha.roomrent.dto.AgentDto;
-import com.thiha.roomrent.dto.RoomPostDto;
 import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.LogoutService;
 import com.thiha.roomrent.service.RoomPostService;
@@ -29,8 +28,6 @@ public class AdminController {
     @Autowired
     private LogoutService logoutService;
 
-    @Autowired
-    private RoomPostService roomPostService;
 
     @GetMapping("/agents")
     public ResponseEntity<List<AgentDto>> getAllAgents(){

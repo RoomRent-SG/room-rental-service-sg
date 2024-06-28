@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,14 +24,19 @@ import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.repository.AgentRepository;
 import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.impl.AgentServiceImpl;
-import lombok.AllArgsConstructor;
 
 @Service
-@AllArgsConstructor
 public class AgentService implements AgentServiceImpl{
+    @Autowired
     private AgentRepository agentRepository;
+    @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
     private S3ImageService imageService;
+
+    @Value("${aws.cloudFront}")
+    private String cloudFrontUrl;
+
     @Override
     public AgentDto createAgent(AgentRegisterDto registeredAgent) {
         Optional<Agent> agentByEmail = agentRepository.findByEmail(registeredAgent.getEmail());
@@ -49,7 +56,7 @@ public class AgentService implements AgentServiceImpl{
         }catch(IOException e){
             throw new S3ImageUploadException(e.getMessage());
         }
-        registeredAgent.setProfilePhoto(profileImage.getOriginalFilename());
+        registeredAgent.setProfilePhoto(cloudFrontUrl+profileImage.getOriginalFilename());
         registeredAgent.setRole(UserRole.AGENT);
         String hashedPassword = passwordEncoder.encode(registeredAgent.getPassword());
         

@@ -7,9 +7,9 @@ import lombok.Data;
 
 @Data
 public class AllRoomPostsResponse implements Serializable{
-   private List<RoomPostDto> allRoomPosts;
+   private List<RoomPostListDto> allRoomPosts;
    private int pageNo;
    private int pageSize;
-   private Long totalContenSize;
+   private Long totalContentSize;
    private boolean last;
 }

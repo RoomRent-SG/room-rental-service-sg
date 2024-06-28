@@ -1,6 +1,7 @@
 package com.thiha.roomrent.dto;
 
 import com.amazonaws.services.iotsitewise.model.PropertyType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thiha.roomrent.enums.AirConTime;
 import com.thiha.roomrent.enums.CookingAllowance;
 import com.thiha.roomrent.enums.Location;
@@ -28,5 +29,7 @@ public class RoomPostSearchFilter {
     private AirConTime airConTime;
     private boolean allow_visitor;
     private PropertyType propertyType;
+    @JsonIgnore
+    private boolean isArchived;
 }
 

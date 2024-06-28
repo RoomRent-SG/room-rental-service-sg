@@ -33,6 +33,9 @@ public class RoomPostRegisterDto {
 
     @NotNull(message = "Station name cannot be null")
     private StationName stationName;
+
+    @NotNull(message = "Address cannot be null")
+    private String address;
     /*
      * need to validate somehow
      */

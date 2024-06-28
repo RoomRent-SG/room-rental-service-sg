@@ -51,6 +51,9 @@ public class RoomPost implements Serializable{
     @Column(name = "price", nullable = false)
     private double price;
 
+    @Column(name = "address", nullable = false)
+    private String address;
+
     @Column(name = "posted_at")
     private Date postedAt;
 
@@ -96,13 +99,17 @@ public class RoomPost implements Serializable{
     @Column(name = "is_archived", nullable = false)
     private boolean isArchived;
 
+    @Column(name = "thumbnail_image", nullable = false)
+    private String thumbnailImage;
+
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "agent_id", referencedColumnName = "id")
     private Agent agent;
 
     /*
      * If roomPhotos are loaded lazily, the data will only be loaded if the object is called or used.So, if the code
-     * doesn't use the roomPhoto objects, they will not loaded. owever, if roomPhotos are not accessed within an active Hibernate session,
+     * doesn't use the roomPhoto objects, they will not be loaded. owever, if roomPhotos are not accessed within an active Hibernate session,
      * As a result, trying to access them later (e.g., during serialization for caching) will cause a LazyInitializationExceptionit 
      * will become serialization error when the roompost data is cached in the redis. 
      * However, changing FetchType to EAGER will effect on performance of the app in other operations if the data is large.

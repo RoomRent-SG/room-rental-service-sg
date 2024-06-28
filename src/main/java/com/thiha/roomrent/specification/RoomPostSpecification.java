@@ -66,7 +66,7 @@ public class RoomPostSpecification implements Specification<RoomPost>{
             Predicate totalPaxPredicate = criteriaBuilder.equal(root.get("totalPax"), searchFilter.getTotalPax());
             predicates.add(totalPaxPredicate);
         }
-
+        predicates.add(criteriaBuilder.equal(root.get("isArchived"), searchFilter.isArchived()));
         return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
     }
     

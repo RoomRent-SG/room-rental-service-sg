@@ -2,14 +2,19 @@ package com.thiha.roomrent.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -18,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.thiha.roomrent.dto.AgentDto;
 import com.thiha.roomrent.dto.AllRoomPostsResponse;
 import com.thiha.roomrent.dto.RoomPostDto;
+import com.thiha.roomrent.dto.RoomPostListDto;
 import com.thiha.roomrent.dto.RoomPostRegisterDto;
 import com.thiha.roomrent.dto.RoomPostSearchFilter;
 import com.thiha.roomrent.exceptions.EntityNotFoundException;
@@ -68,6 +74,11 @@ public class RoomPostService implements RoomPostServiceImpl{
                         throw new S3ImageUploadException("Error uploading room photos to s3");
                     }
                 });
+        roomPost.setAddress(roomPostRegisterDto.getAddress());
+        /*
+         * set the first image as the thumbnail
+         */
+        roomPost.setThumbnailImage(roomPhotos.get(0).getImageUrl());
         roomPost.setAirConTime(roomPostRegisterDto.getAirConTime());
         roomPost.setAllowVisitor(roomPostRegisterDto.isAllowVisitor());
         roomPost.setCookingAllowance(roomPostRegisterDto.getCookingAllowance());
@@ -93,6 +104,20 @@ public class RoomPostService implements RoomPostServiceImpl{
         Optional<RoomPost> optionalRoomPost = roomPostRepository.findById(id);
         if(optionalRoomPost.isPresent()){
             return RoomPostMapper.mapToRoomPostDto(optionalRoomPost.get());
+        }
+        throw new EntityNotFoundException("Roompost cannot be found");
+    }
+
+    @Override
+    public RoomPostDto findRoomPostById(Long id, AgentDto agent){
+        Optional<RoomPost> optionalRoomPost = roomPostRepository.findById(id);
+        if(optionalRoomPost.isPresent()){
+            RoomPostDto roomPostDto = RoomPostMapper.mapToRoomPostDto(optionalRoomPost.get());
+            if (roomPostDto.getAgent().getId()==agent.getId()) {
+                return roomPostDto;
+            }else{
+                throw new EntityNotFoundException("Roompost cannot be found");
+            }
         }
         throw new EntityNotFoundException("Roompost cannot be found");
     }
@@ -200,53 +225,73 @@ public class RoomPostService implements RoomPostServiceImpl{
     @Override
     @Cacheable(value = "all_room_posts")
     public AllRoomPostsResponse getAllActiveRoomPosts(int pageNo, int pageSize, RoomPostSearchFilter searchFilter) {
+        
+        /*
+         * must add isArchive attribute to retrieve active room posts because specification api cannot work with custom query
+         */
+        if(searchFilter==null){
+            searchFilter = new RoomPostSearchFilter();
+        }
+        searchFilter.setArchived(false);
+
         /*
          * make sure pageNo and pageSize are positive
          */
         pageNo = pageNo<0? 0 : pageNo ;
         pageSize = pageSize<0? 10: pageSize;
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("postedAt").descending());
-        Page<RoomPost> roomPosts;
+        Page<RoomPost> roomPosts = new PageImpl<>(new ArrayList<RoomPost>());
         List<RoomPost> listOfRoomPosts;
         List<RoomPostDto> listOfRoomPostDtos = new ArrayList<>();
+        List<RoomPostListDto> listOfRoomPostListDtos = new ArrayList<>();
         AllRoomPostsResponse roomPostsResponse = new AllRoomPostsResponse();
 
 
-        List<RoomPostDto> filteredRoomPosts = new ArrayList<>();
-
-        //apply filter after retrieving all posts
-        if(searchFilter == null){
-            roomPosts = roomPostRepository.findAllActiveRoomPosts(pageable);
-            listOfRoomPosts =  roomPosts.getContent();
-
-        }else{
-            RoomPostSpecification specification = new RoomPostSpecification(searchFilter);
-            roomPosts = roomPostRepository.findAllActiveRoomPosts(specification, pageable);
-            listOfRoomPosts = roomPosts.getContent();
-
+        RoomPostSpecification specification = new RoomPostSpecification(searchFilter);
+        try{
+            roomPosts = roomPostRepository.findAll(specification, pageable);
         }
-
-        //map to RoomPostDTO
-        for(RoomPost roomPost:listOfRoomPosts){
-            RoomPostDto roomPostDto = RoomPostMapper.mapToRoomPostDto(roomPost); 
-            listOfRoomPostDtos.add(roomPostDto);
-            /*
-             * load the roomphots data manually because they are implemented by lazy loading
-             * forcing hibernate to fetch the contents by creating new ArrayList
-             * without creating new ArrayList (roomPostDto.setRoomPhotos(roomPost.getRoomPhotos())), it will not work
-             */
-            roomPostDto.setRoomPhotos(new ArrayList<>(roomPost.getRoomPhotos()));
+        catch(Exception e){
+            e.printStackTrace();
         }
+        
+        listOfRoomPosts = roomPosts.getContent();
+        
+        // try{
+        //     listOfRoomPostListDtos = listOfRoomPosts.stream()
+        //                             .map(roomPost -> RoomPostMapper.mapToRoomPostListDto(roomPost))
+        //                             .collect(Collectors.toList());
+        // }
+        // catch(Exception e){
+        //     e.printStackTrace();
+        // }
 
-        filteredRoomPosts = listOfRoomPostDtos;        
-        roomPostsResponse.setAllRoomPosts(filteredRoomPosts);
+        // //map to RoomPostDTO
+        // for(RoomPost roomPost:listOfRoomPosts){
+        //     RoomPostDto roomPostDto = RoomPostMapper.mapToRoomPostDto(roomPost); 
+        //     listOfRoomPostDtos.add(roomPostDto);
+        //     /*
+        //      * load the roomphots data manually because they are implemented by lazy loading
+        //      * forcing hibernate to fetch the contents by creating new ArrayList
+        //      * without creating new ArrayList (roomPostDto.setRoomPhotos(roomPost.getRoomPhotos())), it will not work
+        //      */
+        //     roomPostDto.setRoomPhotos(new ArrayList<>(roomPost.getRoomPhotos()));
+        // }
+
+        for(RoomPost roomPost : listOfRoomPosts){
+            listOfRoomPostListDtos.add(RoomPostMapper.mapToRoomPostListDto(roomPost));
+        }
+               
+        roomPostsResponse.setAllRoomPosts(listOfRoomPostListDtos);
         roomPostsResponse.setPageNo(roomPosts.getNumber());
         roomPostsResponse.setPageSize(roomPosts.getSize());
-        roomPostsResponse.setTotalContenSize(roomPosts.getTotalElements());
+        roomPostsResponse.setTotalContentSize(roomPosts.getTotalElements());
         roomPostsResponse.setLast(roomPosts.isLast());
         
         return roomPostsResponse;
     }
+
+    
 
     @Override
     public List<RoomPostDto> getActiveRoomPostsByAgentId(Long agentId) {
@@ -284,6 +329,6 @@ public class RoomPostService implements RoomPostServiceImpl{
             throw new EntityNotFoundException("RoomPost Not Found");
         }
     }
-    
+
     
 }
