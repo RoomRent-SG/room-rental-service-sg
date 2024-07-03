@@ -17,6 +17,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class RoomPostListDto implements Serializable {
     private Long id;
+    private double price;
     private String thumbnailImage;
     private Location location;
     private RoomType roomType;

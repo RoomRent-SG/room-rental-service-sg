@@ -1,5 +1,10 @@
 package com.thiha.roomrent.enums;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum RoomType {
@@ -18,4 +23,13 @@ public enum RoomType {
     public String getRoomType(){
         return this.roomType;
     }
+
+    public static List<String> getValueList(){
+     Set<RoomType> enums = EnumSet.allOf(RoomType.class);
+     List<String> valueList = new ArrayList<>();
+     for (RoomType room : enums){
+          valueList.add(room.getRoomType());
+     }
+     return valueList;
+   }
 }

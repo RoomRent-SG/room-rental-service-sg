@@ -25,7 +25,7 @@ public class RoomPostMapper {
                         roomPost.getPostedAt(),
                         roomPost.getRoomPhotos());
    }
-   
+
    public static RoomPost mapToRoomPost(RoomPostDto roomPostDto){
       RoomPost roomPost = RoomPost.builder()
                               .id(roomPostDto.getId())
@@ -49,27 +49,12 @@ public class RoomPostMapper {
     return roomPost;
    }
 
-   // public static RoomPostDto mapToRoomPostDtoFromRoomPostRegisterDto(RoomPostRegisterDto registerDto){
-   //    return new RoomPostDto(registerDto.getId(),
-   //                      registerDto.getStationName(),
-   //                      registerDto.getPrice(),
-   //                      registerDto.getRoomType(),
-   //                      registerDto.getTotalPax(),
-   //                      registerDto.getCookingAllowance(),
-   //                      registerDto.getSharePub(),
-   //                      registerDto.getAirConTime(),
-   //                      registerDto.isAllowVisitor(),
-   //                      registerDto.getLocation(),
-   //                      registerDto.getPropertyType(),
-   //                      registerDto.getDescription(),
-   //                      registerDto.getAgent(),
-   //                      registerDto.getPostedAt(),
-   //                      registerDto.getRoomPhotos());
-   // }
+
 
    public static RoomPostListDto mapToRoomPostListDto(RoomPost roomPost){
       return new RoomPostListDto(
          roomPost.getId(),
+         roomPost.getPrice(),
          roomPost.getThumbnailImage(),
          roomPost.getLocation(),
          roomPost.getRoomType(),
