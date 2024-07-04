@@ -22,17 +22,4 @@ public class AllRoomPostsResponse implements Serializable{
    private int pageSize;
    private Long totalContentSize;
    private boolean last;
-
-   private Map<String, List<String>> searchParams;
-
-   public AllRoomPostsResponse(){
-      searchParams = new HashMap<>();
-      searchParams.put("airConTime", AirConTime.getValueList());
-      searchParams.put("cookingAllowance", CookingAllowance.getValueList());
-      searchParams.put("location", Location.getValueList());
-      searchParams.put("propertyType", PropertyType.getValueList());
-      searchParams.put("roomType", RoomType.getValueList());
-      searchParams.put("sharePub", SharePub.getValueList());
-      searchParams.put("stationName", StationName.getValueList());
-   }
 }

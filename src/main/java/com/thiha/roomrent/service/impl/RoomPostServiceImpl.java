@@ -1,11 +1,11 @@
 package com.thiha.roomrent.service.impl;
 import java.util.List;
+import java.util.Map;
 
 import com.thiha.roomrent.dto.AgentDto;
 import com.thiha.roomrent.dto.AllRoomPostsResponse;
 import com.thiha.roomrent.dto.RoomPostDto;
 import com.thiha.roomrent.dto.RoomPostRegisterDto;
-import com.thiha.roomrent.dto.RoomPostSearchFilter;
 import com.thiha.roomrent.model.Agent;
 
 public interface RoomPostServiceImpl {
@@ -17,6 +17,6 @@ public interface RoomPostServiceImpl {
    List<RoomPostDto> getRoomPostsByAgentId(Long agentId);
    List<RoomPostDto> getActiveRoomPostsByAgentId(Long agentId);
    List<RoomPostDto> getArchivedRoomPostsByAgentId(Long agentId);
-   AllRoomPostsResponse getAllActiveRoomPosts(int pageNo, int pageSize, RoomPostSearchFilter searchFilter);
+   AllRoomPostsResponse getAllActiveRoomPosts(int pageNo, int pageSize, Map<String, String> searchFilter);
    void deleteRoomPostById(Long id, AgentDto currentAgent);
 }

@@ -1,10 +1,10 @@
 package com.thiha.roomrent.dto;
 
-import com.amazonaws.services.iotsitewise.model.PropertyType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thiha.roomrent.enums.AirConTime;
 import com.thiha.roomrent.enums.CookingAllowance;
 import com.thiha.roomrent.enums.Location;
+import com.thiha.roomrent.enums.PropertyType;
 import com.thiha.roomrent.enums.RoomType;
 import com.thiha.roomrent.enums.SharePub;
 import com.thiha.roomrent.enums.StationName;

@@ -22,6 +22,11 @@ public enum CookingAllowance {
         return this.cooking;
     }
 
+    @Override
+    public String toString(){
+        return this.cooking;
+    }
+
     public static List<String> getValueList(){
      Set<CookingAllowance> enums = EnumSet.allOf(CookingAllowance.class);
      List<String> valueList = new ArrayList<>();

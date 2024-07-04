@@ -142,6 +142,11 @@ public enum StationName{
         return this.station;
     }
 
+    @Override
+    public String toString(){
+        return this.station;
+    }
+
     public static List<String> getValueList(){
      Set<StationName> enums = EnumSet.allOf(StationName.class);
      List<String> valueList = new ArrayList<>();

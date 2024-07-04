@@ -2,13 +2,10 @@ package com.thiha.roomrent.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -26,6 +23,13 @@ import com.thiha.roomrent.dto.RoomPostDto;
 import com.thiha.roomrent.dto.RoomPostListDto;
 import com.thiha.roomrent.dto.RoomPostRegisterDto;
 import com.thiha.roomrent.dto.RoomPostSearchFilter;
+import com.thiha.roomrent.enums.AirConTime;
+import com.thiha.roomrent.enums.CookingAllowance;
+import com.thiha.roomrent.enums.Location;
+import com.thiha.roomrent.enums.PropertyType;
+import com.thiha.roomrent.enums.RoomType;
+import com.thiha.roomrent.enums.SharePub;
+import com.thiha.roomrent.enums.StationName;
 import com.thiha.roomrent.exceptions.EntityNotFoundException;
 import com.thiha.roomrent.exceptions.RoomPhotoNotFoundException;
 import com.thiha.roomrent.exceptions.RoomPhotosExceedLimitException;
@@ -224,15 +228,13 @@ public class RoomPostService implements RoomPostServiceImpl{
 
     @Override
     @Cacheable(value = "all_room_posts")
-    public AllRoomPostsResponse getAllActiveRoomPosts(int pageNo, int pageSize, RoomPostSearchFilter searchFilter) {
+    public AllRoomPostsResponse getAllActiveRoomPosts(int pageNo, int pageSize, Map<String, String> searchFilter) {
         
         /*
          * must add isArchive attribute to retrieve active room posts because specification api cannot work with custom query
          */
-        if(searchFilter==null){
-            searchFilter = new RoomPostSearchFilter();
-        }
-        searchFilter.setArchived(false);
+        RoomPostSearchFilter roomPostFilter = createSearchFilter(searchFilter);
+        roomPostFilter.setArchived(false);
 
         /*
          * make sure pageNo and pageSize are positive
@@ -242,12 +244,12 @@ public class RoomPostService implements RoomPostServiceImpl{
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("postedAt").descending());
         Page<RoomPost> roomPosts = new PageImpl<>(new ArrayList<RoomPost>());
         List<RoomPost> listOfRoomPosts;
-        List<RoomPostDto> listOfRoomPostDtos = new ArrayList<>();
         List<RoomPostListDto> listOfRoomPostListDtos = new ArrayList<>();
         AllRoomPostsResponse roomPostsResponse = new AllRoomPostsResponse();
 
 
-        RoomPostSpecification specification = new RoomPostSpecification(searchFilter);
+        RoomPostSpecification specification = new RoomPostSpecification(roomPostFilter);
+
         try{
             roomPosts = roomPostRepository.findAll(specification, pageable);
         }
@@ -257,26 +259,6 @@ public class RoomPostService implements RoomPostServiceImpl{
         
         listOfRoomPosts = roomPosts.getContent();
         
-        // try{
-        //     listOfRoomPostListDtos = listOfRoomPosts.stream()
-        //                             .map(roomPost -> RoomPostMapper.mapToRoomPostListDto(roomPost))
-        //                             .collect(Collectors.toList());
-        // }
-        // catch(Exception e){
-        //     e.printStackTrace();
-        // }
-
-        // //map to RoomPostDTO
-        // for(RoomPost roomPost:listOfRoomPosts){
-        //     RoomPostDto roomPostDto = RoomPostMapper.mapToRoomPostDto(roomPost); 
-        //     listOfRoomPostDtos.add(roomPostDto);
-        //     /*
-        //      * load the roomphots data manually because they are implemented by lazy loading
-        //      * forcing hibernate to fetch the contents by creating new ArrayList
-        //      * without creating new ArrayList (roomPostDto.setRoomPhotos(roomPost.getRoomPhotos())), it will not work
-        //      */
-        //     roomPostDto.setRoomPhotos(new ArrayList<>(roomPost.getRoomPhotos()));
-        // }
 
         for(RoomPost roomPost : listOfRoomPosts){
             listOfRoomPostListDtos.add(RoomPostMapper.mapToRoomPostListDto(roomPost));
@@ -330,5 +312,61 @@ public class RoomPostService implements RoomPostServiceImpl{
         }
     }
 
+    private RoomPostSearchFilter createSearchFilter(Map<String, String> filter){
+        RoomPostSearchFilter searchFilter = new RoomPostSearchFilter();
+
+        if (filter == null) {
+            return new RoomPostSearchFilter();
+        }
+
+        for (String key: filter.keySet()){
+            String value = filter.get(key);
+            switch (key) {
+                case "airConTime":
+                    searchFilter.setAirConTime(getEnumFromString(AirConTime.class, value));
+                    break;
+                case "cookingAllowance":
+                    searchFilter.setCookingAllowance(getEnumFromString(CookingAllowance.class, value));
+                    break;
+                case "location":
+                    searchFilter.setLocation(getEnumFromString(Location.class, value));
+                    break;
+                case "propertyType":
+                    searchFilter.setPropertyType(getEnumFromString(PropertyType.class, value));
+                    break;
+                case "roomType":
+                    searchFilter.setRoomType(getEnumFromString(RoomType.class, value));
+                    break;
+                case "sharePub":
+                    searchFilter.setSharePub(getEnumFromString(SharePub.class, value));
+                    break;
+                case "stationName":
+                    searchFilter.setStationName(getEnumFromString(StationName.class, value));
+                    break;
+                case "minPrice":
+                    searchFilter.setMinPrice(Double.valueOf(value));
+                    break;
+                case "maxPrice":
+                    searchFilter.setMaxPrice(Double.valueOf(value));
+                    break;
+            
+                default:
+                    break;
+            }
+        }
+
+        return searchFilter;
+    }
+
+    private <T extends Enum<T>> T getEnumFromString(Class<T> enumClass, String value){
+        if(enumClass.isEnum()){
+            for(T enumConstant: enumClass.getEnumConstants()){
+                if (enumConstant.toString().equals(value)) {
+                    return enumConstant;
+                }
+            }
+        }
+        return null;
+    }
     
 }

@@ -87,7 +87,12 @@ public enum Location {
     public String getLocation(){
         return this.location;
     }
-    
+
+    @Override
+    public String toString(){
+        return this.location;
+    }
+   
     public static List<String> getValueList(){
      Set<Location> enums = EnumSet.allOf(Location.class);
      List<String> valueList = new ArrayList<>();

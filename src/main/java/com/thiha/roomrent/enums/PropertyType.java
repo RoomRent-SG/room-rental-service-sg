@@ -21,6 +21,11 @@ public enum PropertyType {
         return this.propertyType;
     }
 
+    @Override
+    public String toString(){
+        return this.propertyType;
+    }
+
     public static List<String> getValueList(){
      Set<PropertyType> enums = EnumSet.allOf(PropertyType.class);
      List<String> valueList = new ArrayList<>();

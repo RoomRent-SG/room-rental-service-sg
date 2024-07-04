@@ -24,6 +24,11 @@ public enum RoomType {
         return this.roomType;
     }
 
+    @Override
+    public String toString(){
+        return this.roomType;
+    }
+
     public static List<String> getValueList(){
      Set<RoomType> enums = EnumSet.allOf(RoomType.class);
      List<String> valueList = new ArrayList<>();

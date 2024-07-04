@@ -21,6 +21,11 @@ public enum SharePub {
         return this.pub;
     }
 
+    @Override
+    public String toString(){
+        return this.pub;
+    }
+
     public static List<String> getValueList(){
      Set<SharePub> enums = EnumSet.allOf(SharePub.class);
      List<String> valueList = new ArrayList<>();

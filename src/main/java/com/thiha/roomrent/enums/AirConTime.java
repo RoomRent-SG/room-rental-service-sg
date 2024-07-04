@@ -21,6 +21,11 @@ public enum AirConTime{
      return this.airConTime;
    }
 
+   @Override
+    public String toString(){
+        return this.airConTime;
+    }
+
    public static List<String> getValueList(){
      Set<AirConTime> enums = EnumSet.allOf(AirConTime.class);
      List<String> valueList = new ArrayList<>();
