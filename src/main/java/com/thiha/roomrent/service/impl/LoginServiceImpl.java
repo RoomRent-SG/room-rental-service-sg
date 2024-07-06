@@ -33,7 +33,7 @@ public class LoginServiceImpl implements LoginService{
             UserDetailsImpl userDetails = (UserDetailsImpl)authentication.getPrincipal();
             UserModel user = userDetails.getUser();
             log.info("user " + user);
-            String jwtToken = jwtUtils.generateJwtToken(loginRequestDto);
+            String jwtToken = jwtUtils.generateJwtToken(loginRequestDto, false);
             JwtToken token = new JwtToken();
             token.setToken(jwtToken);
             token.setUser(user);

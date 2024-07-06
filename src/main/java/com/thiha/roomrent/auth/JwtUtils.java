@@ -30,9 +30,15 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateJwtToken(LoginRequestDto user){
+    public String generateJwtToken(LoginRequestDto user, Boolean isRefreshToken){
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + JwtConstants.TOKEN_VALIDITY);
+        long tokenValidity;
+        if(isRefreshToken){
+            tokenValidity = JwtConstants.TOKEN_VALIDITY;
+        }else{
+            tokenValidity = JwtConstants.REFRESH_TOKEN_VALIDITY;
+        }
+        Date expiryDate = new Date(now.getTime() + tokenValidity);
         return Jwts
                     .builder()
                     .subject((user.getUsername()))
