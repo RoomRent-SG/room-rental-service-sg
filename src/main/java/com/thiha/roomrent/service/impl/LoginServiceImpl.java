@@ -11,12 +11,14 @@ import org.springframework.stereotype.Service;
 import com.thiha.roomrent.auth.JwtUtils;
 import com.thiha.roomrent.dto.LoginRequestDto;
 import com.thiha.roomrent.dto.LoginResponseDto;
+import com.thiha.roomrent.exceptions.RefreshTokenInvalidException;
 import com.thiha.roomrent.model.JwtToken;
 import com.thiha.roomrent.model.UserModel;
 import com.thiha.roomrent.security.UserDetailsImpl;
 import com.thiha.roomrent.service.LoginService;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,14 +39,15 @@ public class LoginServiceImpl implements LoginService{
             UserDetailsImpl userDetails = (UserDetailsImpl)authentication.getPrincipal();
             UserModel user = userDetails.getUser();
             log.info("user " + user);
+            String userID = user.getId().toString();
 
-            String accessToken = jwtUtils.generateJwtToken(user, false);
+            String accessToken = jwtUtils.generateJwtToken(userID, false);
             JwtToken token = new JwtToken();
             token.setToken(accessToken);
             token.setUser(user);
             jwtTokenService.saveToken(token);
 
-            String refreshToken = jwtUtils.generateJwtToken(user, true);
+            String refreshToken = jwtUtils.generateJwtToken(userID, true);
             Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
             refreshTokenCookie.setHttpOnly(true);
             refreshTokenCookie.setSecure(false);
@@ -59,5 +62,26 @@ public class LoginServiceImpl implements LoginService{
             log.error(e.getMessage());
             throw new BadCredentialsException("Invalid password");
         }
+    }
+    @Override
+    public LoginResponseDto refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies = request.getCookies();
+        String refreshToken = null;
+
+        if(cookies!=null){
+            for(Cookie cookie: cookies){
+                if(cookie.getName().equals("refreshToken")){
+                    refreshToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if(refreshToken!=null && !jwtUtils.isTokenExpired(refreshToken)){
+            String userID = jwtUtils.getIdFromToken(refreshToken);
+            String newAccessToken = jwtUtils.generateJwtToken(userID,false);
+            return new LoginResponseDto(Long.parseLong(newAccessToken), newAccessToken);
+        }
+        throw new RefreshTokenInvalidException();
     }    
 }

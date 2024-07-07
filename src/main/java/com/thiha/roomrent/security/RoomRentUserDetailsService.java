@@ -34,20 +34,14 @@ public class RoomRentUserDetailsService implements UserDetailsService{
         
     }
 
-
-    public UserModel getUserWithUsername(String username){
-        Optional<UserModel> optionalUser = userRepository.findByUsername(username);
+    public UserDetails loadUserWithUserID(Long id){
+        Optional<UserModel> optionalUser = userRepository.findById(id);
         if(optionalUser.isPresent()){
-            return optionalUser.get();
+            UserModel user = optionalUser.get();
+            return new UserDetailsImpl(user);
         }
-        System.out.println("user not found");
         return null;
     }
 
-    // private Collection<GrantedAuthority> getAuthorities(UserModel user){
-    //     List<GrantedAuthority> authorities = new ArrayList<>();
-    //     authorities.add(new SimpleGrantedAuthority(user.getRole().toString()));
-    //     return authorities;
-    // }
    
 }

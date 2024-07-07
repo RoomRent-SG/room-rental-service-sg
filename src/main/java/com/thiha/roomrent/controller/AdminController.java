@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.thiha.roomrent.dto.AgentDto;
 import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.LogoutService;
-import com.thiha.roomrent.service.RoomPostService;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 

@@ -1,16 +1,10 @@
 package com.thiha.roomrent.auth;
 
 import java.util.Date;
-
 import javax.crypto.SecretKey;
-
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
-
 import com.thiha.roomrent.constant.JwtConstants;
-import com.thiha.roomrent.dto.LoginRequestDto;
-import com.thiha.roomrent.model.UserModel;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -32,7 +26,7 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateJwtToken(UserModel user, Boolean isRefreshToken){
+    public String generateJwtToken(String userID, Boolean isRefreshToken){
         Date now = new Date();
         long tokenValidity;
         if(isRefreshToken){
@@ -43,7 +37,7 @@ public class JwtUtils {
         Date expiryDate = new Date(now.getTime() + tokenValidity);
         return Jwts
                     .builder()
-                    .subject(user.getId().toString())
+                    .subject(userID)
                     .issuedAt(new Date())
                     .expiration(expiryDate)
                     .signWith(getSigningKey(), Jwts.SIG.HS256)
@@ -103,7 +97,7 @@ public class JwtUtils {
         }
     }
 
-    public String getUsernameFromToken(String token){
+    public String getIdFromToken(String token){
         Claims claims = parseClaimsFromJwtToken(token);
         return claims.getSubject();
     }

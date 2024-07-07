@@ -7,6 +7,8 @@ import com.thiha.roomrent.auth.JwtUtils;
 import com.thiha.roomrent.dto.TokenDto;
 import com.thiha.roomrent.exceptions.LogoutException;
 import com.thiha.roomrent.mapper.TokenMapper;
+
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -31,7 +33,13 @@ public class LogoutService {
             if(token !=null){
                 token.setRevoked(true);
                 tokenService.saveToken(TokenMapper.mapToJwtToken(token));
-                System.out.println("gotToken..");
+                
+                Cookie clearRefreshToken = new Cookie("refreshToken", null);
+                clearRefreshToken.setHttpOnly(true);
+                clearRefreshToken.setSecure(false);
+                clearRefreshToken.setPath("/api/auth/refresh");
+                clearRefreshToken.setMaxAge(0);
+                response.addCookie(clearRefreshToken);
                 // clean up 
                 this.logoutHandler.logout(request, response, authentication);
                 this.logoutHandler.setClearAuthentication(true);

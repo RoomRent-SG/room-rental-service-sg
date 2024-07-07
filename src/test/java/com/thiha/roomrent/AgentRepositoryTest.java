@@ -61,9 +61,9 @@ public class AgentRepositoryTest {
                                 .build();
         Agent agent = AgentMapper.mapToAgent(agentDto);
 
-        Agent savedAgent = agentRepository.save(agent);
+        agentRepository.save(agent);
 
-        Agent savedAgent1 = agentRepository.save(agent1);
+        agentRepository.save(agent1);
 
         List<Agent> allAgents = agentRepository.findAll();
 
@@ -82,7 +82,7 @@ public class AgentRepositoryTest {
                                 .build();
         Agent agent = AgentMapper.mapToAgent(agentDto);
 
-        Agent savedAgent = agentRepository.save(agent);
+        agentRepository.save(agent);
 
         Agent returnAgent = agentRepository.findByEmail(agentDto.getEmail()).get();
 

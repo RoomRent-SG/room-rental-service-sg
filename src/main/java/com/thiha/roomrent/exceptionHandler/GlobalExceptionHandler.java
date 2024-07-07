@@ -13,6 +13,7 @@ import com.thiha.roomrent.exceptions.InvalidObjectException;
 import com.thiha.roomrent.exceptions.LogoutException;
 import com.thiha.roomrent.exceptions.NameAlreadyExistedException;
 import com.thiha.roomrent.exceptions.ProfileImageNotFoundException;
+import com.thiha.roomrent.exceptions.RefreshTokenInvalidException;
 import com.thiha.roomrent.exceptions.RoomPhotoNotFoundException;
 import com.thiha.roomrent.exceptions.RoomPhotosExceedLimitException;
 import com.thiha.roomrent.exceptions.S3ImageUploadException;
@@ -109,4 +110,11 @@ public class GlobalExceptionHandler {
                             .body(response);
     }
 
+    @ExceptionHandler(RefreshTokenInvalidException.class)
+    public ResponseEntity<ErrorResponse> handleRefreshTokenInvalidException(RefreshTokenInvalidException exception){
+        ErrorResponse response = new ErrorResponse(HttpStatus.FORBIDDEN.value(), exception.getErrorMessage());
+        return ResponseEntity
+                            .status(HttpStatus.FORBIDDEN)
+                            .body(response);
+    }
 }
