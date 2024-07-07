@@ -15,6 +15,8 @@ import com.thiha.roomrent.dto.LoginResponseDto;
 import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.LoginService;
 import com.thiha.roomrent.validator.ObjectValidator;
+
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -36,14 +38,14 @@ public class AuthController {
 
   
    @PostMapping("/agent/login")
-   private ResponseEntity<LoginResponseDto> loginAgent(@RequestBody LoginRequestDto loginDto){
-        LoginResponseDto loginResponse = loginService.performLogin(loginDto, authenticationManager);
+   private ResponseEntity<LoginResponseDto> loginAgent(@RequestBody LoginRequestDto loginDto, HttpServletResponse response){
+        LoginResponseDto loginResponse = loginService.performLogin(loginDto, authenticationManager, response);
         return new ResponseEntity<>(loginResponse, HttpStatus.OK);
    }
 
    @PostMapping("/admin/login")
-   private ResponseEntity<LoginResponseDto> loginAdmin(@RequestBody LoginRequestDto loginDto){
-     LoginResponseDto loginResponse = loginService.performLogin(loginDto, authenticationManager);
+   private ResponseEntity<LoginResponseDto> loginAdmin(@RequestBody LoginRequestDto loginDto, HttpServletResponse response){
+     LoginResponseDto loginResponse = loginService.performLogin(loginDto, authenticationManager, response);
      return new ResponseEntity<LoginResponseDto>(loginResponse, HttpStatus.OK);
    }
 }

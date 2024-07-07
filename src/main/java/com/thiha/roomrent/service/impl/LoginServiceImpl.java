@@ -16,6 +16,8 @@ import com.thiha.roomrent.model.UserModel;
 import com.thiha.roomrent.security.UserDetailsImpl;
 import com.thiha.roomrent.service.LoginService;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -26,19 +28,30 @@ public class LoginServiceImpl implements LoginService{
     @Autowired
     JwtTokenService jwtTokenService;
     @Override
-    public LoginResponseDto performLogin(LoginRequestDto loginRequestDto, AuthenticationManager authenticationManager) {
+    public LoginResponseDto performLogin(LoginRequestDto loginRequestDto,
+                                         AuthenticationManager authenticationManager,
+                                         HttpServletResponse response) {
         try{
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequestDto.getUsername(), loginRequestDto.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
             UserDetailsImpl userDetails = (UserDetailsImpl)authentication.getPrincipal();
             UserModel user = userDetails.getUser();
             log.info("user " + user);
-            String jwtToken = jwtUtils.generateJwtToken(loginRequestDto, false);
+
+            String accessToken = jwtUtils.generateJwtToken(user, false);
             JwtToken token = new JwtToken();
-            token.setToken(jwtToken);
+            token.setToken(accessToken);
             token.setUser(user);
             jwtTokenService.saveToken(token);
-            return new LoginResponseDto(loginRequestDto.getUsername(), jwtToken);
+
+            String refreshToken = jwtUtils.generateJwtToken(user, true);
+            Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setSecure(false);
+            refreshTokenCookie.setPath("/api/auth/refresh");
+            response.addCookie(refreshTokenCookie);
+            
+            return new LoginResponseDto(user.getId(), accessToken);
         }catch(BadCredentialsException e){
             throw new BadCredentialsException("Invalid password");
         }

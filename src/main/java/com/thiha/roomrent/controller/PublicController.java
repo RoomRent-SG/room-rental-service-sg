@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.thiha.roomrent.dto.AllRoomPostsResponse;
 import com.thiha.roomrent.dto.FilterKeywords;
 import com.thiha.roomrent.dto.RoomPostDto;
-import com.thiha.roomrent.dto.RoomPostSearchFilter;
 import com.thiha.roomrent.service.RoomPostService;
 
 @RestController

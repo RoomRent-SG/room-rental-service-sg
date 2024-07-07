@@ -7,6 +7,8 @@ public class JwtConstants {
 
     public static final long TOKEN_VALIDITY = 60*60*1000;
 
+    public static final long REFRESH_TOKEN_VALIDITY = 24 * 60 * 60 * 1000;
+
     public static final String  TOKEN_HEADER = "Authorization";
 
     public static final String TOKEN_PREFIX = "Bearer ";
