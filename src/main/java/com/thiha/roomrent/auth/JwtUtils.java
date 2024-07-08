@@ -1,10 +1,15 @@
 package com.thiha.roomrent.auth;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.crypto.SecretKey;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 import com.thiha.roomrent.constant.JwtConstants;
+import com.thiha.roomrent.model.UserModel;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -26,7 +31,7 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateJwtToken(String userID, Boolean isRefreshToken){
+    public String generateJwtToken(UserModel user, Boolean isRefreshToken){
         Date now = new Date();
         long tokenValidity;
         if(isRefreshToken){
@@ -37,11 +42,19 @@ public class JwtUtils {
         Date expiryDate = new Date(now.getTime() + tokenValidity);
         return Jwts
                     .builder()
-                    .subject(userID)
+                    .subject(user.getId().toString())
                     .issuedAt(new Date())
                     .expiration(expiryDate)
                     .signWith(getSigningKey(), Jwts.SIG.HS256)
+                    .claim("user", createJwtClaims(user))
                     .compact();
+    }
+
+    private Map<String, Object> createJwtClaims(UserModel user){
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("username", user.getUsername());
+        claims.put("role", user.getRole());
+        return claims;
     }
 
     private Claims parseClaimsFromJwtToken(String token){
@@ -68,6 +81,7 @@ public class JwtUtils {
         }
 
     }
+
 
     
 

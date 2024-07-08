@@ -29,6 +29,9 @@ public class LoginServiceImpl implements LoginService{
     JwtUtils jwtUtils;
     @Autowired
     JwtTokenService jwtTokenService;
+    @Autowired
+    UserService userService;
+
     @Override
     public LoginResponseDto performLogin(LoginRequestDto loginRequestDto,
                                          AuthenticationManager authenticationManager,
@@ -39,19 +42,18 @@ public class LoginServiceImpl implements LoginService{
             UserDetailsImpl userDetails = (UserDetailsImpl)authentication.getPrincipal();
             UserModel user = userDetails.getUser();
             log.info("user " + user);
-            String userID = user.getId().toString();
 
-            String accessToken = jwtUtils.generateJwtToken(userID, false);
+            String accessToken = jwtUtils.generateJwtToken(user, false);
             JwtToken token = new JwtToken();
             token.setToken(accessToken);
             token.setUser(user);
             jwtTokenService.saveToken(token);
 
-            String refreshToken = jwtUtils.generateJwtToken(userID, true);
+            String refreshToken = jwtUtils.generateJwtToken(user, true);
             Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
             refreshTokenCookie.setHttpOnly(true);
             refreshTokenCookie.setSecure(false);
-            refreshTokenCookie.setPath("/api/auth/refresh");
+            refreshTokenCookie.setPath("/");
             response.addCookie(refreshTokenCookie);
             
             return new LoginResponseDto(user.getId(), accessToken);
@@ -78,8 +80,9 @@ public class LoginServiceImpl implements LoginService{
         }
 
         if(refreshToken!=null && !jwtUtils.isTokenExpired(refreshToken)){
-            String userID = jwtUtils.getIdFromToken(refreshToken);
-            String newAccessToken = jwtUtils.generateJwtToken(userID,false);
+            long userID = Long.valueOf(jwtUtils.getIdFromToken(refreshToken));
+            UserModel user = userService.getUser(userID);
+            String newAccessToken = jwtUtils.generateJwtToken(user,false);
             return new LoginResponseDto(Long.parseLong(newAccessToken), newAccessToken);
         }
         throw new RefreshTokenInvalidException();

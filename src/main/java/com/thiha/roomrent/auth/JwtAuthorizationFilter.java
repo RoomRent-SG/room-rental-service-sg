@@ -59,6 +59,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter{
                 TokenDto tokenDto = tokenService.getTokenUsingTokenValue(token);
                 if(claims != null && !jwtUtils.isJwtTokenExpired(claims) && tokenDto!=null && !tokenDto.isRevoked()){
                     String userID = claims.getSubject();
+                    System.out.println("userID "+userID);
                     UserDetails userDetails = roomRentUserDetailsService.loadUserWithUserID(Long.valueOf(userID));
                     Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails,"", userDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
