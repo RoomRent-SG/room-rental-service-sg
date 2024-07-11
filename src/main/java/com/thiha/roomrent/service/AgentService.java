@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,33 +38,58 @@ public class AgentService implements AgentServiceImpl{
 
     @Override
     public AgentDto createAgent(AgentRegisterDto registeredAgent) {
-        Optional<Agent> agentByEmail = agentRepository.findByEmail(registeredAgent.getEmail());
-        if(agentByEmail.isPresent()){
-            throw new EmailAlreadyRegisteredException("Email already registered");
-        }
-        Optional<Agent> agentByName = agentRepository.findByUsername(registeredAgent.getUsername());
-        if(agentByName.isPresent()){
-            throw new NameAlreadyExistedException("Name already taken");
-        }
-        if (registeredAgent.getProfileImage() == null || registeredAgent.getProfileImage().isEmpty()) {
-            throw new ProfileImageNotFoundException("Profile Image cannot be null");
-        }
+        
+        validateAgentRegistrationDetails(registeredAgent);
+
         MultipartFile profileImage = registeredAgent.getProfileImage();
-        try{
-            imageService.uploadImage(profileImage.getOriginalFilename(), profileImage);
-        }catch(IOException e){
-            throw new S3ImageUploadException(e.getMessage());
-        }
+
+        uploadAgentProfileImage(profileImage);
+        
         registeredAgent.setProfilePhoto(cloudFrontUrl+profileImage.getOriginalFilename());
         registeredAgent.setRole(UserRole.AGENT);
         String hashedPassword = passwordEncoder.encode(registeredAgent.getPassword());
-        
         registeredAgent.setPassword(hashedPassword);
+
+
         Agent agent = AgentMapper.mapToAgent(AgentMapper.mapToAgentDtoFromAgentRegisterDto(registeredAgent));
         // set the creation date
         agent.setCreatedAt(new Date());
         Agent savedAgent = agentRepository.save(agent);
         return AgentMapper.mapToAgentDto(savedAgent);
+    }
+
+    private void validateAgentRegistrationDetails(AgentRegisterDto registeredAgent){
+        checkAlreadyRegisteredEmail(registeredAgent.getEmail());
+        checkAlreadyRegisteredName(registeredAgent.getUsername());
+        checkProfileImageIsPresent(registeredAgent.getProfileImage());
+    }
+
+    private void checkAlreadyRegisteredEmail(String email){
+        Optional<Agent> agentByEmail = agentRepository.findByEmail(email);
+        if(agentByEmail.isPresent()){
+            throw new EmailAlreadyRegisteredException("Email already registered");
+        }
+    }
+
+    private void checkAlreadyRegisteredName(String name){
+        Optional<Agent> agentByName = agentRepository.findByUsername(name);
+        if(agentByName.isPresent()){
+            throw new NameAlreadyExistedException("Name already taken");
+        }
+    }
+
+    private void checkProfileImageIsPresent(MultipartFile profileImage){
+        if (profileImage == null || profileImage.isEmpty()) {
+            throw new ProfileImageNotFoundException("Profile Image cannot be null");
+        }
+    }
+
+    private void uploadAgentProfileImage(MultipartFile profileImage){
+        try{
+            imageService.uploadImage(profileImage.getOriginalFilename(), profileImage);
+        }catch(IOException e){
+            throw new S3ImageUploadException(e.getMessage());
+        }
     }
 
     @Override
@@ -95,12 +119,6 @@ public class AgentService implements AgentServiceImpl{
         }
         throw new EntityNotFoundException("Agent cannot be found");
     }
-    // @Override
-    // public AgentDto updateExistingAgent(AgentDto newAgentDto, AgentDto existingAgentDto) {
-    //     existingAgentDto.setPhoneNumber(newAgentDto.getPhoneNumber());
-    //     existingAgentDto.setProfilePhoto(newAgentDto.getProfilePhoto());
-    //     return AgentMapper.mapToAgentDto(agentRepository.save(AgentMapper.mapToAgent(existingAgentDto)));
-    // }
 
     @Override
     public AgentDto updateExistingAgent(AgentRegisterDto newAgentDto, AgentDto existingAgentDto) {
@@ -113,11 +131,7 @@ public class AgentService implements AgentServiceImpl{
         MultipartFile newProfileImage = newAgentDto.getProfileImage();
         imageService.deleteImage(existingAgentDto.getProfilePhoto());
         String newFileName = newProfileImage.getOriginalFilename();
-        try {
-            imageService.uploadImage(newFileName, newProfileImage);
-        } catch (IOException e) {
-            throw new S3ImageUploadException("Error uploading Image to s3");
-        }
+        uploadAgentProfileImage(newProfileImage);
 
         //change profile photo
         existingAgentDto.setProfilePhoto(newFileName);

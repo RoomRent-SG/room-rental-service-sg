@@ -235,20 +235,13 @@ public class RoomPostService implements RoomPostServiceImpl{
          */
         RoomPostSearchFilter roomPostFilter = createSearchFilter(searchFilter);
         roomPostFilter.setArchived(false);
-
-        /*
-         * make sure pageNo and pageSize are positive
-         */
+        RoomPostSpecification specification = new RoomPostSpecification(roomPostFilter);
+        
         pageNo = pageNo<0? 0 : pageNo ;
         pageSize = pageSize<0? 10: pageSize;
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("postedAt").descending());
         Page<RoomPost> roomPosts = new PageImpl<>(new ArrayList<RoomPost>());
         List<RoomPost> listOfRoomPosts;
-        List<RoomPostListDto> listOfRoomPostListDtos = new ArrayList<>();
-        AllRoomPostsResponse roomPostsResponse = new AllRoomPostsResponse();
-
-
-        RoomPostSpecification specification = new RoomPostSpecification(roomPostFilter);
 
         try{
             roomPosts = roomPostRepository.findAll(specification, pageable);
@@ -258,19 +251,32 @@ public class RoomPostService implements RoomPostServiceImpl{
         }
         
         listOfRoomPosts = roomPosts.getContent();
+        List<RoomPostListDto> listOfRoomPostListDtos = convertToRoomPostDtoList(listOfRoomPosts); 
+               
+        AllRoomPostsResponse allRoomPostsResponse = createRoomPostListResponse(listOfRoomPostListDtos, roomPosts);
         
+        return allRoomPostsResponse;
+    }
 
-        for(RoomPost roomPost : listOfRoomPosts){
+    // TODO: Change name of RoomPostListDto
+    private List<RoomPostListDto> convertToRoomPostDtoList(List<RoomPost> roomPosts){
+        List<RoomPostListDto> listOfRoomPostListDtos = new ArrayList<>();
+        for(RoomPost roomPost : roomPosts){
             listOfRoomPostListDtos.add(RoomPostMapper.mapToRoomPostListDto(roomPost));
         }
-               
-        roomPostsResponse.setAllRoomPosts(listOfRoomPostListDtos);
-        roomPostsResponse.setPageNo(roomPosts.getNumber());
-        roomPostsResponse.setPageSize(roomPosts.getSize());
-        roomPostsResponse.setTotalContentSize(roomPosts.getTotalElements());
-        roomPostsResponse.setLast(roomPosts.isLast());
+        return listOfRoomPostListDtos;
+    }
+
+    private AllRoomPostsResponse createRoomPostListResponse(List<RoomPostListDto> roomPostList, 
+                Page<RoomPost> roomPostPageResponse){
+        AllRoomPostsResponse response = new AllRoomPostsResponse();
+        response.setAllRoomPosts(roomPostList);
+        response.setPageNo(roomPostPageResponse.getNumber());
+        response.setPageSize(roomPostPageResponse.getSize());
+        response.setTotalContentSize(roomPostPageResponse.getTotalElements());
+        response.setLast(roomPostPageResponse.isLast());
         
-        return roomPostsResponse;
+        return response;
     }
 
     

@@ -41,7 +41,6 @@ public class LoginServiceImpl implements LoginService{
             SecurityContextHolder.getContext().setAuthentication(authentication);
             UserDetailsImpl userDetails = (UserDetailsImpl)authentication.getPrincipal();
             UserModel user = userDetails.getUser();
-            log.info("user " + user);
 
             String accessToken = jwtUtils.generateJwtToken(user, false);
             JwtToken token = new JwtToken();
@@ -61,8 +60,7 @@ public class LoginServiceImpl implements LoginService{
             throw new BadCredentialsException("Invalid password");
         }
         catch(AuthenticationException e){
-            log.error(e.getMessage());
-            throw new BadCredentialsException("Invalid password");
+            throw new BadCredentialsException(e.getMessage());
         }
     }
     @Override

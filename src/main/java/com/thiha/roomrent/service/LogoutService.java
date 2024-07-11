@@ -34,11 +34,7 @@ public class LogoutService {
                 token.setRevoked(true);
                 tokenService.saveToken(TokenMapper.mapToJwtToken(token));
                 
-                Cookie clearRefreshToken = new Cookie("refreshToken", null);
-                clearRefreshToken.setHttpOnly(true);
-                clearRefreshToken.setSecure(false);
-                clearRefreshToken.setPath("/api/auth/refresh");
-                clearRefreshToken.setMaxAge(0);
+                Cookie clearRefreshToken = generateTokenToClearRefreshToken();
                 response.addCookie(clearRefreshToken);
                 // clean up 
                 this.logoutHandler.logout(request, response, authentication);
@@ -50,5 +46,15 @@ public class LogoutService {
         }else{
             throw new LogoutException("Error parsing jwt from request");
         } 
+   }
+
+   private Cookie generateTokenToClearRefreshToken(){
+        Cookie clearRefreshToken = new Cookie("refreshToken", null);
+        clearRefreshToken.setHttpOnly(true);
+        clearRefreshToken.setSecure(false);
+        clearRefreshToken.setPath("/api/auth/refresh");
+        clearRefreshToken.setMaxAge(0);
+
+        return clearRefreshToken;
    }
 }
