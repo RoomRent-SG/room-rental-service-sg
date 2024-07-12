@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.thiha.roomrent.dto.AllRoomPostsResponse;
 import com.thiha.roomrent.dto.FilterKeywords;
 import com.thiha.roomrent.dto.RoomPostDto;
-import com.thiha.roomrent.service.RoomPostService;
+import com.thiha.roomrent.service.impl.RoomPostServiceImpl;
 
 @RestController
 @RequestMapping("api/public")
 public class PublicController {
     @Autowired
-    private RoomPostService roomPostService;
+    private RoomPostServiceImpl roomPostService;
     
     @GetMapping("/all-room-posts")
     public ResponseEntity<AllRoomPostsResponse> getAllroomPosts(

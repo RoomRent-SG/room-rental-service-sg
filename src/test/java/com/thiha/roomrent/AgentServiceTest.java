@@ -32,8 +32,8 @@ import com.thiha.roomrent.mapper.AgentMapper;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.JwtToken;
 import com.thiha.roomrent.repository.AgentRepository;
-import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.S3ImageService;
+import com.thiha.roomrent.service.impl.AgentServiceImpl;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -41,7 +41,7 @@ import com.thiha.roomrent.service.S3ImageService;
 public class AgentServiceTest {
    
     @InjectMocks
-    private AgentService agentService;
+    private AgentServiceImpl agentService;
 
     @Mock
     private AgentRepository agentRepository;

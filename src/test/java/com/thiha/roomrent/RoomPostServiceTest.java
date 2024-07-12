@@ -45,14 +45,14 @@ import com.thiha.roomrent.model.RoomPhoto;
 import com.thiha.roomrent.model.RoomPost;
 import com.thiha.roomrent.repository.AgentRepository;
 import com.thiha.roomrent.repository.RoomPostRepository;
-import com.thiha.roomrent.service.RoomPostService;
 import com.thiha.roomrent.service.S3ImageService;
+import com.thiha.roomrent.service.impl.RoomPostServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class RoomPostServiceTest {
 
     @InjectMocks
-    private RoomPostService roomPostService;
+    private RoomPostServiceImpl roomPostService;
 
     @Mock
     private RoomPostRepository roomPostRepository;

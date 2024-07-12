@@ -23,12 +23,10 @@ public class RoomRentUserDetailsService implements UserDetailsService{
     public UserDetails loadUserByUsername(String username) {
         UserModel user;
         Optional<UserModel> optionalUser = userRepository.findByUsername(username);
-        log.info("USERNAME "+ optionalUser);
         if(optionalUser.isPresent()){
             user = optionalUser.get();
             return new UserDetailsImpl(user);
         }else{
-            log.info("user not found");
             throw new UsernameNotFoundException(username);
         }
         

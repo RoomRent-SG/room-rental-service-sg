@@ -1,4 +1,4 @@
-package com.thiha.roomrent.service;
+package com.thiha.roomrent.service.impl;
 
 import java.util.Optional;
 
@@ -9,7 +9,7 @@ import com.thiha.roomrent.dto.TokenDto;
 import com.thiha.roomrent.mapper.TokenMapper;
 import com.thiha.roomrent.model.JwtToken;
 import com.thiha.roomrent.repository.JwtTokenRepository;
-import com.thiha.roomrent.service.impl.JwtTokenService;
+import com.thiha.roomrent.service.JwtTokenService;
 
 @Service
 public class JwtTokenServiceImpl implements JwtTokenService{

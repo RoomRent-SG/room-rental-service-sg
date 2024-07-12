@@ -17,7 +17,8 @@ import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thiha.roomrent.dto.TokenDto;
 import com.thiha.roomrent.security.RoomRentUserDetailsService;
-import com.thiha.roomrent.service.JwtTokenServiceImpl;
+import com.thiha.roomrent.service.impl.JwtTokenServiceImpl;
+
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

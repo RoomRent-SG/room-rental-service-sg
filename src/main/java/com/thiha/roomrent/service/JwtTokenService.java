@@ -1,4 +1,4 @@
-package com.thiha.roomrent.service.impl;
+package com.thiha.roomrent.service;
 
 
 import com.thiha.roomrent.dto.TokenDto;

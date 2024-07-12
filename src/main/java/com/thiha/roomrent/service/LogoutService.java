@@ -7,6 +7,7 @@ import com.thiha.roomrent.auth.JwtUtils;
 import com.thiha.roomrent.dto.TokenDto;
 import com.thiha.roomrent.exceptions.LogoutException;
 import com.thiha.roomrent.mapper.TokenMapper;
+import com.thiha.roomrent.service.impl.JwtTokenServiceImpl;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,7 +30,7 @@ public class LogoutService {
         String stringToken = jwtUtils.extractTokenFromRequest(request);
         if(stringToken!=null){
             TokenDto token = tokenService.getTokenUsingTokenValue(stringToken);
-            System.out.println(stringToken);
+            
             if(token !=null){
                 token.setRevoked(true);
                 tokenService.saveToken(TokenMapper.mapToJwtToken(token));

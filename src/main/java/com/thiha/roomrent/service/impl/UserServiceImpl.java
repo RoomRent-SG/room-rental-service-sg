@@ -11,6 +11,7 @@ import com.thiha.roomrent.model.UserModel;
 import com.thiha.roomrent.repository.AdminRepository;
 import com.thiha.roomrent.repository.AgentRepository;
 import com.thiha.roomrent.repository.UserRepository;
+import com.thiha.roomrent.service.UserService;
 
 @Service
 public class UserServiceImpl implements UserService{

@@ -24,9 +24,9 @@ import com.thiha.roomrent.mapper.AgentMapper;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.UserModel;
 import com.thiha.roomrent.security.UserDetailsImpl;
-import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.LogoutService;
-import com.thiha.roomrent.service.RoomPostService;
+import com.thiha.roomrent.service.impl.AgentServiceImpl;
+import com.thiha.roomrent.service.impl.RoomPostServiceImpl;
 import com.thiha.roomrent.validator.ObjectValidator;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,8 +38,8 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/api/agent")
 @AllArgsConstructor
 public class AgentController {
-    private AgentService agentService;
-    private RoomPostService roomPostService;
+    private AgentServiceImpl agentService;
+    private RoomPostServiceImpl roomPostService;
     private LogoutService logoutService;
     private ObjectValidator<RoomPostRegisterDto> roomPostValidator;
     private ObjectValidator<AgentRegisterDto> agentValidator;

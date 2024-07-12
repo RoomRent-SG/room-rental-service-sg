@@ -10,8 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.thiha.roomrent.dto.AgentDto;
-import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.LogoutService;
+import com.thiha.roomrent.service.impl.AgentServiceImpl;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -21,7 +22,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @RequestMapping("/api/admin")
 public class AdminController {
     @Autowired
-    private AgentService agentService;
+    private AgentServiceImpl agentService;
 
     @Autowired
     private LogoutService logoutService;
