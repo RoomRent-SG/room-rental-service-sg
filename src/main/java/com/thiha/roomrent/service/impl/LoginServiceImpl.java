@@ -74,6 +74,7 @@ public class LoginServiceImpl implements LoginService{
             for(Cookie cookie: cookies){
                 if(cookie.getName().equals("refreshToken")){
                     refreshToken = cookie.getValue();
+                    // TODO to genearete new refresh token
                     break;
                 }
             }
@@ -83,7 +84,7 @@ public class LoginServiceImpl implements LoginService{
             long userID = Long.valueOf(jwtUtils.getIdFromToken(refreshToken));
             UserModel user = userService.getUser(userID);
             String newAccessToken = jwtUtils.generateJwtToken(user,false);
-            return new LoginResponseDto(Long.parseLong(newAccessToken), newAccessToken);
+            return new LoginResponseDto(userID, newAccessToken);
         }
         throw new RefreshTokenInvalidException();
     }    

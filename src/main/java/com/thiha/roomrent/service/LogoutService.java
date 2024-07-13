@@ -28,34 +28,43 @@ public class LogoutService {
 
    public void performLogout(HttpServletRequest request, HttpServletResponse response, Authentication authentication){
         String stringToken = jwtUtils.extractTokenFromRequest(request);
+        System.out.println("Token "+ stringToken);
         if(stringToken!=null){
             TokenDto token = tokenService.getTokenUsingTokenValue(stringToken);
             
             if(token !=null){
                 token.setRevoked(true);
                 tokenService.saveToken(TokenMapper.mapToJwtToken(token));
-                
-                Cookie clearRefreshToken = generateTokenToClearRefreshToken();
-                response.addCookie(clearRefreshToken);
+                Cookie cookie = getRefreshTokenCookieFromRequest(request);
+                cookie.setValue(null);
+                cookie.setMaxAge(0);
+                cookie.setPath("/");
+                response.addCookie(cookie);
                 // clean up 
                 this.logoutHandler.logout(request, response, authentication);
                 this.logoutHandler.setClearAuthentication(true);
             }else{
+                System.out.println("Extracted Token is null.....");
                 throw new LogoutException("JWT not found in repo");
             }
             
         }else{
+            System.out.println("DB Token is null...");
             throw new LogoutException("Error parsing jwt from request");
         } 
    }
 
-   private Cookie generateTokenToClearRefreshToken(){
-        Cookie clearRefreshToken = new Cookie("refreshToken", null);
-        clearRefreshToken.setHttpOnly(true);
-        clearRefreshToken.setSecure(false);
-        clearRefreshToken.setPath("/api/auth/refresh");
-        clearRefreshToken.setMaxAge(0);
+   private Cookie getRefreshTokenCookieFromRequest(HttpServletRequest request){
+    Cookie[] cookies = request.getCookies();
+    if(cookies != null){
+        for(Cookie cookie : cookies){
+            if(cookie.getName().equals("refreshToken")){
+                return cookie;
+            }
+        }
+    }
+    System.out.println("Cookie notfound..");
+    return new Cookie("refreshToken", null);
 
-        return clearRefreshToken;
    }
 }

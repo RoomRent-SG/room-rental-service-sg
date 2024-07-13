@@ -124,6 +124,7 @@ public class AgentController {
     private ResponseEntity<Void> doLogout(HttpServletRequest request,
                  HttpServletResponse response
                  ,Authentication authentication){
+                    System.out.println("INSIDE CONTROLLER...");
         logoutService.performLogout(request, response, authentication);
         return new ResponseEntity<>(HttpStatus.OK);
     }
