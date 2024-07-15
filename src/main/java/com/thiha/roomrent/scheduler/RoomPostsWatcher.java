@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import com.thiha.roomrent.model.RoomPost;
 import com.thiha.roomrent.repository.RoomPostRepository;
+import com.thiha.roomrent.utility.DateTimeHandler;
 @Component
 public class RoomPostsWatcher {
     private final RoomPostRepository roomPostRepository;
@@ -18,7 +19,7 @@ public class RoomPostsWatcher {
 
     @Scheduled(cron = "0 0 0 * * *")
     public void checkAndUpdateRoomPosts(){
-        Date now = new Date();
+        Date now = DateTimeHandler.getUTCNow();
         List<RoomPost> activeRoomPosts = roomPostRepository.findAllActiveRoomPosts();
         for(RoomPost roomPost: activeRoomPosts){
             long timeDifference = now.getTime() - roomPost.getPostedAt().getTime();

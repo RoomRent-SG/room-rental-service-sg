@@ -47,6 +47,7 @@ import com.thiha.roomrent.repository.AgentRepository;
 import com.thiha.roomrent.repository.RoomPostRepository;
 import com.thiha.roomrent.service.S3ImageService;
 import com.thiha.roomrent.service.impl.RoomPostServiceImpl;
+import com.thiha.roomrent.utility.DateTimeHandler;
 
 @ExtendWith(MockitoExtension.class)
 public class RoomPostServiceTest {
@@ -82,7 +83,7 @@ public class RoomPostServiceTest {
                             "tester7@tt.com",
                             "091111111",
                             "profilephoto.com",
-                            new Date()
+                            DateTimeHandler.getUTCNow()
                         );
 
         mockMultipartFile = new MockMultipartFile(
@@ -101,7 +102,7 @@ public class RoomPostServiceTest {
                                 .description("MasterRoom for rent")
                                 .id(11L)
                                 .location(Location.BALESTIER)
-                                .postedAt(new Date())
+                                .postedAt(DateTimeHandler.getUTCNow())
                                 .price(1600.0)
                                 .propertyType(PropertyType.CONDO)
                                 .roomType(RoomType.MASTER_ROOM)
@@ -120,7 +121,7 @@ public class RoomPostServiceTest {
                     .description("MasterRoom for rent")
                     .id(11L)
                     .location(Location.BALESTIER)
-                    .postedAt(new Date())
+                    .postedAt(DateTimeHandler.getUTCNow())
                     .isArchived(false)
                     .price(1600.0)
                     .propertyType(PropertyType.CONDO)
@@ -192,7 +193,7 @@ public class RoomPostServiceTest {
                                                     .description("MasterRoom for rent")
                                                     .id(11L)
                                                     .location(Location.BUKIT_TIMAH)
-                                                    .postedAt(new Date())
+                                                    .postedAt(DateTimeHandler.getUTCNow())
                                                     .price(1600.0)
                                                     .propertyType(PropertyType.CONDO)
                                                     .roomType(RoomType.MASTER_ROOM)
@@ -232,7 +233,7 @@ public class RoomPostServiceTest {
                                                     .description("MasterRoom for rent")
                                                     .id(11L)
                                                     .location(Location.BUKIT_TIMAH)
-                                                    .postedAt(new Date())
+                                                    .postedAt(DateTimeHandler.getUTCNow())
                                                     .price(1600.0)
                                                     .propertyType(PropertyType.CONDO)
                                                     .roomType(RoomType.MASTER_ROOM)
@@ -264,7 +265,7 @@ public class RoomPostServiceTest {
                                                     .description("MasterRoom for rent")
                                                     .id(11L)
                                                     .location(Location.BUKIT_TIMAH)
-                                                    .postedAt(new Date())
+                                                    .postedAt(DateTimeHandler.getUTCNow())
                                                     .price(1600.0)
                                                     .propertyType(PropertyType.CONDO)
                                                     .roomType(RoomType.MASTER_ROOM)
@@ -279,7 +280,7 @@ public class RoomPostServiceTest {
                                             .username("Invalid Agent")
                                             .email("invalidagent.tt.com")
                                             .password("password")
-                                            .createdAt(new Date())
+                                            .createdAt(DateTimeHandler.getUTCNow())
                                             .phoneNumber("134324343")
                                             .profilePhoto("profile")
                                             .role(UserRole.AGENT)

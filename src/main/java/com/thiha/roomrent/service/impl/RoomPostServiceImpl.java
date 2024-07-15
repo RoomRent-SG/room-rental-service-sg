@@ -2,7 +2,6 @@ package com.thiha.roomrent.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,9 +38,11 @@ import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.RoomPhoto;
 import com.thiha.roomrent.model.RoomPost;
 import com.thiha.roomrent.repository.RoomPostRepository;
+import com.thiha.roomrent.service.RoomPhotoService;
 import com.thiha.roomrent.service.RoomPostService;
 import com.thiha.roomrent.service.S3ImageService;
 import com.thiha.roomrent.specification.RoomPostSpecification;
+import com.thiha.roomrent.utility.DateTimeHandler;
 
 
 @Service
@@ -50,6 +51,8 @@ public class RoomPostServiceImpl implements RoomPostService{
     private RoomPostRepository roomPostRepository;
     @Autowired
     private S3ImageService s3ImageService;
+    @Autowired
+    private RoomPhotoService roomPhotoService;
 
     @Value("${aws.cloudFront}")
     private String cloudFrontUrl;
@@ -58,50 +61,68 @@ public class RoomPostServiceImpl implements RoomPostService{
     @CacheEvict(value = "all_room_posts", allEntries = true)
     public RoomPostDto createRoomPost(RoomPostRegisterDto roomPostRegisterDto, Agent agent) {
         RoomPost roomPost = new RoomPost();
-        // upload images to s3
+        
         List<MultipartFile> roomPhotoFiles = roomPostRegisterDto.getRoomPhotoFiles();
-        if (roomPhotoFiles.size()>10) {
-            throw new RoomPhotosExceedLimitException("Too many room photos");
-        }
-        if(roomPhotoFiles==null || roomPhotoFiles.size()==0){
-            throw new RoomPhotoNotFoundException("You need to provide room photos to create room post");
-        }
-        List<RoomPhoto> roomPhotos = new ArrayList<>();
-        roomPhotoFiles.forEach(image -> {
-                    try{
-                        s3ImageService.uploadImage(image.getOriginalFilename(), image);
-                        RoomPhoto roomPhoto = new RoomPhoto();
-                        roomPhoto.setImageUrl(cloudFrontUrl+image.getOriginalFilename());
-                        roomPhoto.setRoomPost(roomPost);
-                        roomPhoto.setFilename(image.getOriginalFilename());
-                        roomPhotos.add(roomPhoto);
-                    }catch(IOException e){
-                        throw new S3ImageUploadException("Error uploading room photos to s3");
-                    }
-                });
+        roomPostImageValidation(roomPhotoFiles);
+        
+        List<RoomPhoto> roomPhotos = uploadImagesToS3(roomPhotoFiles, roomPost);
         roomPost.setAddress(roomPostRegisterDto.getAddress());
         /*
          * set the first image as the thumbnail
          */
-        roomPost.setThumbnailImage(roomPhotos.get(0).getImageUrl());
-        roomPost.setAirConTime(roomPostRegisterDto.getAirConTime());
-        roomPost.setAllowVisitor(roomPostRegisterDto.isAllowVisitor());
-        roomPost.setCookingAllowance(roomPostRegisterDto.getCookingAllowance());
-        roomPost.setLocation(roomPostRegisterDto.getLocation());
-        roomPost.setPropertyType(roomPostRegisterDto.getPropertyType());
-        roomPost.setRoomType(roomPostRegisterDto.getRoomType());
-        roomPost.setSharePub(roomPostRegisterDto.getSharePub());
-        roomPost.setStationName(roomPostRegisterDto.getStationName());
-        roomPost.setTotalPax(roomPostRegisterDto.getTotalPax());
-        roomPost.setDescription(roomPostRegisterDto.getDescription());
-        roomPost.setAgent(agent);
-        roomPost.setPrice(roomPostRegisterDto.getPrice()); 
-        roomPost.setPostedAt(new Date());
-        roomPost.setArchived(false);
-        roomPost.setRoomPhotos(roomPhotos);
+        setRoomPostAttributesFromDto(roomPost, roomPostRegisterDto, agent, roomPhotos);
         RoomPost savedRoomPost = roomPostRepository.save(roomPost);
 
         return RoomPostMapper.mapToRoomPostDto(savedRoomPost);
+    }
+
+    private void setRoomPostAttributesFromDto(RoomPost roomPost,
+                     RoomPostRegisterDto dto, 
+                     Agent ownerAgent,
+                     List<RoomPhoto> roomPhotos){
+        roomPost.setThumbnailImage(roomPhotos.get(0).getImageUrl());
+        roomPost.setAirConTime(dto.getAirConTime());
+        roomPost.setAllowVisitor(dto.isAllowVisitor());
+        roomPost.setCookingAllowance(dto.getCookingAllowance());
+        roomPost.setLocation(dto.getLocation());
+        roomPost.setPropertyType(dto.getPropertyType());
+        roomPost.setRoomType(dto.getRoomType());
+        roomPost.setSharePub(dto.getSharePub());
+        roomPost.setStationName(dto.getStationName());
+        roomPost.setTotalPax(dto.getTotalPax());
+        roomPost.setDescription(dto.getDescription());
+        roomPost.setAgent(ownerAgent);
+        roomPost.setPrice(dto.getPrice()); 
+        roomPost.setPostedAt(DateTimeHandler.getUTCNow());
+        roomPost.setArchived(false);
+        roomPost.setRoomPhotos(roomPhotos);
+    }
+
+    List<RoomPhoto> uploadImagesToS3(List<MultipartFile> images, RoomPost ownerRoomPost){
+        List<RoomPhoto> roomPhotos = new ArrayList<>();
+        images.forEach(image -> {
+            try{
+                s3ImageService.uploadImage(image.getOriginalFilename(), image);
+                RoomPhoto roomPhoto = new RoomPhoto();
+                roomPhoto.setImageUrl(cloudFrontUrl+image.getOriginalFilename());
+                roomPhoto.setRoomPost(ownerRoomPost);
+                roomPhoto.setFilename(image.getOriginalFilename());
+                roomPhotos.add(roomPhoto);
+            }catch(IOException e){
+                throw new S3ImageUploadException("Error uploading room photos to s3");
+            }
+        });
+        return roomPhotos;
+    }
+
+    private void roomPostImageValidation(List<MultipartFile> imagFiles){
+        if(imagFiles==null || imagFiles.size()==0){
+            throw new RoomPhotoNotFoundException("You need to provide room photos to create room post");
+        }
+
+        if (imagFiles.size()>10) {
+            throw new RoomPhotosExceedLimitException("Too many room photos");
+        }
     }
 
     @Override
@@ -130,26 +151,10 @@ public class RoomPostServiceImpl implements RoomPostService{
     @Override
     @CacheEvict(value = "all_room_posts")
     public RoomPostDto updateRoomPost(Long postId, AgentDto agent, RoomPostRegisterDto updateRoomPost) {
-        Optional<RoomPost> optionalRoomPost = roomPostRepository.findById(postId);
-        if(!optionalRoomPost.isPresent()){
-            throw new EntityNotFoundException("RoomPost cannot be found");
-        }
-        RoomPost originalRoomPost = optionalRoomPost.get();
-        if(!originalRoomPost.getAgent().getUsername().equals(agent.getUsername())){
-            //unauthorized entity
-            throw new EntityNotFoundException("RoomPost cannot be found");
-        }
-        originalRoomPost.setStationName(updateRoomPost.getStationName());
-        originalRoomPost.setPrice(updateRoomPost.getPrice());
-        originalRoomPost.setRoomType(updateRoomPost.getRoomType());
-        originalRoomPost.setTotalPax(updateRoomPost.getTotalPax());
-        originalRoomPost.setCookingAllowance(updateRoomPost.getCookingAllowance());
-        originalRoomPost.setSharePub(updateRoomPost.getSharePub());
-        originalRoomPost.setAirConTime(updateRoomPost.getAirConTime());
-        originalRoomPost.setAllowVisitor(updateRoomPost.isAllowVisitor());
-        originalRoomPost.setLocation(updateRoomPost.getLocation());
-        originalRoomPost.setPropertyType(updateRoomPost.getPropertyType());
-        originalRoomPost.setDescription(updateRoomPost.getDescription());
+
+        RoomPost originalRoomPost = getRoomPostIfExist(postId);
+        validateOwnership(originalRoomPost, agent);
+        
         List<MultipartFile> updatedRoomImageFiles = updateRoomPost.getRoomPhotoFiles();
         List<String> updatedFilenames = new ArrayList<>();
         List<RoomPhoto> existingRoomPhotos = originalRoomPost.getRoomPhotos();
@@ -164,6 +169,7 @@ public class RoomPostServiceImpl implements RoomPostService{
         for(int i=0; i<existingRoomPhotos.size(); i++){
             String filename = existingRoomPhotos.get(i).getFilename();
             if(!updatedFilenames.contains(filename)){
+                roomPhotoService.deleteRoomPhotoById(existingRoomPhotos.get(i).getId());
                 existingRoomPhotos.remove(i);
             }else{
                 existingFilenames.add(filename);
@@ -182,21 +188,46 @@ public class RoomPostServiceImpl implements RoomPostService{
                     roomPhoto.setImageUrl(cloudFrontUrl+filename);
                     roomPhoto.setFilename(image.getOriginalFilename());
                     roomPhoto.setRoomPost(originalRoomPost);
-                    /*
-                     * update the room photo list
-                     * creating new list and setting to roomPost object will raise JPASystemException 
-                     */
                     existingRoomPhotos.add(roomPhoto);
                 } catch (IOException e) {
                     throw new S3ImageUploadException("Error uploading room photos to s3");
                 }
             }
         }
-        
+        originalRoomPost.setThumbnailImage(existingRoomPhotos.get(0).getImageUrl());
         originalRoomPost.setRoomPhotos(existingRoomPhotos);
+
+        originalRoomPost.setStationName(updateRoomPost.getStationName());
+        originalRoomPost.setPrice(updateRoomPost.getPrice());
+        originalRoomPost.setRoomType(updateRoomPost.getRoomType());
+        originalRoomPost.setTotalPax(updateRoomPost.getTotalPax());
+        originalRoomPost.setCookingAllowance(updateRoomPost.getCookingAllowance());
+        originalRoomPost.setSharePub(updateRoomPost.getSharePub());
+        originalRoomPost.setAirConTime(updateRoomPost.getAirConTime());
+        originalRoomPost.setAllowVisitor(updateRoomPost.isAllowVisitor());
+        originalRoomPost.setLocation(updateRoomPost.getLocation());
+        originalRoomPost.setPropertyType(updateRoomPost.getPropertyType());
+        originalRoomPost.setDescription(updateRoomPost.getDescription());
+
+        
         RoomPost savedRoomPost = roomPostRepository.save(originalRoomPost);
 
         return RoomPostMapper.mapToRoomPostDto(savedRoomPost);
+    }
+
+    private RoomPost getRoomPostIfExist(long roomPostId){
+        Optional<RoomPost> optionalRoomPost = roomPostRepository.findById(roomPostId);
+        if(!optionalRoomPost.isPresent()){
+            throw new EntityNotFoundException("RoomPost cannot be found");
+        }
+        return optionalRoomPost.get();
+    }
+
+    private void validateOwnership(RoomPost roomPost, AgentDto agent){
+        if(!roomPost.getAgent().getUsername().equals(agent.getUsername())){
+            //unauthorized entity
+            throw new EntityNotFoundException("RoomPost cannot be found");
+        }
     }
 
     @Override

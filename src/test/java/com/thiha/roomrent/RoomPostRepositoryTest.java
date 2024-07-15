@@ -34,6 +34,7 @@ import com.thiha.roomrent.model.RoomPhoto;
 import com.thiha.roomrent.model.RoomPost;
 import com.thiha.roomrent.repository.AgentRepository;
 import com.thiha.roomrent.repository.RoomPostRepository;
+import com.thiha.roomrent.utility.DateTimeHandler;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
@@ -62,7 +63,7 @@ public class RoomPostRepositoryTest {
                             "tester7@tt.com",
                             "091111111",
                             "profilephoto.com",
-                            new Date()
+                            DateTimeHandler.getUTCNow()
                         );
         agent = agentRepository.save(newAgent);
 
@@ -85,7 +86,7 @@ public class RoomPostRepositoryTest {
                             .thumbnailImage("imageUrl")
                             .description("description")
                             .location(Location.BALESTIER)
-                            .postedAt(new Date())
+                            .postedAt(DateTimeHandler.getUTCNow())
                             .price(3000.0)
                             .propertyType(PropertyType.CONDO)
                             .roomPhotos(new ArrayList<RoomPhoto>())

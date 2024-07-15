@@ -13,6 +13,7 @@ import com.thiha.roomrent.enums.UserRole;
 import com.thiha.roomrent.mapper.AgentMapper;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.repository.AgentRepository;
+import com.thiha.roomrent.utility.DateTimeHandler;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
@@ -28,7 +29,7 @@ public class AgentRepositoryTest {
                                 .password("password")
                                 .phoneNumber("091128393")
                                 .profilePhoto("photolink")
-                                .createdAt(new Date())
+                                .createdAt(DateTimeHandler.getUTCNow())
                                 .role(UserRole.AGENT)
                                 .build();
         Agent agent = AgentMapper.mapToAgent(agentDto);
@@ -47,7 +48,7 @@ public class AgentRepositoryTest {
                                 .password("password")
                                 .phoneNumber("091128393")
                                 .profilePhoto("photolink")
-                                .createdAt(new Date())
+                                .createdAt(DateTimeHandler.getUTCNow())
                                 .role(UserRole.AGENT)
                                 .build();
         Agent agent1 = AgentMapper.mapToAgent(agentDto1);
@@ -56,7 +57,7 @@ public class AgentRepositoryTest {
                                 .password("password")
                                 .phoneNumber("091128393")
                                 .profilePhoto("photolink")
-                                .createdAt(new Date())
+                                .createdAt(DateTimeHandler.getUTCNow())
                                 .role(UserRole.AGENT)
                                 .build();
         Agent agent = AgentMapper.mapToAgent(agentDto);
@@ -77,7 +78,7 @@ public class AgentRepositoryTest {
                                 .password("password")
                                 .phoneNumber("091128393")
                                 .profilePhoto("photolink")
-                                .createdAt(new Date())
+                                .createdAt(DateTimeHandler.getUTCNow())
                                 .role(UserRole.AGENT)
                                 .build();
         Agent agent = AgentMapper.mapToAgent(agentDto);
@@ -98,7 +99,7 @@ public class AgentRepositoryTest {
                                 .password("password")
                                 .phoneNumber("091128393")
                                 .profilePhoto("photolink")
-                                .createdAt(new Date())
+                                .createdAt(DateTimeHandler.getUTCNow())
                                 .role(UserRole.AGENT)
                                 .build();
         Agent agent = AgentMapper.mapToAgent(agentDto);
@@ -118,7 +119,7 @@ public class AgentRepositoryTest {
                                 .password("password")
                                 .phoneNumber("091128393")
                                 .profilePhoto("photolink")
-                                .createdAt(new Date())
+                                .createdAt(DateTimeHandler.getUTCNow())
                                 .role(UserRole.AGENT)
                                 .build();
         Agent agent = AgentMapper.mapToAgent(agentDto);

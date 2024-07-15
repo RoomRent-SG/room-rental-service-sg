@@ -9,6 +9,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 import com.thiha.roomrent.constant.JwtConstants;
 import com.thiha.roomrent.model.UserModel;
+import com.thiha.roomrent.utility.DateTimeHandler;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -32,7 +33,7 @@ public class JwtUtils {
     }
 
     public String generateJwtToken(UserModel user, Boolean isRefreshToken){
-        Date now = new Date();
+        Date now = DateTimeHandler.getUTCNow();
         long tokenValidity;
         if(isRefreshToken){
             tokenValidity = JwtConstants.TOKEN_VALIDITY;
@@ -43,7 +44,7 @@ public class JwtUtils {
         return Jwts
                     .builder()
                     .subject(user.getId().toString())
-                    .issuedAt(new Date())
+                    .issuedAt(DateTimeHandler.getUTCNow())
                     .expiration(expiryDate)
                     .signWith(getSigningKey(), Jwts.SIG.HS256)
                     .claim("user", createJwtClaims(user))
@@ -105,7 +106,7 @@ public class JwtUtils {
     // checked the token expiration
     public boolean isJwtTokenExpired(Claims claims)throws AuthenticationException{
         try{
-            return claims.getExpiration().before(new Date());
+            return claims.getExpiration().before(DateTimeHandler.getUTCNow());
         }catch(Exception e){
             throw e;
         }
@@ -119,7 +120,7 @@ public class JwtUtils {
     public boolean isTokenExpired(String token){
         Claims claims = parseClaimsFromJwtToken(token);
         Date expiration = claims.getExpiration();
-        return expiration.before(new Date());
+        return expiration.before(DateTimeHandler.getUTCNow());
     }
     
 }

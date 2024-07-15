@@ -34,6 +34,7 @@ import com.thiha.roomrent.model.JwtToken;
 import com.thiha.roomrent.repository.AgentRepository;
 import com.thiha.roomrent.service.S3ImageService;
 import com.thiha.roomrent.service.impl.AgentServiceImpl;
+import com.thiha.roomrent.utility.DateTimeHandler;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -75,7 +76,7 @@ public class AgentServiceTest {
                             "tester7@tt.com",
                             "091111111",
                             "profilephoto.com",
-                            new Date()
+                            DateTimeHandler.getUTCNow()
                         );
 
         // Mockito.when(agentRepository.save(any(Agent.class))).thenReturn(existingAgent);
@@ -93,7 +94,7 @@ public class AgentServiceTest {
                                             .phoneNumber("09222222")
                                             .profilePhoto("photolink")
                                             .profileImage(mockMultipartFile)
-                                            .createdAt(new Date())
+                                            .createdAt(DateTimeHandler.getUTCNow())
                                             .role(UserRole.AGENT)
                                             .build();
         // Mock S3 image upload behavior
@@ -117,7 +118,7 @@ public class AgentServiceTest {
                                         .phoneNumber("09440224474")
                                         .profilePhoto("photolink")
                                         .profileImage(mockMultipartFile)
-                                        .createdAt(new Date())
+                                        .createdAt(DateTimeHandler.getUTCNow())
                                         .role(UserRole.AGENT)
                                         .build();
         AgentDto existigAgentDto = AgentMapper.mapToAgentDto(existingAgent);
@@ -143,7 +144,7 @@ public class AgentServiceTest {
                                         .password("password")
                                         .phoneNumber("09440224474")
                                         .profilePhoto("photolink")
-                                        .createdAt(new Date())
+                                        .createdAt(DateTimeHandler.getUTCNow())
                                         .role(UserRole.AGENT)
                                         .build();
         AgentDto existigAgentDto = AgentMapper.mapToAgentDto(existingAgent);

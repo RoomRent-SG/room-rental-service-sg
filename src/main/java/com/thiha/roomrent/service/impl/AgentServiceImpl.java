@@ -1,7 +1,6 @@
 package com.thiha.roomrent.service.impl;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,6 +23,7 @@ import com.thiha.roomrent.repository.AgentRepository;
 import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.S3ImageService;
 import com.thiha.roomrent.service.impl.AgentServiceImpl;
+import com.thiha.roomrent.utility.DateTimeHandler;
 
 @Service
 public class AgentServiceImpl implements AgentService{
@@ -54,7 +54,7 @@ public class AgentServiceImpl implements AgentService{
 
         Agent agent = AgentMapper.mapToAgent(AgentMapper.mapToAgentDtoFromAgentRegisterDto(registeredAgent));
         // set the creation date
-        agent.setCreatedAt(new Date());
+        agent.setCreatedAt(DateTimeHandler.getUTCNow());
         Agent savedAgent = agentRepository.save(agent);
         return AgentMapper.mapToAgentDto(savedAgent);
     }
