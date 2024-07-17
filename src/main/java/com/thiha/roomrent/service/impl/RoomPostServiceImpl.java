@@ -2,6 +2,7 @@ package com.thiha.roomrent.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -405,6 +406,26 @@ public class RoomPostServiceImpl implements RoomPostService{
             }
         }
         return null;
+    }
+
+    @Override
+    public Map<String, Object> getRoomPostRegisterMetadata() {
+        Map<String, Object> metaData = new HashMap<>();
+
+        metaData.put("stationName", StationName.getValueList());
+        metaData.put("address", "required");
+        metaData.put("price", "required");
+        metaData.put("roomType", RoomType.getValueList());
+        metaData.put("totalPax", "required");
+        metaData.put("cookingAllowance", CookingAllowance.getValueList());
+        metaData.put("sharePub", SharePub.getValueList());
+        metaData.put("airConTime", AirConTime.getValueList());
+        metaData.put("allowVisitor", "boolean");
+        metaData.put("location", Location.getValueList());
+        metaData.put("propertyType", PropertyType.getValueList());
+        metaData.put("description", "room post description");
+        metaData.put("roomPhotoFiles", "Image File array");
+        return metaData;
     }
     
 }

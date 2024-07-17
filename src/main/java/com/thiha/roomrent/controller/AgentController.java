@@ -2,6 +2,8 @@ package com.thiha.roomrent.controller;
 
 
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -68,6 +70,12 @@ public class AgentController {
         Agent agent = AgentMapper.mapToAgent(currentAgent);
         RoomPostDto savedRoomPost = roomPostService.createRoomPost(registeredRoomPost, agent);
         return new ResponseEntity<>(savedRoomPost, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/room-post")
+    public ResponseEntity<?> getRoomPostRegisterMetadata(){
+        Map<String, Object> metaData = roomPostService.getRoomPostRegisterMetadata();
+        return new ResponseEntity<>(metaData, HttpStatus.OK);
     }
 
     @GetMapping("/room-post/active")

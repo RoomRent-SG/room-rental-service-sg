@@ -19,4 +19,5 @@ public interface RoomPostService {
    List<RoomPostDto> getArchivedRoomPostsByAgentId(Long agentId);
    AllRoomPostsResponse getAllActiveRoomPosts(int pageNo, int pageSize, Map<String, String> searchFilter);
    void deleteRoomPostById(Long id, AgentDto currentAgent);
+   Map<String, Object> getRoomPostRegisterMetadata();
 }
