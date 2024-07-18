@@ -1,11 +1,14 @@
 name: Unit test runner
 
 on:
-  pull_request_target:
+  pull-request:
+    branches:
+      - main
 
 jobs:
   unit_test_runner:
     runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.head.ref == github.ref }}
     steps:
       - uses: actions/checkout@v4
 
