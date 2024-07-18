@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import org.assertj.core.api.Assertions;
 import org.junit.Rule;
 import org.junit.contrib.java.lang.system.SystemOutRule;

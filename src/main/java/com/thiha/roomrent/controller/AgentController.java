@@ -64,6 +64,7 @@ public class AgentController {
 
     @PostMapping("/room-post")
     private ResponseEntity<?> createRoomPost(@ModelAttribute RoomPostRegisterDto registeredRoomPost){
+        System.out.println("INside roompost creation..");
         roomPostValidator.doVaildation(registeredRoomPost);
         AgentDto currentAgent = getCurrentAgent();
         System.out.println("Inside agent controler....");
