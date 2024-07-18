@@ -2,8 +2,6 @@ name: Unit test runner
 
 on:
   pull-request:
-    branches:
-      - main
 
 jobs:
   unit_test_runner:
