@@ -6,10 +6,9 @@ import com.thiha.roomrent.dto.AgentDto;
 import com.thiha.roomrent.dto.AllRoomPostsResponse;
 import com.thiha.roomrent.dto.RoomPostDto;
 import com.thiha.roomrent.dto.RoomPostRegisterDto;
-import com.thiha.roomrent.model.Agent;
 
 public interface RoomPostService {
-   RoomPostDto createRoomPost(RoomPostRegisterDto roomPostRegisterDto, Agent agent);
+   RoomPostDto createRoomPost(RoomPostRegisterDto roomPostRegisterDto, AgentDto agent);
    RoomPostDto findRoomPostById(Long id);
    RoomPostDto findRoomPostById(Long id, AgentDto agentDto);
    RoomPostDto updateRoomPost(Long postId,AgentDto agent, RoomPostRegisterDto updateRoomPost);

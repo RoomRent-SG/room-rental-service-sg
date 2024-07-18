@@ -38,6 +38,7 @@ import com.thiha.roomrent.mapper.RoomPostMapper;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.RoomPhoto;
 import com.thiha.roomrent.model.RoomPost;
+import com.thiha.roomrent.repository.AgentRepository;
 import com.thiha.roomrent.repository.RoomPostRepository;
 import com.thiha.roomrent.service.RoomPhotoService;
 import com.thiha.roomrent.service.RoomPostService;
@@ -54,13 +55,15 @@ public class RoomPostServiceImpl implements RoomPostService{
     private S3ImageService s3ImageService;
     @Autowired
     private RoomPhotoService roomPhotoService;
+    @Autowired
+    private AgentRepository agentRepository;
 
     @Value("${aws.cloudFront}")
     private String cloudFrontUrl;
 
     @Override
     @CacheEvict(value = "all_room_posts", allEntries = true)
-    public RoomPostDto createRoomPost(RoomPostRegisterDto roomPostRegisterDto, Agent agent) {
+    public RoomPostDto createRoomPost(RoomPostRegisterDto roomPostRegisterDto, AgentDto agent) {
         RoomPost roomPost = new RoomPost();
         
         List<MultipartFile> roomPhotoFiles = roomPostRegisterDto.getRoomPhotoFiles();
@@ -71,10 +74,21 @@ public class RoomPostServiceImpl implements RoomPostService{
         /*
          * set the first image as the thumbnail
          */
-        setRoomPostAttributesFromDto(roomPost, roomPostRegisterDto, agent, roomPhotos);
+        Agent ownerAgent = getAgentById(agent.getId());
+        setRoomPostAttributesFromDto(roomPost, roomPostRegisterDto, ownerAgent, roomPhotos);
         RoomPost savedRoomPost = roomPostRepository.save(roomPost);
 
         return RoomPostMapper.mapToRoomPostDto(savedRoomPost);
+    }
+
+    private Agent getAgentById(long id){
+        Optional<Agent> optionalAgent = agentRepository.findById(id);
+        if(optionalAgent.isPresent()){
+            return optionalAgent.get();
+        }else{
+            // TODO throws exception for no agent record
+            return null;
+        }
     }
 
     private void setRoomPostAttributesFromDto(RoomPost roomPost,

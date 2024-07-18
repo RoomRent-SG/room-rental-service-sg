@@ -14,8 +14,8 @@ import com.thiha.roomrent.dto.AgentDto;
 import com.thiha.roomrent.dto.AgentRegisterDto;
 import com.thiha.roomrent.dto.LoginRequestDto;
 import com.thiha.roomrent.dto.LoginResponseDto;
+import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.LoginService;
-import com.thiha.roomrent.service.impl.AgentServiceImpl;
 import com.thiha.roomrent.validator.ObjectValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,7 +25,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 @RequestMapping("/api/auth")
 public class AuthController {
-   private final AgentServiceImpl agentService;
+   private final AgentService agentService;
    private final AuthenticationManager authenticationManager;
    private final LoginService loginService;
    private final ObjectValidator<AgentRegisterDto> agentRegisterValidator;

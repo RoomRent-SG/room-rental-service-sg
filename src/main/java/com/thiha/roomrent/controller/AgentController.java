@@ -26,11 +26,10 @@ import com.thiha.roomrent.mapper.AgentMapper;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.UserModel;
 import com.thiha.roomrent.security.UserDetailsImpl;
+import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.LogoutService;
-import com.thiha.roomrent.service.impl.AgentServiceImpl;
-import com.thiha.roomrent.service.impl.RoomPostServiceImpl;
+import com.thiha.roomrent.service.RoomPostService;
 import com.thiha.roomrent.validator.ObjectValidator;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -40,22 +39,22 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/api/agent")
 @AllArgsConstructor
 public class AgentController {
-    private AgentServiceImpl agentService;
-    private RoomPostServiceImpl roomPostService;
+    private AgentService agentService;
+    private RoomPostService roomPostService;
     private LogoutService logoutService;
     private ObjectValidator<RoomPostRegisterDto> roomPostValidator;
     private ObjectValidator<AgentRegisterDto> agentValidator;
     
 
     @GetMapping("/profile")
-    private ResponseEntity<AgentDto> getAgent(){
+    public ResponseEntity<AgentDto> getAgent(){
         String currentUser = getCurrentAgentName();
         AgentDto agent = agentService.findAgentByName(currentUser);
         return new ResponseEntity<>(agent, HttpStatus.OK);
     }
    
     @PutMapping("/profile")
-    private ResponseEntity<AgentDto> updateAgent(@ModelAttribute AgentRegisterDto newAgent){
+    public ResponseEntity<AgentDto> updateAgent(@ModelAttribute AgentRegisterDto newAgent){
         agentValidator.doVaildation(newAgent);
         AgentDto existingAgent = getCurrentAgent();
         AgentDto updatedAgent = agentService.updateExistingAgent(newAgent, existingAgent);
@@ -63,13 +62,10 @@ public class AgentController {
     }
 
     @PostMapping("/room-post")
-    private ResponseEntity<?> createRoomPost(@ModelAttribute RoomPostRegisterDto registeredRoomPost){
-        System.out.println("INside roompost creation..");
+    public ResponseEntity<?> createRoomPost(@ModelAttribute RoomPostRegisterDto registeredRoomPost){
         roomPostValidator.doVaildation(registeredRoomPost);
         AgentDto currentAgent = getCurrentAgent();
-        System.out.println("Inside agent controler....");
-        Agent agent = AgentMapper.mapToAgent(currentAgent);
-        RoomPostDto savedRoomPost = roomPostService.createRoomPost(registeredRoomPost, agent);
+        RoomPostDto savedRoomPost = roomPostService.createRoomPost(registeredRoomPost, currentAgent);
         return new ResponseEntity<>(savedRoomPost, HttpStatus.CREATED);
     }
 
@@ -80,14 +76,14 @@ public class AgentController {
     }
 
     @GetMapping("/room-post/active")
-    private ResponseEntity<List<RoomPostDto>> getActiveRoomPosts(){
+    public ResponseEntity<List<RoomPostDto>> getActiveRoomPosts(){
         AgentDto currentAgent = getCurrentAgent();
         List<RoomPostDto> roomPosts = roomPostService.getActiveRoomPostsByAgentId(currentAgent.getId());
         return new ResponseEntity<>(roomPosts, HttpStatus.OK);
     }
 
     @GetMapping("/room-post/archived")
-    private ResponseEntity<List<RoomPostDto>> getArchivedRoomPosts(){
+    public ResponseEntity<List<RoomPostDto>> getArchivedRoomPosts(){
         AgentDto currentAgent = getCurrentAgent();
         List<RoomPostDto> roomPosts = roomPostService.getArchivedRoomPostsByAgentId(currentAgent.getId());
         return new ResponseEntity<>(roomPosts, HttpStatus.OK);
@@ -96,7 +92,7 @@ public class AgentController {
 
 
     @GetMapping("/room-post/{id}")
-    private ResponseEntity<RoomPostDto> getRoomPost(@PathVariable Long id){
+    public ResponseEntity<RoomPostDto> getRoomPost(@PathVariable Long id){
         String currentUser = getCurrentAgentName();
         RoomPostDto roomPostDto = roomPostService.findRoomPostById(id);
         if(roomPostDto.getAgent().getUsername().equals(currentUser)){
@@ -109,7 +105,7 @@ public class AgentController {
 
     // Edit existing room post
     @PutMapping("/room-post/{id}")
-    private ResponseEntity<RoomPostDto> updateRoomPost(@ModelAttribute RoomPostRegisterDto editedRoomPost, @PathVariable Long id){
+    public ResponseEntity<RoomPostDto> updateRoomPost(@ModelAttribute RoomPostRegisterDto editedRoomPost, @PathVariable Long id){
         AgentDto currentAgent = getCurrentAgent();
         roomPostValidator.doVaildation(editedRoomPost);
         RoomPostDto updatedRoomPost = roomPostService.updateRoomPost(id, currentAgent, editedRoomPost);
@@ -117,13 +113,13 @@ public class AgentController {
     }
 
     @PutMapping("/room-post/{id}/activate")
-    private ResponseEntity<Void> reactivateRoomPost(@PathVariable Long id){
+    public ResponseEntity<Void> reactivateRoomPost(@PathVariable Long id){
         roomPostService.reactivateRoomPost(id, getCurrentAgent());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @DeleteMapping("/room-post/{roomPostId}")
-    private ResponseEntity<Void> deleteRoomPost(@PathVariable Long roomPostId){
+    public ResponseEntity<Void> deleteRoomPost(@PathVariable Long roomPostId){
         AgentDto currentAgent = getCurrentAgent();
         roomPostService.deleteRoomPostById(roomPostId, currentAgent);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -131,7 +127,7 @@ public class AgentController {
 
 
     @PostMapping("/logout")
-    private ResponseEntity<Void> doLogout(HttpServletRequest request,
+    public ResponseEntity<Void> doLogout(HttpServletRequest request,
                  HttpServletResponse response
                  ,Authentication authentication){
                     System.out.println("INSIDE CONTROLLER...");
@@ -141,7 +137,7 @@ public class AgentController {
 
 
     //utility methods
-    private AgentDto getCurrentAgent(){
+    public AgentDto getCurrentAgent(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl)authentication.getPrincipal();
         UserModel user = userDetails.getUser();

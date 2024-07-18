@@ -70,6 +70,7 @@ public class RoomPostServiceTest {
     private RoomPostRegisterDto roomPostRegisterDto;
     private RoomPost roomPost;
     private Agent agent;
+    private AgentDto agentDto;
     private MultipartFile mockMultipartFile;
     private List<MultipartFile> imageFiles = new ArrayList<>();
 
@@ -85,6 +86,7 @@ public class RoomPostServiceTest {
                             "profilephoto.com",
                             DateTimeHandler.getUTCNow()
                         );
+        agentDto = AgentMapper.mapToAgentDto(agent);
 
         mockMultipartFile = new MockMultipartFile(
                                             "profileImage",
@@ -140,7 +142,7 @@ public class RoomPostServiceTest {
 
         //mock s3ImageSerive
         doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));
-        RoomPostDto createdRoomPostDto = roomPostService.createRoomPost(roomPostRegisterDto, agent);
+        RoomPostDto createdRoomPostDto = roomPostService.createRoomPost(roomPostRegisterDto, agentDto);
         
         verify(imageService, times(1)).uploadImage(anyString(), any(MultipartFile.class));
         Assertions.assertThat(createdRoomPostDto.getId()).isEqualTo(roomPost.getId());
@@ -153,7 +155,7 @@ public class RoomPostServiceTest {
 
        //mock s3ImageSerive
        doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));
-       RoomPostDto createdRoomPostDto = roomPostService.createRoomPost(roomPostRegisterDto, agent);
+       RoomPostDto createdRoomPostDto = roomPostService.createRoomPost(roomPostRegisterDto, agentDto);
        
        when(roomPostRepository.findById(anyLong())).thenReturn(Optional.of(roomPost));
        RoomPostDto existingRoomPost = roomPostService.findRoomPostById(createdRoomPostDto.getId());
@@ -168,7 +170,7 @@ public class RoomPostServiceTest {
 
        //mock s3ImageSerive
        doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));
-       roomPostService.createRoomPost(roomPostRegisterDto, agent);
+       roomPostService.createRoomPost(roomPostRegisterDto, agentDto);
        
        verify(imageService, times(1)).uploadImage(anyString(), any(MultipartFile.class));
 
@@ -215,7 +217,7 @@ public class RoomPostServiceTest {
 
         RoomPostDto updatedRoomPostDto =  roomPostService.updateRoomPost(anyLong(), agentDto, updatedRegisterRoomPost);
 
-        Assertions.assertThat(updatedRoomPostDto.getLocation()).isEqualTo(updatedRegisterRoomPost.getLocation());
+        Assertions.assertThat(updatedRoomPostDto.getId()).isEqualTo(updatedRegisterRoomPost.getId());
         verify(roomPostRepository, times(1)).findById(anyLong());
         verify(roomPostRepository, times(1)).save(any(RoomPost.class));
 

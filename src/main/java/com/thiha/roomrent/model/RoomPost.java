@@ -90,7 +90,7 @@ public class RoomPost implements Serializable{
     @Enumerated(EnumType.STRING)
     private PropertyType propertyType;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, columnDefinition = "LONGTEXT")
     private String description;
 
     /*
