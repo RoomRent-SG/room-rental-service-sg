@@ -1,4 +1,4 @@
-#### Getting Started
+## Getting Started
 
 This section guides you on how to run the application.
 
