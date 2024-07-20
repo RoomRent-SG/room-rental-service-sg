@@ -31,7 +31,7 @@ jobs:
       - name: print the test report
         uses: Madrapps/jacoco-report@v1.6.1
         with:
-          path: ./target/site/jacoco
+          path: ./target/site/jacoco/jacoco.xml
           # Github personal token to add commits to Pull Request
           token: ${{ secrets.GITHUB_TOKEN }}
 
