@@ -1,9 +1,5 @@
 name: Unit test runner
 on:
-  # run on every push except main
-  push:
-    branches-ignore:
-      - main
   pull_request:
 
 jobs:
