@@ -39,13 +39,18 @@ jobs:
       - name: Upload Report
         uses: actions/upload-artifact@v4
         with:
-          name: jacoco-report
-          path: ${{ github.workspace }}/target/site/jacoco
+          name: jacoco-report.xml
+          path: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
 
       - name: Print the test report
-        uses: Madrapps/jacoco-report@v1.6.1
+        uses: madrapps/jacoco-report@v1.6.1
         with:
           paths: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
           # Github personal token to add commits to Pull Request
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get the Coverage info
+        run: |
+          echo "Total coverage ${{ steps.jacoco.outputs.coverage-overall }}"
+          echo "Changed Files coverage ${{ steps.jacoco.outputs.coverage-changed-files }}"
 
