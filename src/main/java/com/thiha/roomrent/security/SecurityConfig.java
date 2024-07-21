@@ -2,6 +2,7 @@ package com.thiha.roomrent.security;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,9 +20,10 @@ import com.thiha.roomrent.auth.JwtAuthorizationFilter;
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
+    @Autowired
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
 
-    
+   
     public SecurityConfig( JwtAuthorizationFilter jwtAuthorizationFilter){
         this.jwtAuthorizationFilter = jwtAuthorizationFilter;
     }

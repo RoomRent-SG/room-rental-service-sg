@@ -38,6 +38,7 @@ import com.thiha.roomrent.mapper.RoomPostMapper;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.RoomPhoto;
 import com.thiha.roomrent.model.RoomPost;
+import com.thiha.roomrent.repository.AgentRepository;
 import com.thiha.roomrent.repository.RoomPostRepository;
 import com.thiha.roomrent.service.RoomPhotoService;
 import com.thiha.roomrent.service.RoomPostService;
@@ -54,13 +55,15 @@ public class RoomPostServiceImpl implements RoomPostService{
     private S3ImageService s3ImageService;
     @Autowired
     private RoomPhotoService roomPhotoService;
+    @Autowired
+    private AgentRepository agentRepository;
 
     @Value("${aws.cloudFront}")
     private String cloudFrontUrl;
 
     @Override
     @CacheEvict(value = "all_room_posts", allEntries = true)
-    public RoomPostDto createRoomPost(RoomPostRegisterDto roomPostRegisterDto, Agent agent) {
+    public RoomPostDto createRoomPost(RoomPostRegisterDto roomPostRegisterDto, AgentDto agent) {
         RoomPost roomPost = new RoomPost();
         
         List<MultipartFile> roomPhotoFiles = roomPostRegisterDto.getRoomPhotoFiles();
@@ -71,10 +74,21 @@ public class RoomPostServiceImpl implements RoomPostService{
         /*
          * set the first image as the thumbnail
          */
-        setRoomPostAttributesFromDto(roomPost, roomPostRegisterDto, agent, roomPhotos);
+        Agent ownerAgent = getAgentById(agent.getId());
+        setRoomPostAttributesFromDto(roomPost, roomPostRegisterDto, ownerAgent, roomPhotos);
         RoomPost savedRoomPost = roomPostRepository.save(roomPost);
 
         return RoomPostMapper.mapToRoomPostDto(savedRoomPost);
+    }
+
+    private Agent getAgentById(long id){
+        Optional<Agent> optionalAgent = agentRepository.findById(id);
+        if(optionalAgent.isPresent()){
+            return optionalAgent.get();
+        }else{
+            // TODO throws exception for no agent record
+            return null;
+        }
     }
 
     private void setRoomPostAttributesFromDto(RoomPost roomPost,
@@ -82,14 +96,14 @@ public class RoomPostServiceImpl implements RoomPostService{
                      Agent ownerAgent,
                      List<RoomPhoto> roomPhotos){
         roomPost.setThumbnailImage(roomPhotos.get(0).getImageUrl());
-        roomPost.setAirConTime(dto.getAirConTime());
+        roomPost.setAirConTime(getEnumFromString(AirConTime.class, dto.getAirConTime()));
         roomPost.setAllowVisitor(dto.isAllowVisitor());
-        roomPost.setCookingAllowance(dto.getCookingAllowance());
-        roomPost.setLocation(dto.getLocation());
-        roomPost.setPropertyType(dto.getPropertyType());
-        roomPost.setRoomType(dto.getRoomType());
-        roomPost.setSharePub(dto.getSharePub());
-        roomPost.setStationName(dto.getStationName());
+        roomPost.setCookingAllowance(getEnumFromString(CookingAllowance.class, dto.getCookingAllowance()));
+        roomPost.setLocation(getEnumFromString(Location.class, dto.getLocation()));
+        roomPost.setPropertyType(getEnumFromString(PropertyType.class, dto.getPropertyType()));
+        roomPost.setRoomType(getEnumFromString(RoomType.class, dto.getRoomType()));
+        roomPost.setSharePub(getEnumFromString(SharePub.class, dto.getSharePub()));
+        roomPost.setStationName(getEnumFromString(StationName.class, dto.getStationName()));
         roomPost.setTotalPax(dto.getTotalPax());
         roomPost.setDescription(dto.getDescription());
         roomPost.setAgent(ownerAgent);
@@ -198,16 +212,16 @@ public class RoomPostServiceImpl implements RoomPostService{
         originalRoomPost.setThumbnailImage(existingRoomPhotos.get(0).getImageUrl());
         originalRoomPost.setRoomPhotos(existingRoomPhotos);
 
-        originalRoomPost.setStationName(updateRoomPost.getStationName());
+        originalRoomPost.setStationName(getEnumFromString(StationName.class, updateRoomPost.getStationName()));
         originalRoomPost.setPrice(updateRoomPost.getPrice());
-        originalRoomPost.setRoomType(updateRoomPost.getRoomType());
+        originalRoomPost.setRoomType(getEnumFromString(RoomType.class, updateRoomPost.getRoomType()));
         originalRoomPost.setTotalPax(updateRoomPost.getTotalPax());
-        originalRoomPost.setCookingAllowance(updateRoomPost.getCookingAllowance());
-        originalRoomPost.setSharePub(updateRoomPost.getSharePub());
-        originalRoomPost.setAirConTime(updateRoomPost.getAirConTime());
+        originalRoomPost.setCookingAllowance(getEnumFromString(CookingAllowance.class, updateRoomPost.getCookingAllowance()));
+        originalRoomPost.setSharePub(getEnumFromString(SharePub.class, updateRoomPost.getSharePub()));
+        originalRoomPost.setAirConTime(getEnumFromString(AirConTime.class, updateRoomPost.getAirConTime()));
         originalRoomPost.setAllowVisitor(updateRoomPost.isAllowVisitor());
-        originalRoomPost.setLocation(updateRoomPost.getLocation());
-        originalRoomPost.setPropertyType(updateRoomPost.getPropertyType());
+        originalRoomPost.setLocation(getEnumFromString(Location.class, updateRoomPost.getLocation()));
+        originalRoomPost.setPropertyType(getEnumFromString(PropertyType.class, updateRoomPost.getPropertyType()));
         originalRoomPost.setDescription(updateRoomPost.getDescription());
 
         

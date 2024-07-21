@@ -6,12 +6,6 @@ import java.util.List;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.thiha.roomrent.enums.AirConTime;
-import com.thiha.roomrent.enums.CookingAllowance;
-import com.thiha.roomrent.enums.Location;
-import com.thiha.roomrent.enums.PropertyType;
-import com.thiha.roomrent.enums.RoomType;
-import com.thiha.roomrent.enums.SharePub;
 import com.thiha.roomrent.enums.StationName;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.RoomPhoto;
@@ -32,7 +26,7 @@ public class RoomPostRegisterDto {
     private Long id;
 
     @NotNull(message = "Station name cannot be null")
-    private StationName stationName;
+    private String stationName;
 
     @NotNull(message = "Address cannot be null")
     private String address;
@@ -45,28 +39,28 @@ public class RoomPostRegisterDto {
     private Date postedAt;
 
     @NotNull(message = "Room Type cannot be null")
-    private RoomType roomType;
+    private String roomType;
 
     @NotNull(message = "Total person cannot be null")
     private int totalPax;
 
     @NotNull(message = "Cooking Allowance cannot be null")
-    private CookingAllowance cookingAllowance;
+    private String cookingAllowance;
 
     @NotNull(message = "Pub Share field cannot be null")
-    private SharePub sharePub;
+    private String sharePub;
 
     @NotNull(message = "AirconTime field cannot be null")
-    private AirConTime airConTime;
+    private String airConTime;
 
     @NotNull(message = "AllowVisitor field cannot be null")
     private boolean allowVisitor;
 
     @NotNull(message = "Location cannot be null")
-    private Location location;
+    private String location;
 
     @NotNull(message = "Property type cannot be null") 
-    private PropertyType propertyType;
+    private String propertyType;
 
     private List<MultipartFile> roomPhotoFiles;
 
