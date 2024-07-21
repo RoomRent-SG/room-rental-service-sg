@@ -39,10 +39,11 @@ jobs:
       - name: Upload Report
         uses: actions/upload-artifact@v4
         with:
-          name: jacoco-report.xml
+          name: report.xml
           path: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
 
       - name: Print the test report
+        id: jacoco
         uses: madrapps/jacoco-report@v1.6.1
         with:
           paths: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
