@@ -6,7 +6,6 @@ import java.util.List;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.thiha.roomrent.enums.StationName;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.RoomPhoto;
 import jakarta.validation.constraints.NotNull;
