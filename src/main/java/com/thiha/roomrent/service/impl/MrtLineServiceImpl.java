@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 
 import com.thiha.roomrent.dto.MrtLineDto;
 import com.thiha.roomrent.dto.MrtLineRequest;
+import com.thiha.roomrent.dto.StationDto;
+import com.thiha.roomrent.exceptions.EntityNotFoundException;
+import com.thiha.roomrent.mapper.StationMapper;
 import com.thiha.roomrent.model.MrtLine;
 import com.thiha.roomrent.model.MrtStation;
 import com.thiha.roomrent.repository.MrtLineRepository;
@@ -26,9 +29,9 @@ public class MrtLineServiceImpl implements MrtLineService{
     private MrtLineRepository mrtLineRepository;
 
     @Override
-    public List<String> getStationNamesByMrtLineId(Long id) {
+    public List<StationDto> getStationsByMrtLineId(Long id) {
         List<MrtStation> stations = stationRepository.getStationsByMrtLineId(id);
-        return stations.stream().map(station -> station.getName()).collect(Collectors.toList());
+        return stations.stream().map(station -> StationMapper.mapToStationDto(station)).collect(Collectors.toList());
     }
 
     @Override
@@ -88,5 +91,15 @@ public class MrtLineServiceImpl implements MrtLineService{
         lineDto.setLineName(mrtLine.getName());
         lineDto.setStationNames(mrtLine.getStations().stream().map(station -> station.getName()).collect(Collectors.toSet()));
         return lineDto;
+    }
+
+    @Override
+    public void deleteMrtLineById(Long id) {
+        Optional<MrtLine> optionalMrtLine = mrtLineRepository.findById(id);
+        if(optionalMrtLine.isPresent()){
+            MrtLine mrtLine = optionalMrtLine.get();
+            mrtLineRepository.delete(mrtLine);
+        }
+        throw new EntityNotFoundException("MrtLine Not Found");
     }
 }

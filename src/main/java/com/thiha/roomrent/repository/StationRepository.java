@@ -1,6 +1,7 @@
 package com.thiha.roomrent.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +20,11 @@ public interface StationRepository extends JpaRepository<MrtStation, Long>{
             WHERE line.id = :id
             """)
     List<MrtStation> getStationsByMrtLineId(@Param("id")Long id);
+
+    @Query("""
+            SELECT s
+            FROM MrtStation s
+            WHERE s.name = :name
+            """)
+    Optional<MrtStation> getStationByName(@Param("name")String name);
 }

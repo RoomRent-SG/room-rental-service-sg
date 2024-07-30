@@ -3,7 +3,6 @@ package com.thiha.roomrent.model;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,10 +10,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 @Table(name = "stations")
 public class MrtStation implements Serializable {
     @Id
@@ -24,7 +29,7 @@ public class MrtStation implements Serializable {
     private String name;
     @ManyToMany(mappedBy = "stations")
     private Set<MrtLine> mrtLine;
-    
+
     @Override
     public int hashCode() {
     return Objects.hash(id, name);

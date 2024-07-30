@@ -9,8 +9,6 @@ import com.thiha.roomrent.enums.Location;
 import com.thiha.roomrent.enums.PropertyType;
 import com.thiha.roomrent.enums.RoomType;
 import com.thiha.roomrent.enums.SharePub;
-import com.thiha.roomrent.enums.StationName;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -44,9 +42,8 @@ public class RoomPost implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "station_name", nullable = false)
-    private StationName stationName;
+    private String stationName;
 
     @Column(name = "price", nullable = false)
     private double price;

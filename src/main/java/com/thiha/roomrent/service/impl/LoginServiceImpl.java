@@ -18,14 +18,10 @@ import com.thiha.roomrent.security.UserDetailsImpl;
 import com.thiha.roomrent.service.JwtTokenService;
 import com.thiha.roomrent.service.LoginService;
 import com.thiha.roomrent.service.UserService;
-
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
-
 @Service
-@Slf4j
 public class LoginServiceImpl implements LoginService{
     @Autowired
     JwtUtils jwtUtils;

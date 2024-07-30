@@ -8,12 +8,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import com.thiha.roomrent.model.UserModel;
 import com.thiha.roomrent.repository.UserRepository;
-
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
-@Slf4j
 @AllArgsConstructor
 public class RoomRentUserDetailsService implements UserDetailsService{
     

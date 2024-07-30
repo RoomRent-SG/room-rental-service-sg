@@ -85,7 +85,7 @@ public class RoomPostRepositoryTest {
                             .roomPhotos(new ArrayList<RoomPhoto>())
                             .roomType(RoomType.MASTER_ROOM)
                             .sharePub(SharePub.INCLUSIVE)
-                            .stationName(StationName.BAYFRONT)
+                            .stationName("Bouna Vista")
                             .totalPax(1)
                             .build();
     }

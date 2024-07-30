@@ -7,8 +7,6 @@ import com.thiha.roomrent.enums.Location;
 import com.thiha.roomrent.enums.PropertyType;
 import com.thiha.roomrent.enums.RoomType;
 import com.thiha.roomrent.enums.SharePub;
-import com.thiha.roomrent.enums.StationName;
-
 import lombok.Data;
 
 /*
@@ -18,7 +16,7 @@ import lombok.Data;
 
  @Data
 public class RoomPostSearchFilter {
-    private StationName stationName;
+    private String stationName;
     private Location location;
     private Double minPrice;
     private Double maxPrice;

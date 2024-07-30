@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -29,7 +30,6 @@ import com.thiha.roomrent.enums.Location;
 import com.thiha.roomrent.enums.PropertyType;
 import com.thiha.roomrent.enums.RoomType;
 import com.thiha.roomrent.enums.SharePub;
-import com.thiha.roomrent.enums.StationName;
 import com.thiha.roomrent.exceptions.EntityNotFoundException;
 import com.thiha.roomrent.exceptions.RoomPhotoNotFoundException;
 import com.thiha.roomrent.exceptions.RoomPhotosExceedLimitException;
@@ -43,6 +43,7 @@ import com.thiha.roomrent.repository.RoomPostRepository;
 import com.thiha.roomrent.service.RoomPhotoService;
 import com.thiha.roomrent.service.RoomPostService;
 import com.thiha.roomrent.service.S3ImageService;
+import com.thiha.roomrent.service.StationService;
 import com.thiha.roomrent.specification.RoomPostSpecification;
 import com.thiha.roomrent.utility.DateTimeHandler;
 
@@ -57,6 +58,8 @@ public class RoomPostServiceImpl implements RoomPostService{
     private RoomPhotoService roomPhotoService;
     @Autowired
     private AgentRepository agentRepository;
+    @Autowired
+    private StationService stationService;
 
     @Value("${aws.cloudFront}")
     private String cloudFrontUrl;
@@ -86,8 +89,7 @@ public class RoomPostServiceImpl implements RoomPostService{
         if(optionalAgent.isPresent()){
             return optionalAgent.get();
         }else{
-            // TODO throws exception for no agent record
-            return null;
+            throw new EntityNotFoundException("Agent not foud");
         }
     }
 
@@ -103,7 +105,9 @@ public class RoomPostServiceImpl implements RoomPostService{
         roomPost.setPropertyType(getEnumFromString(PropertyType.class, dto.getPropertyType()));
         roomPost.setRoomType(getEnumFromString(RoomType.class, dto.getRoomType()));
         roomPost.setSharePub(getEnumFromString(SharePub.class, dto.getSharePub()));
-        roomPost.setStationName(getEnumFromString(StationName.class, dto.getStationName()));
+
+        validateStationName(dto.getStationName());
+        roomPost.setStationName(dto.getStationName());
         roomPost.setTotalPax(dto.getTotalPax());
         roomPost.setDescription(dto.getDescription());
         roomPost.setAgent(ownerAgent);
@@ -111,6 +115,10 @@ public class RoomPostServiceImpl implements RoomPostService{
         roomPost.setPostedAt(DateTimeHandler.getUTCNow());
         roomPost.setArchived(false);
         roomPost.setRoomPhotos(roomPhotos);
+    }
+
+    private void validateStationName(String stationName){
+        stationService.getStationByName(stationName);
     }
 
     List<RoomPhoto> uploadImagesToS3(List<MultipartFile> images, RoomPost ownerRoomPost){
@@ -212,7 +220,9 @@ public class RoomPostServiceImpl implements RoomPostService{
         originalRoomPost.setThumbnailImage(existingRoomPhotos.get(0).getImageUrl());
         originalRoomPost.setRoomPhotos(existingRoomPhotos);
 
-        originalRoomPost.setStationName(getEnumFromString(StationName.class, updateRoomPost.getStationName()));
+        validateStationName(updateRoomPost.getStationName());
+        originalRoomPost.setStationName(updateRoomPost.getStationName());
+
         originalRoomPost.setPrice(updateRoomPost.getPrice());
         originalRoomPost.setRoomType(getEnumFromString(RoomType.class, updateRoomPost.getRoomType()));
         originalRoomPost.setTotalPax(updateRoomPost.getTotalPax());
@@ -394,7 +404,7 @@ public class RoomPostServiceImpl implements RoomPostService{
                     searchFilter.setSharePub(getEnumFromString(SharePub.class, value));
                     break;
                 case "stationName":
-                    searchFilter.setStationName(getEnumFromString(StationName.class, value));
+                    searchFilter.setStationName(value);
                     break;
                 case "minPrice":
                     searchFilter.setMinPrice(Double.valueOf(value));
@@ -425,8 +435,8 @@ public class RoomPostServiceImpl implements RoomPostService{
     @Override
     public Map<String, Object> getRoomPostRegisterMetadata() {
         Map<String, Object> metaData = new HashMap<>();
-
-        metaData.put("stationName", StationName.getValueList());
+        Set<String> stations = stationService.getAllStationNames();
+        metaData.put("stationName", stations);
         metaData.put("address", "required");
         metaData.put("price", "required");
         metaData.put("roomType", RoomType.getValueList());
