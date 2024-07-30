@@ -5,7 +5,6 @@ import java.util.Date;
 import com.thiha.roomrent.enums.Location;
 import com.thiha.roomrent.enums.PropertyType;
 import com.thiha.roomrent.enums.RoomType;
-import com.thiha.roomrent.enums.StationName;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +21,6 @@ public class RoomPostListDto implements Serializable {
     private Location location;
     private RoomType roomType;
     private PropertyType propertyType;
-    private StationName stationName;
+    private String stationName;
     private Date postedAt;
 } 

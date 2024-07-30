@@ -10,10 +10,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.thiha.roomrent.dto.AdminDto;
+import com.thiha.roomrent.dto.AdminRegister;
 import com.thiha.roomrent.dto.AgentDto;
 import com.thiha.roomrent.dto.AgentRegisterDto;
 import com.thiha.roomrent.dto.LoginRequestDto;
 import com.thiha.roomrent.dto.LoginResponseDto;
+import com.thiha.roomrent.service.AdminService;
 import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.LoginService;
 import com.thiha.roomrent.validator.ObjectValidator;
@@ -26,15 +29,22 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/api/auth")
 public class AuthController {
    private final AgentService agentService;
+   private final AdminService adminService;
    private final AuthenticationManager authenticationManager;
    private final LoginService loginService;
    private final ObjectValidator<AgentRegisterDto> agentRegisterValidator;
 
    @PostMapping("/agent/register")
-   public ResponseEntity<?> registerAgent(@ModelAttribute AgentRegisterDto registeredAgent){
+   public ResponseEntity<AgentDto> registerAgent(@ModelAttribute AgentRegisterDto registeredAgent){
         agentRegisterValidator.doVaildation(registeredAgent);
         AgentDto savedAgent =  agentService.createAgent(registeredAgent);
         return new ResponseEntity<>(savedAgent, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/admin/register")
+    public ResponseEntity<?> registerAdmin(@RequestBody AdminRegister request ){
+      AdminDto adminDto = adminService.createAdmin(request);
+      return new ResponseEntity<>(adminDto, HttpStatus.OK);
     }
 
   

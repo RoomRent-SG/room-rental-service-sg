@@ -9,7 +9,6 @@ import com.thiha.roomrent.enums.Location;
 import com.thiha.roomrent.enums.PropertyType;
 import com.thiha.roomrent.enums.RoomType;
 import com.thiha.roomrent.enums.SharePub;
-import com.thiha.roomrent.enums.StationName;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.RoomPhoto;
 
@@ -24,7 +23,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class RoomPostDto implements Serializable{
     private Long id;
-    private StationName stationName;
+    private String stationName;
     private double price;
     private String address;
     private RoomType roomType;

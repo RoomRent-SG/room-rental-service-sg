@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
@@ -35,7 +34,6 @@ import com.thiha.roomrent.enums.Location;
 import com.thiha.roomrent.enums.PropertyType;
 import com.thiha.roomrent.enums.RoomType;
 import com.thiha.roomrent.enums.SharePub;
-import com.thiha.roomrent.enums.StationName;
 import com.thiha.roomrent.enums.UserRole;
 import com.thiha.roomrent.exceptions.EntityNotFoundException;
 import com.thiha.roomrent.mapper.AgentMapper;
@@ -46,6 +44,7 @@ import com.thiha.roomrent.model.RoomPost;
 import com.thiha.roomrent.repository.AgentRepository;
 import com.thiha.roomrent.repository.RoomPostRepository;
 import com.thiha.roomrent.service.S3ImageService;
+import com.thiha.roomrent.service.StationService;
 import com.thiha.roomrent.service.impl.RoomPostServiceImpl;
 import com.thiha.roomrent.utility.DateTimeHandler;
 
@@ -63,6 +62,9 @@ public class RoomPostServiceTest {
 
     @Mock
     private S3ImageService imageService;
+
+    @Mock
+    private StationService stationService;
 
     @Rule
 	public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
@@ -130,7 +132,7 @@ public class RoomPostServiceTest {
                     .roomType(RoomType.MASTER_ROOM)
                     .roomPhotos(new ArrayList<RoomPhoto>())
                     .sharePub(SharePub.INCLUSIVE)
-                    .stationName(StationName.BUGIS)
+                    .stationName("Bouna Vista")
                     .totalPax(2)
                     .build();
     }
@@ -139,6 +141,7 @@ public class RoomPostServiceTest {
     public void createRoomPostSucceed() throws IOException{
         //mock roompostrepo
         when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
+        when(agentRepository.findById(1L)).thenReturn(Optional.of(agent));
 
         //mock s3ImageSerive
         doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));
@@ -152,7 +155,7 @@ public class RoomPostServiceTest {
     public void findRoomPostByIdSucced() throws IOException{
        //mock roompostrepo
        when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
-
+       when(agentRepository.findById(1L)).thenReturn(Optional.of(agent));
        //mock s3ImageSerive
        doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));
        RoomPostDto createdRoomPostDto = roomPostService.createRoomPost(roomPostRegisterDto, agentDto);
@@ -167,7 +170,7 @@ public class RoomPostServiceTest {
     public void findActiveRoomPostByAgentIdSuceed() throws IOException{
        //mock roompostrepo
        when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
-
+       when(agentRepository.findById(1L)).thenReturn(Optional.of(agent));
        //mock s3ImageSerive
        doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));
        roomPostService.createRoomPost(roomPostRegisterDto, agentDto);
@@ -206,6 +209,7 @@ public class RoomPostServiceTest {
                                                     .totalPax(2)
                                                     .build();
         when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
+        when(stationService.getStationByName("Bugis")).thenReturn("Bugis");
 
         try {
             doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));

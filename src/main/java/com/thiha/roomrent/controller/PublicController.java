@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.thiha.roomrent.dto.AllRoomPostsResponse;
 import com.thiha.roomrent.dto.FilterKeywords;
 import com.thiha.roomrent.dto.RoomPostDto;
+import com.thiha.roomrent.service.FilterService;
 import com.thiha.roomrent.service.impl.RoomPostServiceImpl;
 
 @RestController
@@ -19,6 +20,8 @@ import com.thiha.roomrent.service.impl.RoomPostServiceImpl;
 public class PublicController {
     @Autowired
     private RoomPostServiceImpl roomPostService;
+    @Autowired
+    private FilterService filterService;
     
     @GetMapping("/all-room-posts")
     public ResponseEntity<AllRoomPostsResponse> getAllroomPosts(
@@ -45,7 +48,7 @@ public class PublicController {
 
     @GetMapping("/filter-keywords")
     public ResponseEntity<FilterKeywords> getFilterKeywords(){
-        FilterKeywords filterKeywords = new FilterKeywords();
+        FilterKeywords filterKeywords = filterService.getFilterKeywords();
         return new ResponseEntity<FilterKeywords>(filterKeywords, HttpStatus.OK);
     }
 }

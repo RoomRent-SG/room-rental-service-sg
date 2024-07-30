@@ -2,10 +2,8 @@ package com.thiha.roomrent.dto;
 
 import lombok.Data;
 
-
 @Data
-public class AdminDto {
+public class StationDto {
    private Long id;
-   private String username;
-   private String role;
+   private String name;
 }
