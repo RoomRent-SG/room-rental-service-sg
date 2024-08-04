@@ -16,7 +16,7 @@ import com.thiha.roomrent.service.FilterService;
 import com.thiha.roomrent.service.impl.RoomPostServiceImpl;
 
 @RestController
-@RequestMapping("api/public")
+@RequestMapping("api/v1/public")
 public class PublicController {
     @Autowired
     private RoomPostServiceImpl roomPostService;

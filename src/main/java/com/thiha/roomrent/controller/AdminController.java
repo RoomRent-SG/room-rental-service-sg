@@ -29,7 +29,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api/v1/admin")
 public class AdminController {
     @Autowired
     private AgentService agentService;
