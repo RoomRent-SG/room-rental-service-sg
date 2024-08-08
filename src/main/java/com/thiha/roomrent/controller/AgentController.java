@@ -68,7 +68,7 @@ public class AgentController {
         return new ResponseEntity<>(savedRoomPost, HttpStatus.CREATED);
     }
 
-    @GetMapping("/room-post")
+    @GetMapping("/room-post-data")
     public ResponseEntity<?> getRoomPostRegisterMetadata(){
         Map<String, Object> metaData = roomPostService.getRoomPostRegisterMetadata();
         return new ResponseEntity<>(metaData, HttpStatus.OK);

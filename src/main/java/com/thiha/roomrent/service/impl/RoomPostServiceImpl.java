@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -41,6 +43,7 @@ import com.thiha.roomrent.model.RoomPost;
 import com.thiha.roomrent.repository.AgentRepository;
 import com.thiha.roomrent.repository.LocationRepository;
 import com.thiha.roomrent.repository.RoomPostRepository;
+import com.thiha.roomrent.service.LocationService;
 import com.thiha.roomrent.service.RoomPhotoService;
 import com.thiha.roomrent.service.RoomPostService;
 import com.thiha.roomrent.service.S3ImageService;
@@ -63,6 +66,8 @@ public class RoomPostServiceImpl implements RoomPostService{
     private StationService stationService;
     @Autowired
     private LocationRepository locationRepository;
+    @Autowired
+    private LocationService locationService;
 
     @Value("${aws.cloudFront}")
     private String cloudFrontUrl;
@@ -447,6 +452,10 @@ public class RoomPostServiceImpl implements RoomPostService{
         Map<String, Object> metaData = new HashMap<>();
         Set<String> stations = stationService.getAllStationNames();
         metaData.put("stationName", stations);
+
+        Set<String> locations = locationService.getAllLocations().stream().map(location-> location.getName()).collect(Collectors.toSet());
+        metaData.put("location", locations);
+        
         metaData.put("address", "required");
         metaData.put("price", "required");
         metaData.put("roomType", RoomType.getValueList());
