@@ -3,9 +3,11 @@ package com.thiha.roomrent;
 import com.thiha.roomrent.enums.*;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.JwtToken;
+import com.thiha.roomrent.model.Location;
 import com.thiha.roomrent.model.RoomPhoto;
 import com.thiha.roomrent.model.RoomPost;
 import com.thiha.roomrent.repository.AgentRepository;
+import com.thiha.roomrent.repository.LocationRepository;
 import com.thiha.roomrent.repository.RoomPostRepository;
 import com.thiha.roomrent.utility.DateTimeHandler;
 import org.assertj.core.api.Assertions;
@@ -22,11 +24,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import static org.junit.Assert.assertThrows;
 
 @DataJpaTest
@@ -37,17 +37,21 @@ public class RoomPostRepositoryTest {
     RoomPostRepository roomPostRepository;
     @Autowired
     AgentRepository agentRepository;
+    @Autowired
+    LocationRepository locationRepository;
 
     @Rule
 	public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
     private RoomPost roomPost;
     private Agent agent;
+    private Location location;
     private MultipartFile mockMultipartFile;
     private List<MultipartFile> imageFiles = new ArrayList<>();
 
     @Before
     public void setup(){
+        
         Agent newAgent = new Agent(1L,
                             "tester7",
                             "password",
@@ -59,6 +63,9 @@ public class RoomPostRepositoryTest {
                             DateTimeHandler.getUTCNow()
                         );
         agent = agentRepository.save(newAgent);
+
+        Location newLocation = new Location(1L, "Baliester", null);
+        location = locationRepository.save(newLocation);
 
         mockMultipartFile = new MockMultipartFile(
                                             "profileImage",
@@ -78,7 +85,7 @@ public class RoomPostRepositoryTest {
                             .cookingAllowance(CookingAllowance.COOKING_ALLOWED)
                             .thumbnailImage("imageUrl")
                             .description("description")
-                            .location(Location.BALESTIER)
+                            .location(location)
                             .postedAt(DateTimeHandler.getUTCNow())
                             .price(3000.0)
                             .propertyType(PropertyType.CONDO)

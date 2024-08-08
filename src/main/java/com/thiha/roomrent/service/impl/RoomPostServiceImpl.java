@@ -26,7 +26,6 @@ import com.thiha.roomrent.dto.RoomPostRegisterDto;
 import com.thiha.roomrent.dto.RoomPostSearchFilter;
 import com.thiha.roomrent.enums.AirConTime;
 import com.thiha.roomrent.enums.CookingAllowance;
-import com.thiha.roomrent.enums.Location;
 import com.thiha.roomrent.enums.PropertyType;
 import com.thiha.roomrent.enums.RoomType;
 import com.thiha.roomrent.enums.SharePub;
@@ -36,9 +35,11 @@ import com.thiha.roomrent.exceptions.RoomPhotosExceedLimitException;
 import com.thiha.roomrent.exceptions.S3ImageUploadException;
 import com.thiha.roomrent.mapper.RoomPostMapper;
 import com.thiha.roomrent.model.Agent;
+import com.thiha.roomrent.model.Location;
 import com.thiha.roomrent.model.RoomPhoto;
 import com.thiha.roomrent.model.RoomPost;
 import com.thiha.roomrent.repository.AgentRepository;
+import com.thiha.roomrent.repository.LocationRepository;
 import com.thiha.roomrent.repository.RoomPostRepository;
 import com.thiha.roomrent.service.RoomPhotoService;
 import com.thiha.roomrent.service.RoomPostService;
@@ -60,6 +61,8 @@ public class RoomPostServiceImpl implements RoomPostService{
     private AgentRepository agentRepository;
     @Autowired
     private StationService stationService;
+    @Autowired
+    private LocationRepository locationRepository;
 
     @Value("${aws.cloudFront}")
     private String cloudFrontUrl;
@@ -97,16 +100,17 @@ public class RoomPostServiceImpl implements RoomPostService{
                      RoomPostRegisterDto dto, 
                      Agent ownerAgent,
                      List<RoomPhoto> roomPhotos){
+        validateStationName(dto.getStationName());
+        Location location = validateLocation(dto.getLocation());
+        
+        roomPost.setLocation(location);
         roomPost.setThumbnailImage(roomPhotos.get(0).getImageUrl());
         roomPost.setAirConTime(getEnumFromString(AirConTime.class, dto.getAirConTime()));
         roomPost.setAllowVisitor(dto.isAllowVisitor());
         roomPost.setCookingAllowance(getEnumFromString(CookingAllowance.class, dto.getCookingAllowance()));
-        roomPost.setLocation(getEnumFromString(Location.class, dto.getLocation()));
         roomPost.setPropertyType(getEnumFromString(PropertyType.class, dto.getPropertyType()));
         roomPost.setRoomType(getEnumFromString(RoomType.class, dto.getRoomType()));
         roomPost.setSharePub(getEnumFromString(SharePub.class, dto.getSharePub()));
-
-        validateStationName(dto.getStationName());
         roomPost.setStationName(dto.getStationName());
         roomPost.setTotalPax(dto.getTotalPax());
         roomPost.setDescription(dto.getDescription());
@@ -119,6 +123,13 @@ public class RoomPostServiceImpl implements RoomPostService{
 
     private void validateStationName(String stationName){
         stationService.getStationByName(stationName);
+    }
+    private Location validateLocation(String location){
+        Optional<Location> optionalLocation = locationRepository.findLocationByName(location);
+        if(optionalLocation.isPresent()){
+            return optionalLocation.get();
+        }
+        throw new EntityNotFoundException("Location not found");
     }
 
     List<RoomPhoto> uploadImagesToS3(List<MultipartFile> images, RoomPost ownerRoomPost){
@@ -221,8 +232,10 @@ public class RoomPostServiceImpl implements RoomPostService{
         originalRoomPost.setRoomPhotos(existingRoomPhotos);
 
         validateStationName(updateRoomPost.getStationName());
-        originalRoomPost.setStationName(updateRoomPost.getStationName());
+        Location location = validateLocation(updateRoomPost.getLocation());
 
+        originalRoomPost.setLocation(location);
+        originalRoomPost.setStationName(updateRoomPost.getStationName());
         originalRoomPost.setPrice(updateRoomPost.getPrice());
         originalRoomPost.setRoomType(getEnumFromString(RoomType.class, updateRoomPost.getRoomType()));
         originalRoomPost.setTotalPax(updateRoomPost.getTotalPax());
@@ -230,7 +243,6 @@ public class RoomPostServiceImpl implements RoomPostService{
         originalRoomPost.setSharePub(getEnumFromString(SharePub.class, updateRoomPost.getSharePub()));
         originalRoomPost.setAirConTime(getEnumFromString(AirConTime.class, updateRoomPost.getAirConTime()));
         originalRoomPost.setAllowVisitor(updateRoomPost.isAllowVisitor());
-        originalRoomPost.setLocation(getEnumFromString(Location.class, updateRoomPost.getLocation()));
         originalRoomPost.setPropertyType(getEnumFromString(PropertyType.class, updateRoomPost.getPropertyType()));
         originalRoomPost.setDescription(updateRoomPost.getDescription());
 
@@ -391,9 +403,6 @@ public class RoomPostServiceImpl implements RoomPostService{
                 case "cookingAllowance":
                     searchFilter.setCookingAllowance(getEnumFromString(CookingAllowance.class, value));
                     break;
-                case "location":
-                    searchFilter.setLocation(getEnumFromString(Location.class, value));
-                    break;
                 case "propertyType":
                     searchFilter.setPropertyType(getEnumFromString(PropertyType.class, value));
                     break;
@@ -421,6 +430,7 @@ public class RoomPostServiceImpl implements RoomPostService{
         return searchFilter;
     }
 
+    // TODO check lowercase string
     private <T extends Enum<T>> T getEnumFromString(Class<T> enumClass, String value){
         if(enumClass.isEnum()){
             for(T enumConstant: enumClass.getEnumConstants()){
@@ -445,7 +455,6 @@ public class RoomPostServiceImpl implements RoomPostService{
         metaData.put("sharePub", SharePub.getValueList());
         metaData.put("airConTime", AirConTime.getValueList());
         metaData.put("allowVisitor", "boolean");
-        metaData.put("location", Location.getValueList());
         metaData.put("propertyType", PropertyType.getValueList());
         metaData.put("description", "room post description");
         metaData.put("roomPhotoFiles", "Image File array");

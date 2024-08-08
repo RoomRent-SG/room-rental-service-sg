@@ -3,7 +3,6 @@ package com.thiha.roomrent.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thiha.roomrent.enums.AirConTime;
 import com.thiha.roomrent.enums.CookingAllowance;
-import com.thiha.roomrent.enums.Location;
 import com.thiha.roomrent.enums.PropertyType;
 import com.thiha.roomrent.enums.RoomType;
 import com.thiha.roomrent.enums.SharePub;
@@ -17,7 +16,7 @@ import lombok.Data;
  @Data
 public class RoomPostSearchFilter {
     private String stationName;
-    private Location location;
+    private String location;
     private Double minPrice;
     private Double maxPrice;
     private RoomType roomType;

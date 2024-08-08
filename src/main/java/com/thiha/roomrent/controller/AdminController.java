@@ -14,18 +14,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.thiha.roomrent.dto.AgentDto;
+import com.thiha.roomrent.dto.LocationDto;
+import com.thiha.roomrent.dto.LocationRequest;
 import com.thiha.roomrent.dto.MrtLineDto;
 import com.thiha.roomrent.dto.MrtLineRequest;
 import com.thiha.roomrent.dto.StationDto;
 import com.thiha.roomrent.dto.StationRequest;
 import com.thiha.roomrent.service.AgentService;
+import com.thiha.roomrent.service.LocationService;
 import com.thiha.roomrent.service.LogoutService;
 import com.thiha.roomrent.service.MrtLineService;
 import com.thiha.roomrent.service.StationService;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 
 
 @RestController
@@ -40,6 +41,8 @@ public class AdminController {
     private MrtLineService mrtLineService;
     @Autowired
     private StationService stationService;
+    @Autowired
+    private LocationService locationService;
 
 
     @GetMapping("/agents")
@@ -101,4 +104,9 @@ public class AdminController {
         return new ResponseEntity<>(station, HttpStatus.CREATED);
     }
 
+    @PostMapping("/location")
+    public ResponseEntity<LocationDto> createNewLocation(@RequestBody LocationRequest request){
+        LocationDto location = locationService.createLocation(request);
+        return new ResponseEntity<>(location, HttpStatus.OK);
+    }
 }

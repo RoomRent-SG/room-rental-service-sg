@@ -10,5 +10,6 @@ public interface LocationService {
     LocationDto updateLocation(LocationRequest request, Long locationId);
     List<LocationDto> getAllLocations();
     LocationDto getLocation(Long locationId);
+    LocationDto getLocationByName(String location);
     void deleteLocation(Long locationId);
 }
