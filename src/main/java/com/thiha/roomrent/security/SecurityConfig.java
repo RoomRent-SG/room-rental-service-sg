@@ -32,10 +32,10 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests((authorizeRequests) -> 
-                authorizeRequests.requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("api/public/**").permitAll()
-                .requestMatchers("api/agent/**").hasRole("AGENT")
-                .requestMatchers("api/admin/**").hasRole("ADMIN")
+                authorizeRequests.requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers("api/v1/public/**").permitAll()
+                .requestMatchers("api/v1/agent/**").hasRole("AGENT")
+                .requestMatchers("api/v1/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
                 .sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)

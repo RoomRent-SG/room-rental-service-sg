@@ -30,7 +30,6 @@ import com.thiha.roomrent.dto.RoomPostDto;
 import com.thiha.roomrent.dto.RoomPostRegisterDto;
 import com.thiha.roomrent.enums.AirConTime;
 import com.thiha.roomrent.enums.CookingAllowance;
-import com.thiha.roomrent.enums.Location;
 import com.thiha.roomrent.enums.PropertyType;
 import com.thiha.roomrent.enums.RoomType;
 import com.thiha.roomrent.enums.SharePub;
@@ -39,9 +38,11 @@ import com.thiha.roomrent.exceptions.EntityNotFoundException;
 import com.thiha.roomrent.mapper.AgentMapper;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.JwtToken;
+import com.thiha.roomrent.model.Location;
 import com.thiha.roomrent.model.RoomPhoto;
 import com.thiha.roomrent.model.RoomPost;
 import com.thiha.roomrent.repository.AgentRepository;
+import com.thiha.roomrent.repository.LocationRepository;
 import com.thiha.roomrent.repository.RoomPostRepository;
 import com.thiha.roomrent.service.S3ImageService;
 import com.thiha.roomrent.service.StationService;
@@ -66,12 +67,16 @@ public class RoomPostServiceTest {
     @Mock
     private StationService stationService;
 
+    @Mock
+    private LocationRepository locationRepository;
+
     @Rule
 	public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
     private RoomPostRegisterDto roomPostRegisterDto;
     private RoomPost roomPost;
     private Agent agent;
+    private Location location;
     private AgentDto agentDto;
     private MultipartFile mockMultipartFile;
     private List<MultipartFile> imageFiles = new ArrayList<>();
@@ -89,7 +94,8 @@ public class RoomPostServiceTest {
                             DateTimeHandler.getUTCNow()
                         );
         agentDto = AgentMapper.mapToAgentDto(agent);
-
+        location = new Location(1L, "Baliester", null);
+        
         mockMultipartFile = new MockMultipartFile(
                                             "profileImage",
                                             "testimage.jpg",
@@ -124,7 +130,7 @@ public class RoomPostServiceTest {
                     .cookingAllowance(CookingAllowance.COOKING_ALLOWED)
                     .description("MasterRoom for rent")
                     .id(11L)
-                    .location(Location.BALESTIER)
+                    .location(location)
                     .postedAt(DateTimeHandler.getUTCNow())
                     .isArchived(false)
                     .price(1600.0)
@@ -145,6 +151,10 @@ public class RoomPostServiceTest {
 
         //mock s3ImageSerive
         doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));
+
+        //mock locationService
+        when(locationRepository.findLocationByName(anyString())).thenReturn(Optional.of(location));
+
         RoomPostDto createdRoomPostDto = roomPostService.createRoomPost(roomPostRegisterDto, agentDto);
         
         verify(imageService, times(1)).uploadImage(anyString(), any(MultipartFile.class));
@@ -153,7 +163,7 @@ public class RoomPostServiceTest {
 
     @Test
     public void findRoomPostByIdSucced() throws IOException{
-       //mock roompostrepo
+       when(locationRepository.findLocationByName(anyString())).thenReturn(Optional.of(location));
        when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
        when(agentRepository.findById(1L)).thenReturn(Optional.of(agent));
        //mock s3ImageSerive
@@ -168,7 +178,7 @@ public class RoomPostServiceTest {
 
     @Test
     public void findActiveRoomPostByAgentIdSuceed() throws IOException{
-       //mock roompostrepo
+       when(locationRepository.findLocationByName(anyString())).thenReturn(Optional.of(location));
        when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
        when(agentRepository.findById(1L)).thenReturn(Optional.of(agent));
        //mock s3ImageSerive
@@ -210,7 +220,7 @@ public class RoomPostServiceTest {
                                                     .build();
         when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
         when(stationService.getStationByName("Bugis")).thenReturn("Bugis");
-
+        when(locationRepository.findLocationByName(anyString())).thenReturn(Optional.of(location));
         try {
             doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));
         } catch (IOException e) {

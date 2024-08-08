@@ -5,13 +5,11 @@ import java.util.Date;
 import java.util.List;
 import com.thiha.roomrent.enums.AirConTime;
 import com.thiha.roomrent.enums.CookingAllowance;
-import com.thiha.roomrent.enums.Location;
 import com.thiha.roomrent.enums.PropertyType;
 import com.thiha.roomrent.enums.RoomType;
 import com.thiha.roomrent.enums.SharePub;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.RoomPhoto;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,7 +30,7 @@ public class RoomPostDto implements Serializable{
     private SharePub sharePub;
     private AirConTime airConTime;
     private boolean allowVisitor;
-    private Location location;
+    private String location;
     private PropertyType propertyType;
     private String description;
     private String thumbnailImage;

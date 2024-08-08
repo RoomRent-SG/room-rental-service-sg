@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 import com.thiha.roomrent.enums.AirConTime;
 import com.thiha.roomrent.enums.CookingAllowance;
-import com.thiha.roomrent.enums.Location;
 import com.thiha.roomrent.enums.PropertyType;
 import com.thiha.roomrent.enums.RoomType;
 import com.thiha.roomrent.enums.SharePub;
@@ -78,11 +77,6 @@ public class RoomPost implements Serializable{
     @Column(name = "allow_visitor", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean allowVisitor;
 
-
-    @Column(name = "location", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Location location;
-
     @Column(name = "property_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private PropertyType propertyType;
@@ -98,6 +92,10 @@ public class RoomPost implements Serializable{
 
     @Column(name = "thumbnail_image", nullable = false)
     private String thumbnailImage;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "location_id")
+    private Location location;
 
 
     @ManyToOne(optional = false)
