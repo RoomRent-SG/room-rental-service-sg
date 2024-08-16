@@ -19,7 +19,7 @@ public interface RoomPostRepository extends JpaRepository<RoomPost, Long>, JpaSp
    List<RoomPost> findAllRoomPostsByAgentId(@Param("agentId")Long agentId);
 
    @Query("SELECT roomPost FROM RoomPost roomPost WHERE roomPost.agent.id = :agentId AND roomPost.isArchived=false")
-   List<RoomPost> findActiveRoomPostsByAgentId(@Param("agentId")Long agentId);
+   Page<RoomPost> findActiveRoomPostsByAgentId(@Param("agentId")Long agentId, Pageable pageable);
 
    @Query("SELECT roomPost FROM RoomPost roomPost WHERE roomPost.agent.id = :agentId AND roomPost.isArchived=true")
    List<RoomPost> findArchivedRoomPostsByAgentId(@Param("agentId")Long agentId);

@@ -14,10 +14,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.thiha.roomrent.dto.AgentDto;
 import com.thiha.roomrent.dto.AgentRegisterDto;
+import com.thiha.roomrent.dto.AllRoomPostsResponse;
 import com.thiha.roomrent.dto.RoomPostDto;
+import com.thiha.roomrent.dto.RoomPostListDto;
 import com.thiha.roomrent.dto.RoomPostRegisterDto;
 import com.thiha.roomrent.enums.UserRole;
 import com.thiha.roomrent.exceptions.EntityNotFoundException;
@@ -75,9 +78,12 @@ public class AgentController {
     }
 
     @GetMapping("/room-post/active")
-    public ResponseEntity<List<RoomPostDto>> getActiveRoomPosts(){
+    public ResponseEntity<AllRoomPostsResponse> getActiveRoomPosts(
+         @RequestParam(value = "pageNo", defaultValue = "1", required = false)int pageNo,
+        @RequestParam(value = "pageSize", defaultValue = "10", required = false ) int pageSize
+    ){
         AgentDto currentAgent = getCurrentAgent();
-        List<RoomPostDto> roomPosts = roomPostService.getActiveRoomPostsByAgentId(currentAgent.getId());
+        AllRoomPostsResponse roomPosts = roomPostService.getActiveRoomPostsByAgentId(currentAgent.getId(), pageNo-1, pageSize);
         return new ResponseEntity<>(roomPosts, HttpStatus.OK);
     }
 
@@ -107,6 +113,7 @@ public class AgentController {
     public ResponseEntity<RoomPostDto> updateRoomPost(@ModelAttribute RoomPostRegisterDto editedRoomPost, @PathVariable Long id){
         AgentDto currentAgent = getCurrentAgent();
         roomPostValidator.doVaildation(editedRoomPost);
+        System.out.println("Property Type is null and get past.."+ editedRoomPost.getPropertyType().getClass());
         RoomPostDto updatedRoomPost = roomPostService.updateRoomPost(id, currentAgent, editedRoomPost);
         return new ResponseEntity<>(updatedRoomPost, HttpStatus.OK);
     }

@@ -14,7 +14,7 @@ public interface RoomPostService {
    RoomPostDto updateRoomPost(Long postId,AgentDto agent, RoomPostRegisterDto updateRoomPost);
    RoomPostDto reactivateRoomPost(Long id, AgentDto currentAgent);
    List<RoomPostDto> getRoomPostsByAgentId(Long agentId);
-   List<RoomPostDto> getActiveRoomPostsByAgentId(Long agentId);
+   AllRoomPostsResponse getActiveRoomPostsByAgentId(Long agentId, int pageNo, int pageSize);
    List<RoomPostDto> getArchivedRoomPostsByAgentId(Long agentId);
    AllRoomPostsResponse getAllActiveRoomPosts(int pageNo, int pageSize, Map<String, String> searchFilter);
    void deleteRoomPostById(Long id, AgentDto currentAgent);

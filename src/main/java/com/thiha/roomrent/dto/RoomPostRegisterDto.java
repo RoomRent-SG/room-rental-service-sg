@@ -1,13 +1,13 @@
 package com.thiha.roomrent.dto;
 
-import java.util.Date;
-import java.util.List;
 
+import java.util.List;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.web.multipart.MultipartFile;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.thiha.roomrent.model.Agent;
-import com.thiha.roomrent.model.RoomPhoto;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,10 +21,9 @@ import lombok.Setter;
 @Setter
 @Builder
 public class RoomPostRegisterDto {
-    @JsonIgnore
-    private Long id;
-
+   
     @NotNull(message = "Station name cannot be null")
+    @NotEmpty(message = "Station name cannot be empty")
     private String stationName;
 
     @NotNull(message = "Address cannot be null")
@@ -34,41 +33,33 @@ public class RoomPostRegisterDto {
      */
     @Range(min = 300, message = "Price is not realistic")
     private double price;
-    @JsonIgnore
-    private Date postedAt;
 
-    @NotNull(message = "Room Type cannot be null")
+    @NotBlank(message = "Room Type cannot be null")
     private String roomType;
 
-    @NotNull(message = "Total person cannot be null")
+    @Min(value = 1, message = "Total person must be greater than 0")
     private int totalPax;
 
-    @NotNull(message = "Cooking Allowance cannot be null")
+    @NotBlank(message = "Cooking Allowance cannot be empty")
     private String cookingAllowance;
 
-    @NotNull(message = "Pub Share field cannot be null")
+    @NotBlank(message = "Pub Share field cannot be null")
     private String sharePub;
 
-    @NotNull(message = "AirconTime field cannot be null")
+    @NotBlank(message = "AirconTime field cannot be null")
     private String airConTime;
 
-    @NotNull(message = "AllowVisitor field cannot be null")
     private boolean allowVisitor;
 
-    @NotNull(message = "Location cannot be null")
+    @NotBlank(message = "Location cannot be null")
     private String location;
 
-    @NotNull(message = "Property type cannot be null") 
+    @NotBlank(message = "Property type cannot be empty")
     private String propertyType;
 
     private List<MultipartFile> roomPhotoFiles;
 
-    @NotNull(message = "Description cannot be null")
+    @NotBlank(message = "Description cannot be null")
     private String description;
 
-    @JsonIgnore
-    private Agent agent;
-    
-    @JsonIgnore
-    private List<RoomPhoto> roomPhotos;
 }

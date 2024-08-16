@@ -81,7 +81,7 @@ public class AgentServiceImpl implements AgentService{
 
     private void checkProfileImageIsPresent(MultipartFile profileImage){
         if (profileImage == null || profileImage.isEmpty()) {
-            throw new ProfileImageNotFoundException("Profile Image cannot be null");
+            throw new ProfileImageNotFoundException("Profile Image should not be empty");
         }
     }
 

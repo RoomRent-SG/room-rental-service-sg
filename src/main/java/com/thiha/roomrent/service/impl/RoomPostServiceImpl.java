@@ -356,13 +356,18 @@ public class RoomPostServiceImpl implements RoomPostService{
     
 
     @Override
-    public List<RoomPostDto> getActiveRoomPostsByAgentId(Long agentId) {
-        List<RoomPost> roomPosts = roomPostRepository.findActiveRoomPostsByAgentId(agentId);
-        List<RoomPostDto> roomPostDtos = new ArrayList<>();
-        for(RoomPost roomPost: roomPosts){
-            roomPostDtos.add(RoomPostMapper.mapToRoomPostDto(roomPost));
-        }
-        return roomPostDtos;
+    public AllRoomPostsResponse getActiveRoomPostsByAgentId(Long agentId, int pageNo, int pageSize) {
+        pageNo = pageNo <0 ? 0: pageNo;
+        pageSize = pageSize < 0? 10: pageSize;
+        System.out.println("pageno"+pageNo+"PageSize"+pageSize);
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("postedAt").descending());
+
+        Page<RoomPost> activeRoomPostsPage = roomPostRepository.findActiveRoomPostsByAgentId(agentId, pageable);
+        List<RoomPost> activeRoomPosts = activeRoomPostsPage.getContent();
+        List<RoomPostListDto> activeRoomPostList = convertToRoomPostDtoList(activeRoomPosts);
+        System.out.println("size"+activeRoomPostList.size());
+        AllRoomPostsResponse response = createRoomPostListResponse(activeRoomPostList, activeRoomPostsPage);
+        return response;
     }
 
     @Override

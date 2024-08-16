@@ -1,5 +1,6 @@
 package com.thiha.roomrent;
 
+import com.thiha.roomrent.dto.AllRoomPostsResponse;
 import com.thiha.roomrent.enums.*;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.JwtToken;
@@ -21,6 +22,10 @@ import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.multipart.MultipartFile;
@@ -150,10 +155,10 @@ public class RoomPostRepositoryTest {
         RoomPost roomPostToSave = roomPost;
         roomPostToSave.setArchived(true);
         roomPostRepository.save(roomPostToSave);
+        Pageable pageable = PageRequest.of(1, 2, Sort.by("postedAt").descending());
+        Page<RoomPost> roomPostsResponse = roomPostRepository.findActiveRoomPostsByAgentId(agent.getId(), pageable );
 
-        List<RoomPost> roomPostsList = roomPostRepository.findActiveRoomPostsByAgentId(agent.getId());
-
-        Assertions.assertThat(roomPostsList.size()).isEqualTo(0);
+        Assertions.assertThat(roomPostsResponse.getSize()).isEqualTo(0);
     }
 
     @Test
