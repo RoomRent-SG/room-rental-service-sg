@@ -69,6 +69,9 @@ public class RoomPostServiceImpl implements RoomPostService{
     @Autowired
     private LocationService locationService;
 
+
+
+
     @Value("${aws.cloudFront}")
     private String cloudFrontUrl;
 
