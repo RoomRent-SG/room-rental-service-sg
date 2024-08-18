@@ -1,6 +1,5 @@
 package com.thiha.roomrent;
 
-import com.thiha.roomrent.dto.AllRoomPostsResponse;
 import com.thiha.roomrent.enums.*;
 import com.thiha.roomrent.model.Agent;
 import com.thiha.roomrent.model.JwtToken;
@@ -158,7 +157,7 @@ public class RoomPostRepositoryTest {
         Pageable pageable = PageRequest.of(1, 2, Sort.by("postedAt").descending());
         Page<RoomPost> roomPostsResponse = roomPostRepository.findActiveRoomPostsByAgentId(agent.getId(), pageable );
 
-        Assertions.assertThat(roomPostsResponse.getSize()).isEqualTo(0);
+        Assertions.assertThat(roomPostsResponse.getContent().size()).isEqualTo(0);
     }
 
     @Test
@@ -168,7 +167,9 @@ public class RoomPostRepositoryTest {
         roomPostToSave.setArchived(false);
         RoomPost savedRoomPost = roomPostRepository.save(roomPostToSave);
 
-        List<RoomPost> roomPostsList = roomPostRepository.findActiveRoomPostsByAgentId(agent.getId());
+        Pageable pageable = PageRequest.of(0, 2, Sort.by("postedAt").descending());
+        Page<RoomPost> roomPostsResponse = roomPostRepository.findActiveRoomPostsByAgentId(agent.getId(), pageable );
+        List<RoomPost> roomPostsList = roomPostsResponse.getContent();
 
         Assertions.assertThat(roomPostsList.size()).isEqualTo(1);
         Assertions.assertThat(roomPostsList.get(0).getLocation()).isEqualTo(savedRoomPost.getLocation());

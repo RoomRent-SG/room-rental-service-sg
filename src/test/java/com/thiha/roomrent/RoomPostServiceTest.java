@@ -23,9 +23,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import com.thiha.roomrent.dto.AgentDto;
+import com.thiha.roomrent.dto.AllRoomPostsResponse;
 import com.thiha.roomrent.dto.RoomPostDto;
 import com.thiha.roomrent.dto.RoomPostListDto;
 import com.thiha.roomrent.dto.RoomPostRegisterDto;
@@ -49,6 +51,10 @@ import com.thiha.roomrent.service.S3ImageService;
 import com.thiha.roomrent.service.StationService;
 import com.thiha.roomrent.service.impl.RoomPostServiceImpl;
 import com.thiha.roomrent.utility.DateTimeHandler;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class RoomPostServiceTest {
@@ -184,12 +190,14 @@ public class RoomPostServiceTest {
        
        verify(imageService, times(1)).uploadImage(anyString(), any(MultipartFile.class));
 
-       when(roomPostRepository.findActiveRoomPostsByAgentId(agent.getId())).thenReturn(Arrays.asList(roomPost));
+       Pageable pageable = PageRequest.of(0, 2, Sort.by("postedAt").descending());
+        Page<RoomPost> roomPostsResponse = new PageImpl<>(Arrays.asList(roomPost));
+       when(roomPostRepository.findActiveRoomPostsByAgentId(agent.getId(), pageable)).thenReturn(roomPostsResponse);
 
-       List<RoomPostListDto> roomPosts = roomPostService.getActiveRoomPostsByAgentId(agent.getId());
-
+       AllRoomPostsResponse roomPostResponse = roomPostService.getActiveRoomPostsByAgentId(agent.getId(), 0, 2);
+        List<RoomPostListDto> roomPosts = roomPostResponse.getAllRoomPosts();
        Assertions.assertThat(roomPosts.size()).isEqualTo(1);
-       verify(roomPostRepository, times(1)).findActiveRoomPostsByAgentId(agent.getId());
+       verify(roomPostRepository, times(1)).findActiveRoomPostsByAgentId(agent.getId(), pageable);
     }
 
     @Test
