@@ -37,6 +37,7 @@ public class AuthController {
    @PostMapping("/agent/register")
    public ResponseEntity<AgentDto> registerAgent(@ModelAttribute AgentRegisterDto registeredAgent){
         agentRegisterValidator.doVaildation(registeredAgent);
+        System.out.println("inside auth controller");
         AgentDto savedAgent =  agentService.createAgent(registeredAgent);
         return new ResponseEntity<>(savedAgent, HttpStatus.CREATED);
     }

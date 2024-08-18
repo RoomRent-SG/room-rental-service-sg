@@ -23,10 +23,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import com.thiha.roomrent.dto.AgentDto;
+import com.thiha.roomrent.dto.AllRoomPostsResponse;
 import com.thiha.roomrent.dto.RoomPostDto;
+import com.thiha.roomrent.dto.RoomPostListDto;
 import com.thiha.roomrent.dto.RoomPostRegisterDto;
 import com.thiha.roomrent.enums.AirConTime;
 import com.thiha.roomrent.enums.CookingAllowance;
@@ -48,6 +51,10 @@ import com.thiha.roomrent.service.S3ImageService;
 import com.thiha.roomrent.service.StationService;
 import com.thiha.roomrent.service.impl.RoomPostServiceImpl;
 import com.thiha.roomrent.utility.DateTimeHandler;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class RoomPostServiceTest {
@@ -105,19 +112,15 @@ public class RoomPostServiceTest {
         imageFiles.add(mockMultipartFile);
 
         roomPostRegisterDto = RoomPostRegisterDto.builder()
-                                .agent(agent)
                                 .airConTime("Unlimited")
                                 .allowVisitor(true)
                                 .cookingAllowance("Cooking Allowed")
                                 .description("MasterRoom for rent")
-                                .id(11L)
                                 .location("Jurong East")
-                                .postedAt(DateTimeHandler.getUTCNow())
                                 .price(1600.0)
                                 .propertyType("Condominium")
                                 .roomType("Master Room")
                                 .roomPhotoFiles(imageFiles)
-                                .roomPhotos(new ArrayList<RoomPhoto>())
                                 .sharePub("Inclusive")
                                 .stationName("Bugis")
                                 .totalPax(2)
@@ -187,13 +190,14 @@ public class RoomPostServiceTest {
        
        verify(imageService, times(1)).uploadImage(anyString(), any(MultipartFile.class));
 
-       when(roomPostRepository.findActiveRoomPostsByAgentId(agent.getId())).thenReturn(Arrays.asList(roomPost));
+       Pageable pageable = PageRequest.of(0, 2, Sort.by("postedAt").descending());
+        Page<RoomPost> roomPostsResponse = new PageImpl<>(Arrays.asList(roomPost));
+       when(roomPostRepository.findActiveRoomPostsByAgentId(agent.getId(), pageable)).thenReturn(roomPostsResponse);
 
-       List<RoomPostDto> roomPosts = roomPostService.getActiveRoomPostsByAgentId(agent.getId());
-
+       AllRoomPostsResponse roomPostResponse = roomPostService.getActiveRoomPostsByAgentId(agent.getId(), 0, 2);
+        List<RoomPostListDto> roomPosts = roomPostResponse.getAllRoomPosts();
        Assertions.assertThat(roomPosts.size()).isEqualTo(1);
-       Assertions.assertThat(roomPosts.get(0).getAgent().getUsername()).isEqualTo(agent.getUsername());
-       verify(roomPostRepository, times(1)).findActiveRoomPostsByAgentId(agent.getId());
+       verify(roomPostRepository, times(1)).findActiveRoomPostsByAgentId(agent.getId(), pageable);
     }
 
     @Test
@@ -201,19 +205,15 @@ public class RoomPostServiceTest {
         when(roomPostRepository.findById(anyLong())).thenReturn(Optional.of(roomPost));
 
         RoomPostRegisterDto updatedRegisterRoomPost = RoomPostRegisterDto.builder()
-                                                    .agent(agent)
                                                     .airConTime("Unlimited")
                                                     .allowVisitor(true)
                                                     .cookingAllowance("Allowed")
                                                     .description("MasterRoom for rent")
-                                                    .id(11L)
                                                     .location("Bukit")
-                                                    .postedAt(DateTimeHandler.getUTCNow())
                                                     .price(1600.0)
                                                     .propertyType("Condominium")
                                                     .roomType("Master Room")
                                                     .roomPhotoFiles(imageFiles)
-                                                    .roomPhotos(new ArrayList<RoomPhoto>())
                                                     .sharePub("Inclusive")
                                                     .stationName("Bugis")
                                                     .totalPax(2)
@@ -231,7 +231,7 @@ public class RoomPostServiceTest {
 
         RoomPostDto updatedRoomPostDto =  roomPostService.updateRoomPost(anyLong(), agentDto, updatedRegisterRoomPost);
 
-        Assertions.assertThat(updatedRoomPostDto.getId()).isEqualTo(updatedRegisterRoomPost.getId());
+        Assertions.assertThat(updatedRoomPostDto.getAddress()).isEqualTo(updatedRegisterRoomPost.getAddress());
         verify(roomPostRepository, times(1)).findById(anyLong());
         verify(roomPostRepository, times(1)).save(any(RoomPost.class));
 
@@ -242,19 +242,15 @@ public class RoomPostServiceTest {
         when(roomPostRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         RoomPostRegisterDto updatedRegisterRoomPost = RoomPostRegisterDto.builder()
-                                                    .agent(agent)
                                                     .airConTime("Unlimited")
                                                     .allowVisitor(true)
                                                     .cookingAllowance("Allowed")
                                                     .description("MasterRoom for rent")
-                                                    .id(11L)
                                                     .location("Jurong East")
-                                                    .postedAt(DateTimeHandler.getUTCNow())
                                                     .price(1600.0)
                                                     .propertyType("Condominium")
                                                     .roomType("Master Room")
                                                     .roomPhotoFiles(imageFiles)
-                                                    .roomPhotos(new ArrayList<RoomPhoto>())
                                                     .sharePub("Inclusive")
                                                     .stationName("Bugis")
                                                     .totalPax(2)
@@ -274,19 +270,14 @@ public class RoomPostServiceTest {
         when(roomPostRepository.findById(anyLong())).thenReturn(Optional.of(roomPost));
 
         RoomPostRegisterDto updatedRegisterRoomPost = RoomPostRegisterDto.builder()
-                                                    .agent(agent)
                                                     .airConTime("Unlimited")
                                                     .allowVisitor(true)
                                                     .cookingAllowance("Allowed")
                                                     .description("MasterRoom for rent")
-                                                    .id(11L)
-                                                    .location("Jurong East")
-                                                    .postedAt(DateTimeHandler.getUTCNow())
-                                                    .price(1600.0)
+                                                    .location("Jurong East")                                                    .price(1600.0)
                                                     .propertyType("Condominium")
                                                     .roomType("Master Room")
                                                     .roomPhotoFiles(imageFiles)
-                                                    .roomPhotos(new ArrayList<RoomPhoto>())
                                                     .sharePub("Inclusive")
                                                     .stationName("Bugis")
                                                     .totalPax(2)

@@ -21,6 +21,10 @@ import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.multipart.MultipartFile;
@@ -150,10 +154,10 @@ public class RoomPostRepositoryTest {
         RoomPost roomPostToSave = roomPost;
         roomPostToSave.setArchived(true);
         roomPostRepository.save(roomPostToSave);
+        Pageable pageable = PageRequest.of(1, 2, Sort.by("postedAt").descending());
+        Page<RoomPost> roomPostsResponse = roomPostRepository.findActiveRoomPostsByAgentId(agent.getId(), pageable );
 
-        List<RoomPost> roomPostsList = roomPostRepository.findActiveRoomPostsByAgentId(agent.getId());
-
-        Assertions.assertThat(roomPostsList.size()).isEqualTo(0);
+        Assertions.assertThat(roomPostsResponse.getContent().size()).isEqualTo(0);
     }
 
     @Test
@@ -163,7 +167,9 @@ public class RoomPostRepositoryTest {
         roomPostToSave.setArchived(false);
         RoomPost savedRoomPost = roomPostRepository.save(roomPostToSave);
 
-        List<RoomPost> roomPostsList = roomPostRepository.findActiveRoomPostsByAgentId(agent.getId());
+        Pageable pageable = PageRequest.of(0, 2, Sort.by("postedAt").descending());
+        Page<RoomPost> roomPostsResponse = roomPostRepository.findActiveRoomPostsByAgentId(agent.getId(), pageable );
+        List<RoomPost> roomPostsList = roomPostsResponse.getContent();
 
         Assertions.assertThat(roomPostsList.size()).isEqualTo(1);
         Assertions.assertThat(roomPostsList.get(0).getLocation()).isEqualTo(savedRoomPost.getLocation());

@@ -55,9 +55,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ProfileImageNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleProfileImageNotFoundException(ProfileImageNotFoundException exception){
-        ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND.value(), exception.getErrorMessage());
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getErrorMessage());
         return ResponseEntity
-                            .status(HttpStatus.NOT_FOUND)
+                            .status(HttpStatus.BAD_REQUEST)
                             .body(response);
     }
 
@@ -105,6 +105,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidObjectException.class)
     public ResponseEntity<ErrorResponse> handleInvalidObjectException(InvalidObjectException exception){
         ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getErrorMessage());
+        System.out.println("Exception Handling in global hanlder..."+ exception.getErrorMessage());
         return ResponseEntity
                             .status(HttpStatus.BAD_REQUEST)
                             .body(response);
