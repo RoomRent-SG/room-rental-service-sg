@@ -181,7 +181,10 @@ public class RoomPostRepositoryTest {
         roomPostToSave.setArchived(true);
         RoomPost savedRoomPost = roomPostRepository.save(roomPostToSave);
 
-        List<RoomPost> roomPostsList = roomPostRepository.findArchivedRoomPostsByAgentId(agent.getId());
+        Pageable pageable = PageRequest.of(0, 2, Sort.by("postedAt").descending());
+
+        Page<RoomPost> roomPostsPage = roomPostRepository.findArchivedRoomPostsByAgentId(agent.getId(), pageable);
+        List<RoomPost> roomPostsList = roomPostsPage.getContent();
         Assertions.assertThat(roomPostsList.size()).isEqualTo(1);
         Assertions.assertThat(roomPostsList.get(0).getLocation()).isEqualTo(savedRoomPost.getLocation());
     }
@@ -192,8 +195,9 @@ public class RoomPostRepositoryTest {
         roomPostToSave.setArchived(false);
         roomPostRepository.save(roomPostToSave);
 
-        List<RoomPost> roomPostsList = roomPostRepository.findArchivedRoomPostsByAgentId(agent.getId());
-        roomPostsList = roomPostRepository.findArchivedRoomPostsByAgentId(agent.getId());
+        Pageable pageable = PageRequest.of(0, 2, Sort.by("postedAt").descending());
+        Page<RoomPost> roomPostsPage = roomPostRepository.findArchivedRoomPostsByAgentId(agent.getId(), pageable);
+        List<RoomPost> roomPostsList = roomPostsPage.getContent();
         Assertions.assertThat(roomPostsList.size()).isEqualTo(0);
     }
 }

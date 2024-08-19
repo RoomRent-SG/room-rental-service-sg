@@ -21,6 +21,7 @@ public class RoomPostMapper {
                         roomPost.getPropertyType(),
                         roomPost.getDescription(),
                         roomPost.getThumbnailImage(),
+                        roomPost.isArchived(),
                         roomPost.getAgent(),
                         roomPost.getPostedAt(),
                         roomPost.getRoomPhotos());
