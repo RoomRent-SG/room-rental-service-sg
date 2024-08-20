@@ -47,11 +47,13 @@ public class AgentServiceImpl implements AgentService{
 
     @Override
     public AgentDto createAgent(AgentRegisterDto registeredAgent) {
+        Date funStart = DateTimeHandler.getUTCNow();
         System.out.println("Start of createAgent method");
         validateAgentRegistrationDetails(registeredAgent);
 
         MultipartFile profileImage = registeredAgent.getProfileImage();
 
+        // TODO image upload is taking too long. Need to re-design
         uploadAgentProfileImage(profileImage);
 
         Agent newAgent = new Agent();
@@ -62,7 +64,12 @@ public class AgentServiceImpl implements AgentService{
         newAgent.setRole(UserRole.AGENT);
         newAgent.setConfirmationToken(confirmationToken);
 
+        Date start = DateTimeHandler.getUTCNow(); 
         String hashedPassword = passwordEncoder.encode(registeredAgent.getPassword());
+        Date end = DateTimeHandler.getUTCNow();
+        Long diffInSec = (end.getTime() - start.getTime()) / 1000000;
+        System.out.println("Password encoding lasts "+diffInSec);
+
         newAgent.setPassword(hashedPassword);
 
         newAgent.setUsername(registeredAgent.getUsername());
@@ -73,10 +80,17 @@ public class AgentServiceImpl implements AgentService{
         
         confirmationToken.setAgent(newAgent);
         
+        Date saveStart = DateTimeHandler.getUTCNow(); 
         Agent savedAgent = agentRepository.save(newAgent);
+        Date saveEnd = DateTimeHandler.getUTCNow();
+        Long saveTime = (saveEnd.getTime() - saveStart.getTime()) / 1000000;
+        System.out.println("Password encoding lasts "+saveTime);
 
         eventPublisher.publishEvent(new OnRegisterationCompleteEvent(savedAgent, savedAgent.getUsername(), "has registered"));
         System.out.println("End of createAgent method");
+        Date funEnd = DateTimeHandler.getUTCNow();
+        Long totalSec = (funEnd.getTime() - funStart.getTime()) / 1000;
+        System.out.println("Create lasts "+ totalSec);
         return AgentMapper.mapToAgentDto(savedAgent);
     }
 
@@ -100,17 +114,25 @@ public class AgentServiceImpl implements AgentService{
 
     // TODO combine query for email and username validation
     private void checkAlreadyRegisteredEmail(String email){
+        Date start = DateTimeHandler.getUTCNow();
         Optional<Agent> agentByEmail = agentRepository.findByEmail(email);
         if(agentByEmail.isPresent()){
             throw new EmailAlreadyRegisteredException("Email already registered");
         }
+        Date end = DateTimeHandler.getUTCNow();
+        Long diffInSec = (end.getTime() - start.getTime()) / 1000;
+        System.out.println("Email Check lasts "+diffInSec);
     }
 
     private void checkAlreadyRegisteredName(String name){
+        Date start = DateTimeHandler.getUTCNow(); 
         Optional<Agent> agentByName = agentRepository.findByUsername(name);
         if(agentByName.isPresent()){
             throw new NameAlreadyExistedException("Name already taken");
         }
+        Date end = DateTimeHandler.getUTCNow();
+        Long diffInSec = (end.getTime() - start.getTime()) / 1000;
+        System.out.println("Name Check lasts "+diffInSec);
     }
 
     private void checkProfileImageIsPresent(MultipartFile profileImage){
@@ -120,11 +142,15 @@ public class AgentServiceImpl implements AgentService{
     }
 
     private void uploadAgentProfileImage(MultipartFile profileImage){
+        Date start = DateTimeHandler.getUTCNow(); 
         try{
             imageService.uploadImage(profileImage.getOriginalFilename(), profileImage);
         }catch(IOException e){
             throw new S3ImageUploadException(e.getMessage());
         }
+        Date end = DateTimeHandler.getUTCNow();
+        Long diffInSec = (end.getTime() - start.getTime()) / 1000;
+        System.out.println("Image upload lasts "+diffInSec);
     }
 
     @Override
