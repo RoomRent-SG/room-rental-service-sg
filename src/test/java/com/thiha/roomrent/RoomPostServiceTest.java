@@ -40,7 +40,7 @@ import com.thiha.roomrent.enums.UserRole;
 import com.thiha.roomrent.exceptions.EntityNotFoundException;
 import com.thiha.roomrent.mapper.AgentMapper;
 import com.thiha.roomrent.model.Agent;
-import com.thiha.roomrent.model.JwtToken;
+import com.thiha.roomrent.model.ConfirmationToken;
 import com.thiha.roomrent.model.Location;
 import com.thiha.roomrent.model.RoomPhoto;
 import com.thiha.roomrent.model.RoomPost;
@@ -55,6 +55,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
 public class RoomPostServiceTest {
@@ -78,7 +79,7 @@ public class RoomPostServiceTest {
     private LocationRepository locationRepository;
 
     @Rule
-	public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
     private RoomPostRegisterDto roomPostRegisterDto;
     private RoomPost roomPost;
@@ -87,137 +88,143 @@ public class RoomPostServiceTest {
     private AgentDto agentDto;
     private MultipartFile mockMultipartFile;
     private List<MultipartFile> imageFiles = new ArrayList<>();
+    private ConfirmationToken confirmationToken;
 
     @BeforeEach
-    public void setup(){
-        agent = new Agent(1L,
-                            "tester7",
-                            "password",
-                            UserRole.AGENT,
-                            new ArrayList<JwtToken>(),
-                            "tester7@tt.com",
-                            "091111111",
-                            "profilephoto.com",
-                            DateTimeHandler.getUTCNow()
-                        );
+    public void setup() {
+        confirmationToken = new ConfirmationToken();
+        confirmationToken.setTokenValue(UUID.randomUUID());
+        confirmationToken.setCreatedAt(DateTimeHandler.getUTCNow());
+        agent = new Agent(
+                1L,
+                "tester8",
+                "password",
+                UserRole.AGENT,
+                null,
+                "tester8@test.com",
+                "09222222",
+                "imageUrl",
+                DateTimeHandler.getUTCNow(),
+                false,
+                confirmationToken);
+        confirmationToken.setAgent(agent);
         agentDto = AgentMapper.mapToAgentDto(agent);
         location = new Location(1L, "Baliester", null);
-        
+
         mockMultipartFile = new MockMultipartFile(
-                                            "profileImage",
-                                            "testimage.jpg",
-                                            "image/jpeg",
-                                            "test image content".getBytes()
-                                    );
+                "profileImage",
+                "testimage.jpg",
+                "image/jpeg",
+                "test image content".getBytes());
         imageFiles.add(mockMultipartFile);
 
         roomPostRegisterDto = RoomPostRegisterDto.builder()
-                                .airConTime("Unlimited")
-                                .allowVisitor(true)
-                                .cookingAllowance("Cooking Allowed")
-                                .description("MasterRoom for rent")
-                                .location("Jurong East")
-                                .price(1600.0)
-                                .propertyType("Condominium")
-                                .roomType("Master Room")
-                                .roomPhotoFiles(imageFiles)
-                                .sharePub("Inclusive")
-                                .stationName("Bugis")
-                                .totalPax(2)
-                                .build();
+                .airConTime("Unlimited")
+                .allowVisitor(true)
+                .cookingAllowance("Cooking Allowed")
+                .description("MasterRoom for rent")
+                .location("Jurong East")
+                .price(1600.0)
+                .propertyType("Condominium")
+                .roomType("Master Room")
+                .roomPhotoFiles(imageFiles)
+                .sharePub("Inclusive")
+                .stationName("Bugis")
+                .totalPax(2)
+                .build();
         roomPost = RoomPost.builder()
-                    .id(1L)
-                    .agent(agent)
-                    .airConTime(AirConTime.UNLIMITED)
-                    .allowVisitor(true)
-                    .cookingAllowance(CookingAllowance.COOKING_ALLOWED)
-                    .description("MasterRoom for rent")
-                    .id(11L)
-                    .location(location)
-                    .postedAt(DateTimeHandler.getUTCNow())
-                    .isArchived(false)
-                    .price(1600.0)
-                    .propertyType(PropertyType.CONDO)
-                    .roomType(RoomType.MASTER_ROOM)
-                    .roomPhotos(new ArrayList<RoomPhoto>())
-                    .sharePub(SharePub.INCLUSIVE)
-                    .stationName("Bouna Vista")
-                    .totalPax(2)
-                    .build();
+                .id(1L)
+                .agent(agent)
+                .airConTime(AirConTime.UNLIMITED)
+                .allowVisitor(true)
+                .cookingAllowance(CookingAllowance.COOKING_ALLOWED)
+                .description("MasterRoom for rent")
+                .id(11L)
+                .location(location)
+                .postedAt(DateTimeHandler.getUTCNow())
+                .isArchived(false)
+                .price(1600.0)
+                .propertyType(PropertyType.CONDO)
+                .roomType(RoomType.MASTER_ROOM)
+                .roomPhotos(new ArrayList<RoomPhoto>())
+                .sharePub(SharePub.INCLUSIVE)
+                .stationName("Bouna Vista")
+                .totalPax(2)
+                .build();
     }
 
     @Test
-    public void createRoomPostSucceed() throws IOException{
-        //mock roompostrepo
+    public void createRoomPostSucceed() throws IOException {
+        // mock roompostrepo
         when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
         when(agentRepository.findById(1L)).thenReturn(Optional.of(agent));
 
-        //mock s3ImageSerive
+        // mock s3ImageSerive
         doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));
 
-        //mock locationService
+        // mock locationService
         when(locationRepository.findLocationByName(anyString())).thenReturn(Optional.of(location));
 
         RoomPostDto createdRoomPostDto = roomPostService.createRoomPost(roomPostRegisterDto, agentDto);
-        
+
         verify(imageService, times(1)).uploadImage(anyString(), any(MultipartFile.class));
         Assertions.assertThat(createdRoomPostDto.getId()).isEqualTo(roomPost.getId());
     }
 
     @Test
-    public void findRoomPostByIdSucced() throws IOException{
-       when(locationRepository.findLocationByName(anyString())).thenReturn(Optional.of(location));
-       when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
-       when(agentRepository.findById(1L)).thenReturn(Optional.of(agent));
-       //mock s3ImageSerive
-       doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));
-       RoomPostDto createdRoomPostDto = roomPostService.createRoomPost(roomPostRegisterDto, agentDto);
-       
-       when(roomPostRepository.findById(anyLong())).thenReturn(Optional.of(roomPost));
-       RoomPostDto existingRoomPost = roomPostService.findRoomPostById(createdRoomPostDto.getId());
+    public void findRoomPostByIdSucced() throws IOException {
+        when(locationRepository.findLocationByName(anyString())).thenReturn(Optional.of(location));
+        when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
+        when(agentRepository.findById(1L)).thenReturn(Optional.of(agent));
+        // mock s3ImageSerive
+        doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));
+        RoomPostDto createdRoomPostDto = roomPostService.createRoomPost(roomPostRegisterDto, agentDto);
 
-       Assertions.assertThat(existingRoomPost.getDescription()).isEqualTo(createdRoomPostDto.getDescription());
+        when(roomPostRepository.findById(anyLong())).thenReturn(Optional.of(roomPost));
+        RoomPostDto existingRoomPost = roomPostService.findRoomPostById(createdRoomPostDto.getId());
+
+        Assertions.assertThat(existingRoomPost.getDescription()).isEqualTo(createdRoomPostDto.getDescription());
     }
 
     @Test
-    public void findActiveRoomPostByAgentIdSuceed() throws IOException{
-       when(locationRepository.findLocationByName(anyString())).thenReturn(Optional.of(location));
-       when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
-       when(agentRepository.findById(1L)).thenReturn(Optional.of(agent));
-       //mock s3ImageSerive
-       doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));
-       roomPostService.createRoomPost(roomPostRegisterDto, agentDto);
-       
-       verify(imageService, times(1)).uploadImage(anyString(), any(MultipartFile.class));
+    public void findActiveRoomPostByAgentIdSuceed() throws IOException {
+        when(locationRepository.findLocationByName(anyString())).thenReturn(Optional.of(location));
+        when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
+        when(agentRepository.findById(1L)).thenReturn(Optional.of(agent));
+        // mock s3ImageSerive
+        doNothing().when(imageService).uploadImage(anyString(), any(MultipartFile.class));
+        roomPostService.createRoomPost(roomPostRegisterDto, agentDto);
 
-       Pageable pageable = PageRequest.of(0, 2, Sort.by("postedAt").descending());
+        verify(imageService, times(1)).uploadImage(anyString(), any(MultipartFile.class));
+
+        Pageable pageable = PageRequest.of(0, 2, Sort.by("postedAt").descending());
         Page<RoomPost> roomPostsResponse = new PageImpl<>(Arrays.asList(roomPost));
-       when(roomPostRepository.findActiveRoomPostsByAgentId(agent.getId(), pageable)).thenReturn(roomPostsResponse);
+        when(roomPostRepository.findActiveRoomPostsByAgentId(agent.getId(), pageable)).thenReturn(roomPostsResponse);
 
-       AllRoomPostsResponse roomPostResponse = roomPostService.getActiveRoomPostsByAgentId(agent.getId(), 0, 2);
+        AllRoomPostsResponse roomPostResponse = roomPostService.getActiveRoomPostsByAgentId(agent.getId(), 0, 2);
         List<RoomPostListDto> roomPosts = roomPostResponse.getAllRoomPosts();
-       Assertions.assertThat(roomPosts.size()).isEqualTo(1);
-       verify(roomPostRepository, times(1)).findActiveRoomPostsByAgentId(agent.getId(), pageable);
+        Assertions.assertThat(roomPosts.size()).isEqualTo(1);
+        verify(roomPostRepository, times(1)).findActiveRoomPostsByAgentId(agent.getId(), pageable);
     }
 
     @Test
-    public void updateRoomPostWithValidIdSucceed(){
+    public void updateRoomPostWithValidIdSucceed() {
         when(roomPostRepository.findById(anyLong())).thenReturn(Optional.of(roomPost));
 
         RoomPostRegisterDto updatedRegisterRoomPost = RoomPostRegisterDto.builder()
-                                                    .airConTime("Unlimited")
-                                                    .allowVisitor(true)
-                                                    .cookingAllowance("Allowed")
-                                                    .description("MasterRoom for rent")
-                                                    .location("Bukit")
-                                                    .price(1600.0)
-                                                    .propertyType("Condominium")
-                                                    .roomType("Master Room")
-                                                    .roomPhotoFiles(imageFiles)
-                                                    .sharePub("Inclusive")
-                                                    .stationName("Bugis")
-                                                    .totalPax(2)
-                                                    .build();
+                .airConTime("Unlimited")
+                .allowVisitor(true)
+                .cookingAllowance("Allowed")
+                .description("MasterRoom for rent")
+                .location("Bukit")
+                .price(1600.0)
+                .propertyType("Condominium")
+                .roomType("Master Room")
+                .roomPhotoFiles(imageFiles)
+                .sharePub("Inclusive")
+                .stationName("Bugis")
+                .totalPax(2)
+                .build();
         when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
         when(stationService.getStationByName("Bugis")).thenReturn("Bugis");
         when(locationRepository.findLocationByName(anyString())).thenReturn(Optional.of(location));
@@ -229,7 +236,7 @@ public class RoomPostServiceTest {
 
         AgentDto agentDto = AgentMapper.mapToAgentDto(agent);
 
-        RoomPostDto updatedRoomPostDto =  roomPostService.updateRoomPost(anyLong(), agentDto, updatedRegisterRoomPost);
+        RoomPostDto updatedRoomPostDto = roomPostService.updateRoomPost(anyLong(), agentDto, updatedRegisterRoomPost);
 
         Assertions.assertThat(updatedRoomPostDto.getAddress()).isEqualTo(updatedRegisterRoomPost.getAddress());
         verify(roomPostRepository, times(1)).findById(anyLong());
@@ -238,71 +245,71 @@ public class RoomPostServiceTest {
     }
 
     @Test
-    public void updateRoomPostWithInvalidIdThrowsEntityNotFoundException(){
+    public void updateRoomPostWithInvalidIdThrowsEntityNotFoundException() {
         when(roomPostRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         RoomPostRegisterDto updatedRegisterRoomPost = RoomPostRegisterDto.builder()
-                                                    .airConTime("Unlimited")
-                                                    .allowVisitor(true)
-                                                    .cookingAllowance("Allowed")
-                                                    .description("MasterRoom for rent")
-                                                    .location("Jurong East")
-                                                    .price(1600.0)
-                                                    .propertyType("Condominium")
-                                                    .roomType("Master Room")
-                                                    .roomPhotoFiles(imageFiles)
-                                                    .sharePub("Inclusive")
-                                                    .stationName("Bugis")
-                                                    .totalPax(2)
-                                                    .build();
+                .airConTime("Unlimited")
+                .allowVisitor(true)
+                .cookingAllowance("Allowed")
+                .description("MasterRoom for rent")
+                .location("Jurong East")
+                .price(1600.0)
+                .propertyType("Condominium")
+                .roomType("Master Room")
+                .roomPhotoFiles(imageFiles)
+                .sharePub("Inclusive")
+                .stationName("Bugis")
+                .totalPax(2)
+                .build();
         AgentDto agentDto = AgentMapper.mapToAgentDto(agent);
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                                                 ()->{
-                                                    roomPostService.updateRoomPost(anyLong(), agentDto, updatedRegisterRoomPost);
-                                                 });
+                () -> {
+                    roomPostService.updateRoomPost(anyLong(), agentDto, updatedRegisterRoomPost);
+                });
         Assertions.assertThat(exception.getErrorMassage()).isEqualTo("RoomPost cannot be found");
         verify(roomPostRepository, times(1)).findById(anyLong());
         verify(roomPostRepository, never()).save(any(RoomPost.class));
     }
 
     @Test
-    public void updateRoomPostWithInvalidAgentThrowsEntityNotFoundException(){
+    public void updateRoomPostWithInvalidAgentThrowsEntityNotFoundException() {
         when(roomPostRepository.findById(anyLong())).thenReturn(Optional.of(roomPost));
 
         RoomPostRegisterDto updatedRegisterRoomPost = RoomPostRegisterDto.builder()
-                                                    .airConTime("Unlimited")
-                                                    .allowVisitor(true)
-                                                    .cookingAllowance("Allowed")
-                                                    .description("MasterRoom for rent")
-                                                    .location("Jurong East")                                                    .price(1600.0)
-                                                    .propertyType("Condominium")
-                                                    .roomType("Master Room")
-                                                    .roomPhotoFiles(imageFiles)
-                                                    .sharePub("Inclusive")
-                                                    .stationName("Bugis")
-                                                    .totalPax(2)
-                                                    .build();
+                .airConTime("Unlimited")
+                .allowVisitor(true)
+                .cookingAllowance("Allowed")
+                .description("MasterRoom for rent")
+                .location("Jurong East").price(1600.0)
+                .propertyType("Condominium")
+                .roomType("Master Room")
+                .roomPhotoFiles(imageFiles)
+                .sharePub("Inclusive")
+                .stationName("Bugis")
+                .totalPax(2)
+                .build();
         AgentDto invalidAgentDto = AgentDto.builder()
-                                            .id(22L)
-                                            .username("Invalid Agent")
-                                            .email("invalidagent.tt.com")
-                                            .password("password")
-                                            .createdAt(DateTimeHandler.getUTCNow())
-                                            .phoneNumber("134324343")
-                                            .profilePhoto("profile")
-                                            .role(UserRole.AGENT)
-                                            .build();
+                .id(22L)
+                .username("Invalid Agent")
+                .email("invalidagent.tt.com")
+                .password("password")
+                .createdAt(DateTimeHandler.getUTCNow())
+                .phoneNumber("134324343")
+                .profilePhoto("profile")
+                .role(UserRole.AGENT)
+                .build();
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-                                                 ()->{
-                                                    roomPostService.updateRoomPost(anyLong(), invalidAgentDto, updatedRegisterRoomPost);
-                                                 });
+                () -> {
+                    roomPostService.updateRoomPost(anyLong(), invalidAgentDto, updatedRegisterRoomPost);
+                });
         Assertions.assertThat(exception.getErrorMassage()).isEqualTo("RoomPost cannot be found");
         verify(roomPostRepository, times(1)).findById(anyLong());
         verify(roomPostRepository, never()).save(any(RoomPost.class));
     }
 
     @Test
-    public void deleteRoomPostByIdSucceed(){
+    public void deleteRoomPostByIdSucceed() {
         when(roomPostRepository.save(any(RoomPost.class))).thenReturn(roomPost);
 
         RoomPost savedRoomPost = roomPostRepository.save(roomPost);
@@ -325,5 +332,3 @@ public class RoomPostServiceTest {
     }
 
 }
-
-

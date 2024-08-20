@@ -12,6 +12,7 @@ import com.thiha.roomrent.auth.JwtUtils;
 import com.thiha.roomrent.dto.LoginRequestDto;
 import com.thiha.roomrent.dto.LoginResponseDto;
 import com.thiha.roomrent.exceptions.RefreshTokenInvalidException;
+import com.thiha.roomrent.exceptions.UserDisabledException;
 import com.thiha.roomrent.model.JwtToken;
 import com.thiha.roomrent.model.UserModel;
 import com.thiha.roomrent.security.UserDetailsImpl;
@@ -39,6 +40,10 @@ public class LoginServiceImpl implements LoginService{
             SecurityContextHolder.getContext().setAuthentication(authentication);
             UserDetailsImpl userDetails = (UserDetailsImpl)authentication.getPrincipal();
             UserModel user = userDetails.getUser();
+
+            if(!user.isEnabled()){
+                throw new UserDisabledException("User is currently disabled");
+            }
 
             String accessToken = jwtUtils.generateJwtToken(user, false);
             JwtToken token = new JwtToken();

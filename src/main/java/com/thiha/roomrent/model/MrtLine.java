@@ -24,16 +24,23 @@ public class MrtLine implements Serializable {
     private long id;
     @Column(name = "mrt_line_name", unique = true)
     private String name;
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.DETACH})
-    @JoinTable(
-        name = "line_stations",
-        joinColumns = @JoinColumn(name = "mrt_line_id"),
-        inverseJoinColumns = @JoinColumn(name = "station_id")
-    )
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.DETACH })
+    @JoinTable(name = "line_stations", joinColumns = @JoinColumn(name = "mrt_line_id"), inverseJoinColumns = @JoinColumn(name = "station_id"))
     private Set<MrtStation> stations;
 
     @Override
     public int hashCode() {
-    return Objects.hash(id, name);
+        return Objects.hash(id, name);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        MrtLine mrtLine = (MrtLine) o;
+        return id == mrtLine.id &&
+                Objects.equals(name, mrtLine.name);
     }
 }

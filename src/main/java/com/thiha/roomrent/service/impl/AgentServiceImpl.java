@@ -1,24 +1,30 @@
 package com.thiha.roomrent.service.impl;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.thiha.roomrent.dto.AgentDto;
 import com.thiha.roomrent.dto.AgentRegisterDto;
 import com.thiha.roomrent.enums.UserRole;
+import com.thiha.roomrent.event.OnRegisterationCompleteEvent;
 import com.thiha.roomrent.exceptions.S3ImageUploadException;
 import com.thiha.roomrent.exceptions.EmailAlreadyRegisteredException;
 import com.thiha.roomrent.exceptions.EntityNotFoundException;
+import com.thiha.roomrent.exceptions.InvalidRegistrationConfirmationTokenException;
 import com.thiha.roomrent.exceptions.NameAlreadyExistedException;
 import com.thiha.roomrent.exceptions.ProfileImageNotFoundException;
 import com.thiha.roomrent.mapper.AgentMapper;
 import com.thiha.roomrent.model.Agent;
+import com.thiha.roomrent.model.ConfirmationToken;
 import com.thiha.roomrent.repository.AgentRepository;
 import com.thiha.roomrent.service.AgentService;
 import com.thiha.roomrent.service.S3ImageService;
@@ -30,6 +36,8 @@ public class AgentServiceImpl implements AgentService{
     @Autowired
     private AgentRepository agentRepository;
     @Autowired
+    private ApplicationEventPublisher eventPublisher;
+    @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
     private S3ImageService imageService;
@@ -39,32 +47,58 @@ public class AgentServiceImpl implements AgentService{
 
     @Override
     public AgentDto createAgent(AgentRegisterDto registeredAgent) {
-        
+        System.out.println("Start of createAgent method");
         validateAgentRegistrationDetails(registeredAgent);
 
         MultipartFile profileImage = registeredAgent.getProfileImage();
 
         uploadAgentProfileImage(profileImage);
-        
-        registeredAgent.setProfilePhoto(cloudFrontUrl+profileImage.getOriginalFilename());
-        registeredAgent.setRole(UserRole.AGENT);
+
+        Agent newAgent = new Agent();
+        ConfirmationToken confirmationToken = generateConfirmationToken();
+        Date now = DateTimeHandler.getUTCNow();
+
+        newAgent.setProfilePhoto(cloudFrontUrl+profileImage.getOriginalFilename());
+        newAgent.setRole(UserRole.AGENT);
+        newAgent.setConfirmationToken(confirmationToken);
+
         String hashedPassword = passwordEncoder.encode(registeredAgent.getPassword());
-        registeredAgent.setPassword(hashedPassword);
+        newAgent.setPassword(hashedPassword);
 
+        newAgent.setUsername(registeredAgent.getUsername());
+        newAgent.setEmail(registeredAgent.getEmail());
+        newAgent.setPhoneNumber(registeredAgent.getPhoneNumber());
+        newAgent.setEnabled(false);
+        newAgent.setCreatedAt(now);
+        
+        confirmationToken.setAgent(newAgent);
+        
+        Agent savedAgent = agentRepository.save(newAgent);
 
-        Agent agent = AgentMapper.mapToAgent(AgentMapper.mapToAgentDtoFromAgentRegisterDto(registeredAgent));
-        // set the creation date
-        agent.setCreatedAt(DateTimeHandler.getUTCNow());
-        Agent savedAgent = agentRepository.save(agent);
+        eventPublisher.publishEvent(new OnRegisterationCompleteEvent(savedAgent, savedAgent.getUsername(), "has registered"));
+        System.out.println("End of createAgent method");
         return AgentMapper.mapToAgentDto(savedAgent);
     }
 
+    private ConfirmationToken generateConfirmationToken(){
+        ConfirmationToken confirmationToken = new ConfirmationToken();
+        Date now = DateTimeHandler.getUTCNow();
+        confirmationToken.setCreatedAt(now);
+        confirmationToken.setTokenValue(UUID.randomUUID());
+
+        return confirmationToken;
+    }
+
+
+
     private void validateAgentRegistrationDetails(AgentRegisterDto registeredAgent){
+        System.out.println("validation running twice");
         checkAlreadyRegisteredEmail(registeredAgent.getEmail());
         checkAlreadyRegisteredName(registeredAgent.getUsername());
         checkProfileImageIsPresent(registeredAgent.getProfileImage());
     }
 
+    // TODO combine query for email and username validation
     private void checkAlreadyRegisteredEmail(String email){
         Optional<Agent> agentByEmail = agentRepository.findByEmail(email);
         if(agentByEmail.isPresent()){
@@ -122,31 +156,50 @@ public class AgentServiceImpl implements AgentService{
     }
 
     @Override
-    public AgentDto updateExistingAgent(AgentRegisterDto newAgentDto, AgentDto existingAgentDto) {
-        if(newAgentDto.getProfileImage()==null || newAgentDto.getProfileImage().isEmpty()){
+    public AgentDto updateExistingAgent(AgentRegisterDto updatingAgent, Long agentId) {
+        if(updatingAgent.getProfileImage()==null || updatingAgent.getProfileImage().isEmpty()){
             throw new ProfileImageNotFoundException("Profile photo cannnot be empty");
         }
+
+        Optional<Agent> optionalAgent = agentRepository.findById(agentId);
+        if(!optionalAgent.isPresent()){
+            throw new EntityNotFoundException("User not found");
+        }
+        Agent existingAgent = optionalAgent.get();
+
         /*agent can only change phone number and profile picture
         delete the exsiting image on s3 and update the profile photo name in db 
         */ 
-        MultipartFile newProfileImage = newAgentDto.getProfileImage();
-        imageService.deleteImage(existingAgentDto.getProfilePhoto());
+        MultipartFile newProfileImage = updatingAgent.getProfileImage();
+        imageService.deleteImage(existingAgent.getProfilePhoto());
         String newFileName = newProfileImage.getOriginalFilename();
         uploadAgentProfileImage(newProfileImage);
 
         //change profile photo
-        existingAgentDto.setProfilePhoto(newFileName);
+        existingAgent.setProfilePhoto(newFileName);
 
         //change phone number
-        existingAgentDto.setPhoneNumber(newAgentDto.getPhoneNumber());
+        existingAgent.setPhoneNumber(updatingAgent.getPhoneNumber());
         
-        return AgentMapper.mapToAgentDto(agentRepository.save(AgentMapper.mapToAgent(existingAgentDto)));
+        return AgentMapper.mapToAgentDto(agentRepository.save(existingAgent));
     }
 
     @Override
     public List<AgentDto> findAllAgents() {
         List<Agent> agents = agentRepository.findAll();
         return agents.stream().map(agent -> AgentMapper.mapToAgentDto(agent)).collect(Collectors.toList());
+    }
+
+    @Override
+    public AgentDto enableAgent(UUID token) {
+        Optional<Agent> optionalAgent = agentRepository.findByConfirmationToken(token);
+        if(!optionalAgent.isPresent()){
+            throw new InvalidRegistrationConfirmationTokenException("Invalid confirmtaion token");
+        }
+        Agent agent = optionalAgent.get();
+        agent.setEnabled(true);
+        agentRepository.save(agent);
+        return AgentMapper.mapToAgentDto(optionalAgent.get());
     }
    
 }

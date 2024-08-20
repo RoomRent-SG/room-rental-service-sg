@@ -56,8 +56,8 @@ public class AgentController {
     @PutMapping("/profile")
     public ResponseEntity<AgentDto> updateAgent(@ModelAttribute AgentRegisterDto newAgent){
         agentValidator.doVaildation(newAgent);
-        AgentDto existingAgent = getCurrentAgent();
-        AgentDto updatedAgent = agentService.updateExistingAgent(newAgent, existingAgent);
+        Long userId = getCurrentUserId();
+        AgentDto updatedAgent = agentService.updateExistingAgent(newAgent, userId);
         return new ResponseEntity<>(updatedAgent, HttpStatus.OK);
     }
 
@@ -166,6 +166,12 @@ public class AgentController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl)authentication.getPrincipal();
         return userDetails.getUsername();
+    }
+
+    private Long getCurrentUserId(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl)authentication.getPrincipal();
+        return userDetails.getUserId();
     }
         
 }

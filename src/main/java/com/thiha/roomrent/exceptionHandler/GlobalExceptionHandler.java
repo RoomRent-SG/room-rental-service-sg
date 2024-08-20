@@ -2,6 +2,7 @@ package com.thiha.roomrent.exceptionHandler;
 
 import java.io.IOException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -10,6 +11,7 @@ import com.thiha.roomrent.dto.ErrorResponse;
 import com.thiha.roomrent.exceptions.EmailAlreadyRegisteredException;
 import com.thiha.roomrent.exceptions.EntityNotFoundException;
 import com.thiha.roomrent.exceptions.InvalidObjectException;
+import com.thiha.roomrent.exceptions.InvalidRegistrationConfirmationTokenException;
 import com.thiha.roomrent.exceptions.LogoutException;
 import com.thiha.roomrent.exceptions.NameAlreadyExistedException;
 import com.thiha.roomrent.exceptions.ProfileImageNotFoundException;
@@ -26,6 +28,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleImageUploadException(S3ImageUploadException exception){
         ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getErrorMessage());
         return ResponseEntity.badRequest()
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(response);
     }
 
@@ -34,6 +37,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getErrorMessage());
         return ResponseEntity
                             .badRequest()
+                            .contentType(MediaType.APPLICATION_JSON)
                             .body(response);
     }
 
@@ -42,6 +46,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getErrorMessage());
         return ResponseEntity
                             .badRequest()
+                            .contentType(MediaType.APPLICATION_JSON)
                             .body(response);
     }
 
@@ -50,6 +55,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND.value(), exception.getErrorMassage());
         return ResponseEntity
                             .status(HttpStatus.NOT_FOUND)
+                            .contentType(MediaType.APPLICATION_JSON)
                             .body(response);
     }
 
@@ -58,6 +64,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getErrorMessage());
         return ResponseEntity
                             .status(HttpStatus.BAD_REQUEST)
+                            .contentType(MediaType.APPLICATION_JSON)
                             .body(response);
     }
 
@@ -66,6 +73,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND.value(), exception.getErrorMessage());
         return ResponseEntity
                             .badRequest()
+                            .contentType(MediaType.APPLICATION_JSON)
                             .body(response);
     }
 
@@ -75,6 +83,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getErrorMessage());
         return ResponseEntity
                             .badRequest()
+                            .contentType(MediaType.APPLICATION_JSON)
                             .body(response);
     }
 
@@ -83,6 +92,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage());
         return ResponseEntity
                             .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .contentType(MediaType.APPLICATION_JSON)
                             .body(response);
     }
 
@@ -91,6 +101,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getErrorMessage());
         return ResponseEntity
                             .badRequest()
+                            .contentType(MediaType.APPLICATION_JSON)
                             .body(response);
     }
 
@@ -99,6 +110,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), exception.getMessage());
         return ResponseEntity
                             .status(HttpStatus.UNAUTHORIZED)
+                            .contentType(MediaType.APPLICATION_JSON)
                             .body(response);
     }
 
@@ -108,6 +120,7 @@ public class GlobalExceptionHandler {
         System.out.println("Exception Handling in global hanlder..."+ exception.getErrorMessage());
         return ResponseEntity
                             .status(HttpStatus.BAD_REQUEST)
+                            .contentType(MediaType.APPLICATION_JSON)
                             .body(response);
     }
 
@@ -116,6 +129,16 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(HttpStatus.FORBIDDEN.value(), exception.getErrorMessage());
         return ResponseEntity
                             .status(HttpStatus.FORBIDDEN)
+                            .contentType(MediaType.APPLICATION_JSON)
                             .body(response);
     }
+
+    @ExceptionHandler(InvalidRegistrationConfirmationTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidRegistrationConfirmationTokenException(InvalidRegistrationConfirmationTokenException exception){
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), exception.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .body(response);
+    }
+
 }

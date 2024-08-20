@@ -2,7 +2,7 @@ package com.thiha.roomrent;
 
 import com.thiha.roomrent.enums.*;
 import com.thiha.roomrent.model.Agent;
-import com.thiha.roomrent.model.JwtToken;
+import com.thiha.roomrent.model.ConfirmationToken;
 import com.thiha.roomrent.model.Location;
 import com.thiha.roomrent.model.RoomPhoto;
 import com.thiha.roomrent.model.RoomPost;
@@ -31,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import static org.junit.Assert.assertThrows;
 
 @DataJpaTest
@@ -45,60 +46,64 @@ public class RoomPostRepositoryTest {
     LocationRepository locationRepository;
 
     @Rule
-	public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
     private RoomPost roomPost;
     private Agent agent;
     private Location location;
     private MultipartFile mockMultipartFile;
     private List<MultipartFile> imageFiles = new ArrayList<>();
+    private ConfirmationToken confirmationToken;
 
     @Before
-    public void setup(){
-        
-        Agent newAgent = new Agent(1L,
-                            "tester7",
-                            "password",
-                            UserRole.AGENT,
-                            new ArrayList<JwtToken>(),
-                            "tester7@tt.com",
-                            "091111111",
-                            "profilephoto.com",
-                            DateTimeHandler.getUTCNow()
-                        );
+    public void setup() {
+        confirmationToken = new ConfirmationToken();
+        confirmationToken.setTokenValue(UUID.randomUUID());
+        confirmationToken.setCreatedAt(DateTimeHandler.getUTCNow());
+        Agent newAgent = new Agent(
+                777L,
+                "tester8",
+                "password",
+                UserRole.AGENT,
+                null,
+                "tester8@test.com",
+                "09222222",
+                "imageUrl",
+                DateTimeHandler.getUTCNow(),
+                false,
+                confirmationToken);
+        confirmationToken.setAgent(newAgent);
         agent = agentRepository.save(newAgent);
 
         Location newLocation = new Location(1L, "Baliester", null);
         location = locationRepository.save(newLocation);
 
         mockMultipartFile = new MockMultipartFile(
-                                            "profileImage",
-                                            "testimage.jpg",
-                                            "image/jpeg",
-                                            "test image content".getBytes()
-                                    );
+                "profileImage",
+                "testimage.jpg",
+                "image/jpeg",
+                "test image content".getBytes());
         imageFiles.add(mockMultipartFile);
 
-
         roomPost = RoomPost.builder()
-                            .id(1L)
-                            .agent(agent)
-                            .airConTime(AirConTime.LIMITED)
-                            .allowVisitor(true)
-                            .address("home address")
-                            .cookingAllowance(CookingAllowance.COOKING_ALLOWED)
-                            .thumbnailImage("imageUrl")
-                            .description("description")
-                            .location(location)
-                            .postedAt(DateTimeHandler.getUTCNow())
-                            .price(3000.0)
-                            .propertyType(PropertyType.CONDO)
-                            .roomPhotos(new ArrayList<RoomPhoto>())
-                            .roomType(RoomType.MASTER_ROOM)
-                            .sharePub(SharePub.INCLUSIVE)
-                            .stationName("Bouna Vista")
-                            .totalPax(1)
-                            .build();
+                .id(1L)
+                .agent(agent)
+                .airConTime(AirConTime.LIMITED)
+                .allowVisitor(true)
+                .address("home address")
+                .cookingAllowance(CookingAllowance.COOKING_ALLOWED)
+                .thumbnailImage("imageUrl")
+                .description("description")
+                .location(location)
+                .postedAt(DateTimeHandler.getUTCNow())
+                .price(3000.0)
+                .propertyType(PropertyType.CONDO)
+                .roomPhotos(new ArrayList<RoomPhoto>())
+                .roomType(RoomType.MASTER_ROOM)
+                .sharePub(SharePub.INCLUSIVE)
+                .stationName("Bouna Vista")
+                .totalPax(1)
+                .build();
     }
 
     @Test
@@ -112,21 +117,21 @@ public class RoomPostRepositoryTest {
     }
 
     @Test
-    public void testSaveRoomPostWithoutLocationAttributeThrowsInvalidConstraintException(){
+    public void testSaveRoomPostWithoutLocationAttributeThrowsInvalidConstraintException() {
         roomPost.setLocation(null);
 
         RoomPost newRoomPost = roomPost;
         newRoomPost.setArchived(true);
-        System.out.println("isArchived"+newRoomPost.isArchived());
+        System.out.println("isArchived" + newRoomPost.isArchived());
         DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class,
-                                                    ()-> {
-                                                        roomPostRepository.save(newRoomPost);
-                                                    });
+                () -> {
+                    roomPostRepository.save(newRoomPost);
+                });
         Assertions.assertThat(exception).isExactlyInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
-    public void deleteRoomPostSucceed(){
+    public void deleteRoomPostSucceed() {
         RoomPost roomPostToSave = roomPost;
         RoomPost savedRoomPost = roomPostRepository.save(roomPostToSave);
 
@@ -139,7 +144,7 @@ public class RoomPostRepositoryTest {
     }
 
     @Test
-    public void getRoomPostByAgentIdSucceed(){
+    public void getRoomPostByAgentIdSucceed() {
         RoomPost roomPostToSave = roomPost;
         RoomPost savedRoomPost = roomPostRepository.save(roomPostToSave);
 
@@ -150,25 +155,25 @@ public class RoomPostRepositoryTest {
     }
 
     @Test
-    public void getActiveRoomPostsReturnEmptyList(){
+    public void getActiveRoomPostsReturnEmptyList() {
         RoomPost roomPostToSave = roomPost;
         roomPostToSave.setArchived(true);
         roomPostRepository.save(roomPostToSave);
         Pageable pageable = PageRequest.of(1, 2, Sort.by("postedAt").descending());
-        Page<RoomPost> roomPostsResponse = roomPostRepository.findActiveRoomPostsByAgentId(agent.getId(), pageable );
+        Page<RoomPost> roomPostsResponse = roomPostRepository.findActiveRoomPostsByAgentId(agent.getId(), pageable);
 
         Assertions.assertThat(roomPostsResponse.getContent().size()).isEqualTo(0);
     }
 
     @Test
-    public void getActiveRoomPostByAgentIdSucceed(){
+    public void getActiveRoomPostByAgentIdSucceed() {
         RoomPost roomPostToSave = roomPost;
 
         roomPostToSave.setArchived(false);
         RoomPost savedRoomPost = roomPostRepository.save(roomPostToSave);
 
         Pageable pageable = PageRequest.of(0, 2, Sort.by("postedAt").descending());
-        Page<RoomPost> roomPostsResponse = roomPostRepository.findActiveRoomPostsByAgentId(agent.getId(), pageable );
+        Page<RoomPost> roomPostsResponse = roomPostRepository.findActiveRoomPostsByAgentId(agent.getId(), pageable);
         List<RoomPost> roomPostsList = roomPostsResponse.getContent();
 
         Assertions.assertThat(roomPostsList.size()).isEqualTo(1);
@@ -176,7 +181,7 @@ public class RoomPostRepositoryTest {
     }
 
     @Test
-    public void getArchivedRoomPostByAgentIdReturnRoomPostList(){
+    public void getArchivedRoomPostByAgentIdReturnRoomPostList() {
         RoomPost roomPostToSave = roomPost;
         roomPostToSave.setArchived(true);
         RoomPost savedRoomPost = roomPostRepository.save(roomPostToSave);
@@ -190,7 +195,7 @@ public class RoomPostRepositoryTest {
     }
 
     @Test
-    public void getArchivedRoomPostByAgentIdReturnEmptyList(){
+    public void getArchivedRoomPostByAgentIdReturnEmptyList() {
         RoomPost roomPostToSave = roomPost;
         roomPostToSave.setArchived(false);
         roomPostRepository.save(roomPostToSave);
