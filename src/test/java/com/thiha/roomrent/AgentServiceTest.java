@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
@@ -50,6 +51,9 @@ public class AgentServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private ApplicationEventPublisher publisher;
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
@@ -98,8 +102,12 @@ public class AgentServiceTest {
                 .phoneNumber("09222222")
                 .profileImage(mockMultipartFile)
                 .build();
+
         // Mock S3 image upload behavior
         doNothing().when(imageService).uploadImage(mockMultipartFile.getOriginalFilename(), mockMultipartFile);
+
+        // Mock 
+        doNothing().when(publisher).publishEvent(any());
         // mocek repo behaviour
         Mockito.when(agentRepository.save(Mockito.any(Agent.class)))
                 .thenReturn(existingAgent);

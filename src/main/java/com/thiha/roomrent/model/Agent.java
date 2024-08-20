@@ -2,6 +2,8 @@ package com.thiha.roomrent.model;
 
 import java.util.Date;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thiha.roomrent.enums.UserRole;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -34,6 +36,7 @@ public class Agent extends UserModel {
      private Date createdAt;
 
      @OneToOne(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+     @JsonIgnore
      private ConfirmationToken confirmationToken;
 
 
