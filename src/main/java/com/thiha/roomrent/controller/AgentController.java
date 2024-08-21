@@ -1,7 +1,6 @@
 package com.thiha.roomrent.controller;
 
 
-import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,8 +56,8 @@ public class AgentController {
     @PutMapping("/profile")
     public ResponseEntity<AgentDto> updateAgent(@ModelAttribute AgentRegisterDto newAgent){
         agentValidator.doVaildation(newAgent);
-        AgentDto existingAgent = getCurrentAgent();
-        AgentDto updatedAgent = agentService.updateExistingAgent(newAgent, existingAgent);
+        Long userId = getCurrentUserId();
+        AgentDto updatedAgent = agentService.updateExistingAgent(newAgent, userId);
         return new ResponseEntity<>(updatedAgent, HttpStatus.OK);
     }
 
@@ -78,8 +77,8 @@ public class AgentController {
 
     @GetMapping("/room-post/active")
     public ResponseEntity<AllRoomPostsResponse> getActiveRoomPosts(
-         @RequestParam(value = "pageNo", defaultValue = "1", required = false)int pageNo,
-        @RequestParam(value = "pageSize", defaultValue = "10", required = false ) int pageSize
+         @RequestParam(defaultValue = "1", required = false)int pageNo,
+        @RequestParam(defaultValue = "10", required = false ) int pageSize
     ){
         AgentDto currentAgent = getCurrentAgent();
         AllRoomPostsResponse roomPosts = roomPostService.getActiveRoomPostsByAgentId(currentAgent.getId(), pageNo-1, pageSize);
@@ -87,9 +86,12 @@ public class AgentController {
     }
 
     @GetMapping("/room-post/archived")
-    public ResponseEntity<List<RoomPostDto>> getArchivedRoomPosts(){
+    public ResponseEntity<AllRoomPostsResponse> getArchivedRoomPosts(
+        @RequestParam(defaultValue = "1", required = false)int pageNo,
+        @RequestParam(defaultValue = "10", required = false)int pageSize
+    ){
         AgentDto currentAgent = getCurrentAgent();
-        List<RoomPostDto> roomPosts = roomPostService.getArchivedRoomPostsByAgentId(currentAgent.getId());
+        AllRoomPostsResponse roomPosts = roomPostService.getArchivedRoomPostsByAgentId(currentAgent.getId(), pageNo-1, pageSize);
         return new ResponseEntity<>(roomPosts, HttpStatus.OK);
     }
 
@@ -114,10 +116,18 @@ public class AgentController {
         roomPostValidator.doVaildation(editedRoomPost);
         System.out.println("Property Type is null and get past.."+ editedRoomPost.getPropertyType().getClass());
         RoomPostDto updatedRoomPost = roomPostService.updateRoomPost(id, currentAgent, editedRoomPost);
-        return new ResponseEntity<>(updatedRoomPost, HttpStatus.OK);
+        return new ResponseEntity<>(updatedRoomPost, HttpStatus.CREATED);
     }
 
-    @PutMapping("/room-post/{id}/activate")
+    @PutMapping("/room-post/archive/{roomPostId}")
+    public ResponseEntity<RoomPostDto> archiveRoomPost(@PathVariable Long roomPostId){
+        System.out.println("Archive room post"+ roomPostId);
+        Long agentId = getCurrentAgent().getId();
+        RoomPostDto archivedRoomPost = roomPostService.archiveRoomPostById(roomPostId, agentId);
+        return new ResponseEntity<>(archivedRoomPost, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/room-post/activate/{id}")
     public ResponseEntity<Void> reactivateRoomPost(@PathVariable Long id){
         roomPostService.reactivateRoomPost(id, getCurrentAgent());
         return new ResponseEntity<>(HttpStatus.CREATED);
@@ -156,6 +166,12 @@ public class AgentController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl)authentication.getPrincipal();
         return userDetails.getUsername();
+    }
+
+    private Long getCurrentUserId(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl)authentication.getPrincipal();
+        return userDetails.getUserId();
     }
         
 }

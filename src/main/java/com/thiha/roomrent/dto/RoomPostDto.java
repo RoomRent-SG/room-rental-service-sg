@@ -34,6 +34,7 @@ public class RoomPostDto implements Serializable{
     private PropertyType propertyType;
     private String description;
     private String thumbnailImage;
+    private boolean isArchived;
     private Agent agent;
     private Date postedAt;
     private List<RoomPhoto> roomPhotos;

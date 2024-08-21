@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -362,25 +361,27 @@ public class RoomPostServiceImpl implements RoomPostService{
     public AllRoomPostsResponse getActiveRoomPostsByAgentId(Long agentId, int pageNo, int pageSize) {
         pageNo = pageNo <0 ? 0: pageNo;
         pageSize = pageSize < 0? 10: pageSize;
-        System.out.println("pageno"+pageNo+"PageSize"+pageSize);
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("postedAt").descending());
 
         Page<RoomPost> activeRoomPostsPage = roomPostRepository.findActiveRoomPostsByAgentId(agentId, pageable);
         List<RoomPost> activeRoomPosts = activeRoomPostsPage.getContent();
         List<RoomPostListDto> activeRoomPostList = convertToRoomPostDtoList(activeRoomPosts);
-        System.out.println("size"+activeRoomPostList.size());
         AllRoomPostsResponse response = createRoomPostListResponse(activeRoomPostList, activeRoomPostsPage);
         return response;
     }
 
     @Override
-    public List<RoomPostDto> getArchivedRoomPostsByAgentId(Long agentId) {
-        List<RoomPost> roomPosts = roomPostRepository.findArchivedRoomPostsByAgentId(agentId);
-        List<RoomPostDto> roomPostDtos = new ArrayList<>();
-        for(RoomPost roomPost: roomPosts){
-            roomPostDtos.add(RoomPostMapper.mapToRoomPostDto(roomPost));
-        }
-        return roomPostDtos;
+    public AllRoomPostsResponse getArchivedRoomPostsByAgentId(Long agentId, int pageNo, int pageSize) {
+        pageNo = pageNo <0 ? 0: pageNo;
+        pageSize = pageSize < 0? 10: pageSize;
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("postedAt").descending());
+
+        Page<RoomPost> archivedRoomPostsPage = roomPostRepository.findArchivedRoomPostsByAgentId(agentId, pageable);
+        List<RoomPost> archivedRoomPosts = archivedRoomPostsPage.getContent();
+        List<RoomPostListDto> archivedRoomPostList = convertToRoomPostDtoList(archivedRoomPosts);
+        AllRoomPostsResponse response = createRoomPostListResponse(archivedRoomPostList, archivedRoomPostsPage);
+        
+        return response;
     }
 
     @Override
@@ -476,6 +477,22 @@ public class RoomPostServiceImpl implements RoomPostService{
         metaData.put("description", "room post description");
         metaData.put("roomPhotoFiles", "Image File array");
         return metaData;
+    }
+
+
+    @Override
+    public RoomPostDto archiveRoomPostById(Long roomPostId, Long agentId) {
+       Optional<RoomPost> optioalRoomPost = roomPostRepository.findById(roomPostId);
+       if(!optioalRoomPost.isPresent()){
+            throw new EntityNotFoundException("Room post could not be found");
+       }
+       RoomPost roomPost = optioalRoomPost.get();
+       if(roomPost.getAgent().getId() != agentId){
+            throw new EntityNotFoundException("Room post could not be found");
+       }
+       roomPost.setArchived(true);
+       RoomPost archivedRoomPost = roomPostRepository.save(roomPost);
+       return RoomPostMapper.mapToRoomPostDto(archivedRoomPost);
     }
     
 }

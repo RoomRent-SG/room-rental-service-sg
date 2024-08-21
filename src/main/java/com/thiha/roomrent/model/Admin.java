@@ -16,7 +16,7 @@ public class Admin extends UserModel{
       super();
    }
 
-   public Admin(Long id, String username, String password, UserRole role, List<JwtToken> tokens){
-        super(id, username, password, role, tokens);
+   public Admin(Long id, String username, String password, UserRole role, boolean isEnabled, List<JwtToken> tokens){
+        super(id, username, password, role, isEnabled, tokens);
    }
 }
